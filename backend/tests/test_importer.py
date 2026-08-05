@@ -47,6 +47,15 @@ def test_fatura_payment_is_ignored_and_installment_extracted(session):
     assert renner.installment == "02/04" and renner.ignored is False
 
 
+def test_card_payment_credit_is_ignored(session):
+    import_file(session, 4, "b.ofx", load("inter_cartao.ofx"))
+    session.commit()
+    pagamento = session.scalar(
+        select(Transaction).where(Transaction.amount_cents == 230000)
+    )
+    assert pagamento.ignored is True
+
+
 def test_invalid_file_writes_nothing(session):
     with pytest.raises(ValueError):
         import_file(session, 1, "x.ofx", b"lixo")

@@ -53,6 +53,15 @@ def test_bridge_aggregates_small_deviations_into_demais(session):
     assert b["start"] + sum(s["delta"] for s in b["steps"]) == b["end"]
 
 
+def test_bridge_uncategorized_split_by_sign(session):
+    add_tx(session, None, 850000, date(2026, 8, 5))
+    add_tx(session, None, -7000, date(2026, 8, 6))
+    b = bridge(session, "month", "2026-08")
+    names = {s["categoria"] for s in b["steps"]}
+    assert "Sem categoria (entradas)" in names and "Sem categoria (saídas)" in names
+    assert b["start"] + sum(s["delta"] for s in b["steps"]) == b["end"]
+
+
 def test_bridge_respects_budget_effective_dates_across_period(session):
     mercado = cat(session, "Mercado")
     session.add_all([

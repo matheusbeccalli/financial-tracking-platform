@@ -23,7 +23,7 @@ def month_bounds(month: str) -> tuple[date, date]:
     return date(year, m, 1), date(year, m, last)
 
 
-def real_by_category(session, start: date, end: date) -> dict[int | None, int]:
+def real_by_category(session, start: date, end: date) -> dict[int | str, int]:
     txs = session.scalars(
         select(Transaction).where(
             Transaction.date >= start,
@@ -31,9 +31,13 @@ def real_by_category(session, start: date, end: date) -> dict[int | None, int]:
             Transaction.ignored.is_(False),
         )
     )
-    out: dict[int | None, int] = defaultdict(int)
+    out: dict[int | str, int] = defaultdict(int)
     for t in txs:
-        out[t.category_id] += t.amount_cents
+        if t.category_id is None:
+            key = "uncat_in" if t.amount_cents > 0 else "uncat_out"
+        else:
+            key = t.category_id
+        out[key] += t.amount_cents
     return out
 
 
@@ -46,13 +50,15 @@ def month_summary(session, month: str, today: date | None = None) -> dict:
 
     entradas_real = saidas_real = 0
     for cat_id, cents in real.items():
-        kind = cats[cat_id].kind if cat_id is not None else (
-            "entrada" if cents > 0 else "saida"
-        )
+        if cat_id in ("uncat_in", "uncat_out"):
+            continue
+        kind = cats[cat_id].kind
         if kind == "entrada":
             entradas_real += cents
         else:
             saidas_real += -cents
+    entradas_real += real.get("uncat_in", 0)
+    saidas_real += -real.get("uncat_out", 0)
     entradas_orc = sum(v for cid, v in bmap.items() if cats[cid].kind == "entrada")
     saidas_orc = sum(v for cid, v in bmap.items() if cats[cid].kind == "saida")
 

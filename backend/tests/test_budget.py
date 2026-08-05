@@ -59,8 +59,10 @@ def test_month_summary_cash_flow(session):
     }
 
 
-def test_uncategorized_counts_by_sign(session):
+def test_uncategorized_mixed_signs_do_not_net(session):
     add_tx(session, None, -7000)
+    add_tx(session, None, 850000, d=date(2026, 8, 12))
     s = month_summary(session, "2026-08", today=date(2026, 8, 15))
+    assert s["entradas"]["real"] == 850000
     assert s["saidas"]["real"] == 7000
     assert s["ritmo"] is None  # sem orçamento de saídas

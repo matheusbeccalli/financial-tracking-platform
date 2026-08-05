@@ -27,7 +27,7 @@ def test_parse_bradesco_conta():
 
 def test_parse_inter_cartao():
     txs = parse_file("inter_cartao.ofx", load("inter_cartao.ofx"))
-    assert len(txs) == 2
+    assert len(txs) == 3
     assert txs[1].description == "LOJAS RENNER PARC 02/04"
     assert txs[1].amount_cents == -12000
 

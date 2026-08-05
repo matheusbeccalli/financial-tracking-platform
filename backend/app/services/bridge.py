@@ -45,7 +45,12 @@ def bridge(session, period: str, ref: str) -> dict:
         delta = real_signed.get(cat_id, 0) - orc_signed.get(cat_id, 0)
         if delta == 0:
             continue
-        name = cats[cat_id].name if cat_id is not None else "Sem categoria"
+        if cat_id == "uncat_in":
+            name = "Sem categoria (entradas)"
+        elif cat_id == "uncat_out":
+            name = "Sem categoria (saídas)"
+        else:
+            name = cats[cat_id].name
         effects.append({"categoria": name, "delta": delta})
     effects.sort(key=lambda e: abs(e["delta"]), reverse=True)
 
