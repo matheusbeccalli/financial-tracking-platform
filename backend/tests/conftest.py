@@ -20,3 +20,17 @@ def session():
         seed(s)
         s.commit()
         yield s
+
+
+from fastapi.testclient import TestClient
+
+from app.db import get_session
+from app.main import create_app
+
+
+@pytest.fixture
+def client(session):
+    app = create_app()
+    app.dependency_overrides[get_session] = lambda: session
+    with TestClient(app) as c:
+        yield c
