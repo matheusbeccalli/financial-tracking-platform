@@ -71,7 +71,7 @@ Comportamentos especiais:
 
 ## Interface (5 telas)
 
-1. **Dashboard** — seletor de mês; KPIs de fluxo de caixa: **entradas, saídas, saldo do mês** (real vs. orçado) e **ritmo** das saídas (% do orçamento consumido vs. % do mês decorrido); feed de classificadas pelo LLM com dropdown de correção; barras real vs. orçado por categoria (entradas e saídas); gráfico de evolução (6 meses). Layout com sidebar de navegação.
+1. **Dashboard** — seletor de mês; KPIs de fluxo de caixa: **entradas, saídas, saldo do mês** (real vs. orçado) e **ritmo** das saídas (% do orçamento consumido vs. % do mês decorrido); feed de classificadas pelo LLM com dropdown de correção; barras real vs. orçado por categoria (entradas e saídas); gráfico de evolução (6 meses); e **bridge orçado → realizado** (gráfico waterfall): parte do saldo orçado do período e decompõe os principais desvios por categoria (favoráveis e desfavoráveis, top ~8 + barra "demais" agregada) até chegar ao saldo realizado. O bridge tem **filtro de período próprio: mês atual, YTD e últimos 12 meses** (períodos agregam o orçamento vigente de cada mês). Layout com sidebar de navegação.
 2. **Transações** — tabela com filtros (mês, conta, categoria, texto), edição de categoria inline, toggle para ignoradas/receitas.
 3. **Orçamento** — edição de valores mensais por categoria, organizado como fluxo de caixa (entradas no topo, saídas abaixo, saldo líquido projetado); histórico real vs. orçado mês a mês.
 4. **Importar** — upload com resumo pós-importação; histórico de lotes com desfazer. (Fase 2: botão Sincronizar Pluggy.)
