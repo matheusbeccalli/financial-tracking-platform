@@ -1,0 +1,20 @@
+# Segredos
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.coverage
+
+# Node
+node_modules/
+dist/
+
+# Dados locais
+*.db
+*.sqlite3
+
+# Artefatos do brainstorming visual
+.superpowers/
