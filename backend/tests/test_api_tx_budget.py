@@ -61,3 +61,8 @@ def test_budget_put_and_month_view(client, session):
 
 def test_invalid_month_format_is_400(client):
     assert client.get("/api/transactions", params={"month": "08/2026"}).status_code == 400
+
+
+def test_month_13_is_400_not_500(client):
+    assert client.get("/api/transactions", params={"month": "2026-13"}).status_code == 400
+    assert client.get("/api/dashboard/summary", params={"month": "2026-00"}).status_code == 400

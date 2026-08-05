@@ -1,22 +1,18 @@
-import re
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 
 from app.db import get_session
 from app.models import Budget, Category
+from app.routers.validators import require_month
 from app.schemas import BudgetPut
 from app.services.budget import budget_map
 
 router = APIRouter(prefix="/api/budgets")
 
-MONTH_RE = re.compile(r"^\d{4}-\d{2}$")
-
 
 @router.get("")
 def budgets_for_month(month: str, session=Depends(get_session)):
-    if not MONTH_RE.match(month):
-        raise HTTPException(400, "month deve ser YYYY-MM")
+    require_month(month, "month")
     bmap = budget_map(session, month)
     cats = {c.id: c for c in session.scalars(select(Category))}
     return [
@@ -32,8 +28,7 @@ def budgets_for_month(month: str, session=Depends(get_session)):
 
 @router.put("")
 def put_budget(payload: BudgetPut, session=Depends(get_session)):
-    if not MONTH_RE.match(payload.valid_from):
-        raise HTTPException(400, "valid_from deve ser YYYY-MM")
+    require_month(payload.valid_from, "valid_from")
     if not session.get(Category, payload.category_id):
         raise HTTPException(404, "Categoria não encontrada")
     existing = session.scalar(

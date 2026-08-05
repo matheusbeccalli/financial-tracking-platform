@@ -18,6 +18,8 @@ async def create_import(
 ):
     if not session.get(Account, account_id):
         raise HTTPException(404, "Conta não encontrada")
+    if not file.filename:
+        raise HTTPException(400, "Arquivo sem nome")
     content = await file.read()
     try:
         batch, new = import_file(session, account_id, file.filename, content)

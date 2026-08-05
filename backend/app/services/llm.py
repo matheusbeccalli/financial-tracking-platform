@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 
 import anthropic
@@ -53,7 +54,8 @@ class AnthropicLLM:
                 messages=[{"role": "user", "content": build_prompt(items, categories)}],
             )
             return parse_response(msg.content[0].text)
-        except Exception:
+        except Exception as e:
+            logging.getLogger(__name__).warning("Classificação LLM falhou: %s", e)
             return {}  # LLM é acessório: falha nunca bloqueia importação
 
 

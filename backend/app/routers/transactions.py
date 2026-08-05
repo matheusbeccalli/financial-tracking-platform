@@ -1,4 +1,3 @@
-import re
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -6,13 +5,12 @@ from sqlalchemy import select
 
 from app.db import get_session
 from app.models import Transaction
+from app.routers.validators import require_month
 from app.schemas import TxPatch
 from app.services.budget import month_bounds
 from app.services.classifier import apply_correction
 
 router = APIRouter(prefix="/api/transactions")
-
-MONTH_RE = re.compile(r"^\d{4}-\d{2}$")
 
 
 def tx_out(t: Transaction) -> dict:
@@ -35,8 +33,7 @@ def list_transactions(
 ):
     stmt = select(Transaction).order_by(Transaction.date.desc(), Transaction.id.desc())
     if month:
-        if not MONTH_RE.match(month):
-            raise HTTPException(400, "month deve ser YYYY-MM")
+        require_month(month, "month")
         start, end = month_bounds(month)
         stmt = stmt.where(Transaction.date >= start, Transaction.date <= end)
     if account_id:
@@ -44,7 +41,7 @@ def list_transactions(
     if category_id:
         stmt = stmt.where(Transaction.category_id == category_id)
     if q:
-        stmt = stmt.where(Transaction.description.icontains(q))
+        stmt = stmt.where(Transaction.description.icontains(q, autoescape=True))
     if not include_ignored:
         stmt = stmt.where(Transaction.ignored.is_(False))
     return [tx_out(t) for t in session.scalars(stmt)]
