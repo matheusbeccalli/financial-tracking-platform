@@ -6,7 +6,10 @@ export function formatBRL(cents: number): string {
 }
 
 export function parseBRL(input: string): number | null {
-  const s = input.replace(/[R$\s.]/g, "").replace(",", ".");
-  if (!s || Number.isNaN(Number(s))) return null;
-  return Math.round(Number(s) * 100);
+  const s = input.replace(/R\$|\s/g, "");
+  if (!/^-?\d{1,3}(\.\d{3})*(,\d{1,2})?$/.test(s) && !/^-?\d+(,\d{1,2})?$/.test(s)) {
+    return null;
+  }
+  const normalized = s.replace(/\./g, "").replace(",", ".");
+  return Math.round(Number(normalized) * 100);
 }

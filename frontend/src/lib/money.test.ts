@@ -23,4 +23,9 @@ describe("parseBRL", () => {
     expect(parseBRL("abc")).toBeNull();
     expect(parseBRL("")).toBeNull();
   });
+  it("rejeita ponto ambíguo e aceita milhar válido", () => {
+    expect(parseBRL("1.5")).toBeNull();
+    expect(parseBRL("1.500")).toBe(150000);
+    expect(parseBRL("1.234.567,89")).toBe(123456789);
+  });
 });

@@ -31,7 +31,9 @@ export default function Imports() {
       try {
         done.push(await api<ImportResult>("/imports", { method: "POST", body: form }));
       } catch (e) {
-        setUploadError(`${file.name}: ${(e as Error).message}`);
+        setUploadError(
+          `${file.name}: ${(e as Error).message} — arquivos seguintes não foram enviados`
+        );
         break;
       }
     }

@@ -65,8 +65,14 @@ export default function BridgeChart({ refMonth }: { refMonth: string }) {
             />
             <ReferenceLine y={0} stroke="#c3c2b7" />
             <Tooltip content={<WaterfallTooltip />} />
-            <Bar dataKey="base" stackId="w" fill="transparent" isAnimationActive={false} />
-            <Bar dataKey="value" stackId="w" isAnimationActive={false} radius={[4, 4, 0, 0]}>
+            <Bar dataKey="basePos" stackId="w" fill="transparent" isAnimationActive={false} />
+            <Bar dataKey="pos" stackId="w" isAnimationActive={false} radius={[4, 4, 0, 0]}>
+              {bars.map((bar, i) => (
+                <Cell key={i} fill={BAR_COLORS[bar.kind]} />
+              ))}
+            </Bar>
+            <Bar dataKey="baseNeg" stackId="w" fill="transparent" isAnimationActive={false} />
+            <Bar dataKey="neg" stackId="w" isAnimationActive={false} radius={[0, 0, 4, 4]}>
               {bars.map((bar, i) => (
                 <Cell key={i} fill={BAR_COLORS[bar.kind]} />
               ))}
@@ -84,11 +90,9 @@ export default function BridgeChart({ refMonth }: { refMonth: string }) {
 function WaterfallTooltip({ active, payload }: { active?: boolean; payload?: { payload: WaterfallBar }[] }) {
   if (!active || !payload?.length) return null;
   const bar = payload[0].payload;
-  const signed =
-    bar.kind === "total" ? bar.base + bar.value : bar.kind === "up" ? bar.value : -bar.value;
   return (
     <div className="card" style={{ padding: "6px 10px", fontSize: 13, marginBottom: 0 }}>
-      {bar.label}: <b>{formatBRL(signed)}</b>
+      {bar.label}: <b>{formatBRL(bar.signed)}</b>
     </div>
   );
 }
