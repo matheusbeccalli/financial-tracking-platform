@@ -11,11 +11,20 @@ from app.seed import DEFAULT_LLM_MODEL
 MAX_TOKENS = 2000
 
 
-def build_prompt(items: list[dict], categories: list[str]) -> str:
+def build_prompt(
+    items: list[dict], categories: list[str], examples: list[dict] | None = None
+) -> str:
+    exemplos = (
+        "Exemplos de classificações anteriores do usuário "
+        f"(descrição → categoria): {json.dumps(examples, ensure_ascii=False)}\n"
+        if examples
+        else ""
+    )
     return (
         "Você classifica transações financeiras pessoais brasileiras "
         "(extratos de banco e cartão de crédito).\n"
         f"Categorias válidas: {json.dumps(categories, ensure_ascii=False)}\n"
+        f"{exemplos}"
         "Valores em centavos; negativos são saídas, positivos entradas.\n"
         "Responda SOMENTE com um array JSON no formato "
         '[{"id": <id>, "categoria": "<nome exato da lista>"}] — sem texto extra.\n'
@@ -46,12 +55,22 @@ class AnthropicLLM:
         self.client = anthropic.Anthropic(api_key=api_key)
         self.model = model
 
-    def classify(self, items: list[dict], categories: list[str]) -> dict[int, str]:
+    def classify(
+        self,
+        items: list[dict],
+        categories: list[str],
+        examples: list[dict] | None = None,
+    ) -> dict[int, str]:
         try:
             msg = self.client.messages.create(
                 model=self.model,
                 max_tokens=MAX_TOKENS,
-                messages=[{"role": "user", "content": build_prompt(items, categories)}],
+                messages=[
+                    {
+                        "role": "user",
+                        "content": build_prompt(items, categories, examples),
+                    }
+                ],
             )
             return parse_response(msg.content[0].text)
         except Exception as e:

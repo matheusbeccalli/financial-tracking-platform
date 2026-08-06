@@ -23,14 +23,20 @@ def classify_new(session, txs: list[Transaction], llm) -> dict[str, int]:
             c.name: c.id
             for c in session.scalars(select(Category).where(~Category.archived))
         }
+        by_id = {v: k for k, v in by_name.items()}
         names = list(by_name)
+        examples = [
+            {"descricao": r.matcher, "categoria": by_id[r.category_id]}
+            for r in session.scalars(select(Rule).order_by(Rule.id.desc()).limit(10))
+            if r.category_id in by_id
+        ]
         for i in range(0, len(pending), LLM_BATCH_SIZE):
             chunk = pending[i : i + LLM_BATCH_SIZE]
             items = [
                 {"id": t.id, "descricao": t.description, "valor_centavos": t.amount_cents}
                 for t in chunk
             ]
-            result = llm.classify(items, names)  # dict[tx_id, nome_categoria]
+            result = llm.classify(items, names, examples)  # dict[tx_id, nome_categoria]
             for t in chunk:
                 name = result.get(t.id)
                 if name in by_name:

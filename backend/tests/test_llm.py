@@ -10,8 +10,8 @@ class FakeLLM:
         self.result = result
         self.calls = []
 
-    def classify(self, items, categories):
-        self.calls.append((items, categories))
+    def classify(self, items, categories, examples=None):
+        self.calls.append((items, categories, examples))
         return self.result
 
 
@@ -54,3 +54,18 @@ def test_parse_response_extracts_json_and_ignores_garbage():
 
 def test_parse_response_invalid_returns_empty():
     assert parse_response("não sei") == {}
+
+
+def test_classify_passes_prior_rule_examples_to_llm(session):
+    from sqlalchemy import select
+
+    from app.models import Category, Rule
+
+    transporte = session.scalar(select(Category).where(Category.name == "Transporte"))
+    session.add(Rule(matcher="UBER TRIP", category_id=transporte.id))
+    session.flush()
+    tx = make_tx(session, "NOVA COISA")
+    llm = FakeLLM({})
+    classify_new(session, [tx], llm)
+    _, _, examples = llm.calls[0]
+    assert {"descricao": "UBER TRIP", "categoria": "Transporte"} in examples

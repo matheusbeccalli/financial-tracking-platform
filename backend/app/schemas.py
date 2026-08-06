@@ -28,3 +28,17 @@ class BudgetPut(BaseModel):
     category_id: int
     amount_cents: int = Field(ge=0)
     valid_from: str  # "YYYY-MM"
+
+
+class AccountIn(BaseModel):
+    name: str
+    institution: str
+    kind: str  # "corrente" | "cartao"
+
+
+class AccountPatch(BaseModel):
+    name: Optional[str] = None
+
+
+class RulePatch(BaseModel):
+    category_id: int
