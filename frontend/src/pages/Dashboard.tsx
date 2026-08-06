@@ -4,6 +4,7 @@ import BridgeChart from "../components/dashboard/BridgeChart";
 import CategoryBars from "../components/dashboard/CategoryBars";
 import EvolutionChart from "../components/dashboard/EvolutionChart";
 import KpiRow from "../components/dashboard/KpiRow";
+import LlmFeed from "../components/dashboard/LlmFeed";
 import MonthPicker from "../components/MonthPicker";
 import { currentMonth } from "../lib/months";
 
@@ -16,6 +17,7 @@ export default function Dashboard() {
         <MonthPicker month={month} onChange={setMonth} />
       </div>
       <KpiRow month={month} />
+      <LlmFeed />
       <div className="row" style={{ alignItems: "stretch" }}>
         <div className="card" style={{ flex: 2, minWidth: 340 }}>
           <CategoryBars month={month} />
