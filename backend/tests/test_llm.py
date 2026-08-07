@@ -69,3 +69,26 @@ def test_classify_passes_prior_rule_examples_to_llm(session):
     classify_new(session, [tx], llm)
     _, _, examples = llm.calls[0]
     assert {"descricao": "UBER TRIP", "categoria": "Transporte"} in examples
+
+
+class FakeBlock:
+    def __init__(self, type, **kw):
+        self.type = type
+        for key, value in kw.items():
+            setattr(self, key, value)
+
+
+def test_extract_text_skips_thinking_blocks():
+    from app.services.llm import extract_text
+
+    content = [
+        FakeBlock("thinking", thinking=""),
+        FakeBlock("text", text='[{"id": 1, "categoria": "Mercado"}]'),
+    ]
+    assert extract_text(content) == '[{"id": 1, "categoria": "Mercado"}]'
+
+
+def test_extract_text_empty_when_no_text_blocks():
+    from app.services.llm import extract_text
+
+    assert extract_text([FakeBlock("thinking", thinking="hmm")]) == ""

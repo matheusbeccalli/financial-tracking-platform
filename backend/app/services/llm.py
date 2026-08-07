@@ -8,7 +8,15 @@ from app.config import settings
 from app.models import Setting
 from app.seed import DEFAULT_LLM_MODEL
 
-MAX_TOKENS = 2000
+# Em modelos com thinking adaptativo (ex.: Sonnet 5), max_tokens cobre
+# thinking + resposta — precisa de folga para lotes de ~50 transações.
+MAX_TOKENS = 8192
+
+
+def extract_text(content) -> str:
+    return "".join(
+        block.text for block in content if getattr(block, "type", "") == "text"
+    )
 
 
 def build_prompt(
@@ -72,7 +80,15 @@ class AnthropicLLM:
                     }
                 ],
             )
-            return parse_response(msg.content[0].text)
+            text = extract_text(msg.content)
+            result = parse_response(text)
+            if not result:
+                logging.getLogger(__name__).warning(
+                    "Classificação LLM sem resultado (stop_reason=%s, %d chars)",
+                    getattr(msg, "stop_reason", None),
+                    len(text),
+                )
+            return result
         except Exception as e:
             logging.getLogger(__name__).warning("Classificação LLM falhou: %s", e)
             return {}  # LLM é acessório: falha nunca bloqueia importação
