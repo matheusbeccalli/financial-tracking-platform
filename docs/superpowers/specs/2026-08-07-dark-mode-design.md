@@ -42,7 +42,7 @@ Também setar `color-scheme: light`/`dark` conforme o tema, para que scrollbars 
 
 ### 3. `useThemeColors()` (em `src/theme/ThemeContext.tsx`)
 
-Recharts seta cores como atributos SVG, que não resolvem `var()` de forma confiável. O hook lê as variables computadas (`getComputedStyle(document.documentElement)`) e devolve `{ muted, baseline, blue, blueDark, red, ink2 }`, recalculando quando `resolved` muda. O CSS permanece a única fonte de verdade das cores.
+Recharts seta cores como atributos SVG, que não resolvem `var()` de forma confiável. O hook lê as variables computadas (`getComputedStyle(document.documentElement)`) e devolve `{ muted, baseline, blue, blueDark, red }`, recalculando quando `resolved` muda. O CSS permanece a única fonte de verdade das cores.
 
 ### 4. Componentes
 
