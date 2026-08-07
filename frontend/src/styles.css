@@ -152,3 +152,25 @@ h2 { font-size: 18px; margin: 0 0 12px; }
 h3 { font-size: 14px; margin: 0 0 8px; color: var(--ink-2); }
 .error { color: var(--critical); font-size: 13px; }
 .muted { color: var(--muted); font-size: 12px; }
+
+.toasts {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+  max-width: 360px;
+}
+.toast {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--critical);
+  border-left-width: 4px;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 13px;
+  box-shadow: 0 2px 10px var(--border);
+  cursor: pointer;
+}
