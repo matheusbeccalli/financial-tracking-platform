@@ -50,19 +50,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
+  useEffect(() => {
+    storeMode(mode);
+  }, [mode]);
+
   const resolved = resolveTheme(mode, systemDark);
 
-  useEffect(() => {
+  // Escrita idempotente durante o render: useThemeColors lê getComputedStyle
+  // no render dos consumidores deste mesmo passe — um efeito só rodaria
+  // depois que a árvore inteira renderizasse, deixando os gráficos um tema
+  // atrasado.
+  if (document.documentElement.dataset.theme !== resolved) {
     document.documentElement.dataset.theme = resolved;
-  }, [resolved]);
+  }
 
-  const cycle = useCallback(() => {
-    setMode((m) => {
-      const next = nextMode(m);
-      storeMode(next);
-      return next;
-    });
-  }, []);
+  const cycle = useCallback(() => setMode(nextMode), []);
 
   const value = useMemo(() => ({ mode, resolved, cycle }), [mode, resolved, cycle]);
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
@@ -80,7 +82,6 @@ export interface ThemeColors {
   blue: string;
   blueDark: string;
   red: string;
-  ink2: string;
 }
 
 export function useThemeColors(): ThemeColors {
@@ -94,7 +95,6 @@ export function useThemeColors(): ThemeColors {
       blue: v("--blue"),
       blueDark: v("--blue-dark"),
       red: v("--red"),
-      ink2: v("--ink-2"),
     };
     // resolved na dependência: recalcular quando o tema efetivo muda
   }, [resolved]);

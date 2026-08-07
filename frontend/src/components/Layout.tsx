@@ -18,7 +18,7 @@ const MODE_LABELS = {
 
 export default function Layout() {
   const { mode, cycle } = useTheme();
-  const [icon, label] = MODE_LABELS[mode];
+  const [modeIcon, modeLabel] = MODE_LABELS[mode];
   return (
     <div className="layout">
       <aside className="sidebar">
@@ -31,7 +31,7 @@ export default function Layout() {
           ))}
         </nav>
         <button className="theme-toggle" onClick={cycle} title="Alternar tema">
-          {icon} {label}
+          {modeIcon} {modeLabel}
         </button>
       </aside>
       <main className="content">

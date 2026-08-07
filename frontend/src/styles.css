@@ -17,6 +17,7 @@
   --input-bg: #fff;
   --warn-bg: #fffaf7;
   --warn-border: #e8b8a8;
+  --on-blue: #fff;
 }
 
 :root[data-theme="dark"] {
@@ -38,6 +39,7 @@
   --input-bg: #232320;
   --warn-bg: #2a201b;
   --warn-border: #6b4a3a;
+  --on-blue: #0e2038;
 }
 * { box-sizing: border-box; }
 body {
@@ -136,7 +138,7 @@ button {
   background: var(--surface);
   cursor: pointer;
 }
-button.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+button.primary { background: var(--blue); border-color: var(--blue); color: var(--on-blue); }
 button:disabled { opacity: 0.5; cursor: default; }
 select, input {
   font: inherit;
