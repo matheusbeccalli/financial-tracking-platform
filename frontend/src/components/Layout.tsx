@@ -1,5 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 
+import { useTheme } from "../theme/ThemeContext";
+
 const LINKS = [
   ["/", "📊", "Dashboard"],
   ["/transacoes", "💳", "Transações"],
@@ -8,7 +10,15 @@ const LINKS = [
   ["/config", "⚙️", "Configurações"],
 ] as const;
 
+const MODE_LABELS = {
+  system: ["🖥️", "Tema: sistema"],
+  light: ["☀️", "Tema: claro"],
+  dark: ["🌙", "Tema: escuro"],
+} as const;
+
 export default function Layout() {
+  const { mode, cycle } = useTheme();
+  const [icon, label] = MODE_LABELS[mode];
   return (
     <div className="layout">
       <aside className="sidebar">
@@ -20,6 +30,9 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
+        <button className="theme-toggle" onClick={cycle} title="Alternar tema">
+          {icon} {label}
+        </button>
       </aside>
       <main className="content">
         <Outlet />
