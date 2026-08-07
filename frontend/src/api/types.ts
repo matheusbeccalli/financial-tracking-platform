@@ -83,12 +83,19 @@ export interface ClassifiedCounts {
   pendente: number;
 }
 
+export interface ClassificationProgress {
+  status: "running" | "done" | "error" | "interrupted";
+  total: number;
+  done: number;
+  counts: ClassifiedCounts;
+}
+
 export interface ImportResult {
   batch_id: number;
   filename: string;
   new_count: number;
   dup_count: number;
-  classified: ClassifiedCounts;
+  classification: ClassificationProgress;
 }
 
 export interface Rule {

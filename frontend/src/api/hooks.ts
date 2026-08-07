@@ -11,6 +11,7 @@ import type {
   AppSettings,
   Bridge,
   BudgetLine,
+  ClassificationProgress,
   ClassifiedCounts,
   Category,
   IgnoreRule,
@@ -77,6 +78,19 @@ export const useBudgets = (month: string) =>
 
 export const useImports = () =>
   useQuery({ queryKey: ["imports"], queryFn: () => api<ImportBatch[]>("/imports") });
+
+export const useClassification = (
+  batchId: number,
+  initial: ClassificationProgress
+) =>
+  useQuery({
+    queryKey: ["classification", batchId],
+    queryFn: () =>
+      api<ClassificationProgress>(`/imports/${batchId}/classification`),
+    initialData: initial,
+    refetchInterval: (query) =>
+      query.state.data?.status === "running" ? 1500 : false,
+  });
 
 export const useSettings = () =>
   useQuery({ queryKey: ["settings"], queryFn: () => api<AppSettings>("/settings") });

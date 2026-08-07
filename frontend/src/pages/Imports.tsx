@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
 import { useAccounts, useClassifyPending, useDeleteImport, useImports } from "../api/hooks";
 import type { ClassifiedCounts, ImportResult } from "../api/types";
+import ClassificationStatus from "../components/ClassificationStatus";
 
 export default function Imports() {
   const { data: accounts } = useAccounts();
@@ -70,9 +71,8 @@ export default function Imports() {
         {uploadError && <p className="error">{uploadError}</p>}
         {results.map((r) => (
           <p key={r.batch_id} className="muted">
-            <b>{r.filename}</b>: {r.new_count} novas, {r.dup_count} duplicadas · classificadas:{" "}
-            {r.classified.regra} por regra, {r.classified.llm} pelo LLM, {r.classified.pendente}{" "}
-            pendentes
+            <b>{r.filename}</b>: {r.new_count} novas, {r.dup_count} duplicadas ·{" "}
+            <ClassificationStatus batchId={r.batch_id} initial={r.classification} />
           </p>
         ))}
         <p className="muted">
