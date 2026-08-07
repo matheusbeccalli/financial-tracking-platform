@@ -23,7 +23,7 @@ def sniff(content: bytes) -> bool:
 
 
 def _infer_date(day: int, month: int, ref: date) -> date | None:
-    for year in (ref.year, ref.year - 1, ref.year - 2):
+    for year in (ref.year, ref.year - 1):
         try:
             d = date(year, month, day)
         except ValueError:

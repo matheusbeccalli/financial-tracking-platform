@@ -46,7 +46,8 @@ de cartão, sinal invertido).
   presença de `Valor(US$);Valor(R$)` e de `Situação da Fatura` (ou
   `Total da fatura`) no conteúdo decodificado.
 - `parse_bradesco_fatura(content: bytes) -> list[ParsedTransaction]`:
-  - Decodifica latin-1 (fallback utf-8-sig) e normaliza `\r`/`\r\n` para `\n`.
+  - Decodifica utf-8-sig com fallback latin-1 (latin-1 nunca falha, então
+    precisa ser o fallback) e normaliza `\r`/`\r\n` para `\n`.
   - Extrai a data da fatura do cabeçalho `Data: dd/mm/yyyy` — referência para
     inferência de ano.
   - Considera transação apenas linhas casando `^\d{2}/\d{2};`; todo o resto
