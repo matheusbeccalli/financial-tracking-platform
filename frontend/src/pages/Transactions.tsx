@@ -1,16 +1,43 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-import { useAccounts, usePatchTx, useTransactions } from "../api/hooks";
+import { useAccounts, useCategories, usePatchTx, useTransactions } from "../api/hooks";
 import CategorySelect from "../components/CategorySelect";
 import MonthPicker from "../components/MonthPicker";
 import { formatBRL } from "../lib/money";
 import { currentMonth } from "../lib/months";
+import { sortTxs, summarize, type SortDir, type SortKey } from "../lib/txTable";
 
 const SOURCE_LABEL: Record<string, string> = {
   regra: "regra",
   llm: "🤖 llm",
   manual: "manual",
 };
+
+function SortableTh({
+  label,
+  k,
+  sort,
+  onSort,
+  className,
+}: {
+  label: string;
+  k: SortKey;
+  sort: { key: SortKey; dir: SortDir } | null;
+  onSort: (k: SortKey) => void;
+  className?: string;
+}) {
+  const active = sort?.key === k;
+  return (
+    <th
+      className={className}
+      onClick={() => onSort(k)}
+      style={{ cursor: "pointer", userSelect: "none" }}
+      title="Ordenar"
+    >
+      {label} {active ? (sort!.dir === "asc" ? "▲" : "▼") : ""}
+    </th>
+  );
+}
 
 export default function Transactions() {
   const [month, setMonth] = useState(currentMonth());
@@ -29,7 +56,29 @@ export default function Transactions() {
     include_ignored: showIgnored,
   });
   const patchTx = usePatchTx();
-  const accountName = new Map((accounts ?? []).map((a) => [a.id, a.name]));
+  const { data: categories } = useCategories();
+  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir } | null>(null);
+
+  const lookups = useMemo(
+    () => ({
+      accountName: new Map((accounts ?? []).map((a) => [a.id, a.name])),
+      categoryName: new Map((categories ?? []).map((c) => [c.id, c.name])),
+    }),
+    [accounts, categories]
+  );
+  const rows = useMemo(
+    () => (txs && sort ? sortTxs(txs, sort.key, sort.dir, lookups) : txs ?? []),
+    [txs, sort, lookups]
+  );
+  const summary = useMemo(() => summarize(txs ?? []), [txs]);
+
+  function toggleSort(key: SortKey) {
+    setSort((s) =>
+      s?.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }
+    );
+  }
+
+  const accountName = lookups.accountName;
 
   return (
     <>
@@ -71,20 +120,36 @@ export default function Transactions() {
         {error && <p className="error">{(error as Error).message}</p>}
         {txs && txs.length === 0 && <p className="muted">Nenhuma transação no filtro.</p>}
         {txs && txs.length > 0 && (
+          <p className="muted">
+            {summary.count} transações · entradas {formatBRL(summary.entradas)} ·
+            saídas {formatBRL(-summary.saidas)} ·{" "}
+            <span className={summary.saldo > 0 ? "pos" : undefined}>
+              saldo {formatBRL(summary.saldo)}
+            </span>
+            {summary.temIgnoradas && " (ignoradas fora da soma)"}
+          </p>
+        )}
+        {txs && txs.length > 0 && (
           <table>
             <thead>
               <tr>
-                <th>Data</th>
-                <th>Descrição</th>
-                <th>Conta</th>
-                <th className="num">Valor</th>
-                <th>Categoria</th>
-                <th>Origem</th>
+                <SortableTh label="Data" k="date" sort={sort} onSort={toggleSort} />
+                <SortableTh label="Descrição" k="description" sort={sort} onSort={toggleSort} />
+                <SortableTh label="Conta" k="account" sort={sort} onSort={toggleSort} />
+                <SortableTh
+                  label="Valor"
+                  k="amount_cents"
+                  sort={sort}
+                  onSort={toggleSort}
+                  className="num"
+                />
+                <SortableTh label="Categoria" k="category" sort={sort} onSort={toggleSort} />
+                <SortableTh label="Origem" k="source" sort={sort} onSort={toggleSort} />
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              {txs.map((t) => (
+              {rows.map((t) => (
                 <tr key={t.id} style={t.ignored ? { opacity: 0.5 } : undefined}>
                   <td className="muted">{t.date}</td>
                   <td>
