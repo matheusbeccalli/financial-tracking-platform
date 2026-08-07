@@ -119,7 +119,11 @@ export default function Transactions() {
                   </td>
                   <td>
                     <button
-                      title={t.ignored ? "Voltar a contar" : "Ignorar (não conta no fluxo)"}
+                      title={
+                        t.ignored
+                          ? "Voltar a contar (remove a regra de ignorar)"
+                          : "Ignorar (cria regra: futuras com esta descrição também)"
+                      }
                       onClick={() =>
                         patchTx.mutate({ id: t.id, patch: { ignored: !t.ignored } })
                       }

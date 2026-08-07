@@ -48,7 +48,7 @@ Pluggy (fase 2) ──┘                                                       
 
 Comportamentos especiais:
 
-- **Flag `ignorada`**: pagamentos de fatura no extrato da conta (detectados por padrão de descrição) e transferências **entre contas correntes próprias** (ex.: Bradesco → Inter) não contam no fluxo de caixa (evita dupla contagem). Aportes em investimento **não** são ignorados: são classificados na categoria de saída "Investimentos" e contam no fluxo.
+- **Flag `ignorada`**: pagamentos de fatura no extrato da conta (padrões fixos por descrição, incl. "GASTO C CREDITO" do Bradesco) e transferências **entre contas correntes próprias** (aprendidas via `ignore_rule`, já que dependem do nome do titular) não contam no fluxo de caixa (evita dupla contagem). Aportes em investimento **não** são ignorados: são classificados na categoria de saída "Investimentos" e contam no fluxo.
 - **Entradas** (valores positivos: salário, rendimentos) são classificadas em categorias de entrada e participam do orçamento de fluxo de caixa.
 
 ## Pipeline de Ingestão e Classificação

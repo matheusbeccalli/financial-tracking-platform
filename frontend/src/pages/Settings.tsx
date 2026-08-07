@@ -5,7 +5,9 @@ import {
   useCategories,
   useCreateAccount,
   useCreateCategory,
+  useDeleteIgnoreRule,
   useDeleteRule,
+  useIgnoreRules,
   usePatchAccount,
   usePatchCategory,
   usePatchRule,
@@ -28,6 +30,7 @@ export default function Settings() {
       <CategoriesSection />
       <AccountsSection />
       <RulesSection />
+      <IgnoreRulesSection />
     </>
   );
 }
@@ -260,6 +263,42 @@ function RulesSection() {
                   <button
                     onClick={() =>
                       window.confirm(`Apagar a regra "${r.matcher}"?`) &&
+                      deleteRule.mutate(r.id)
+                    }
+                  >
+                    Apagar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+function IgnoreRulesSection() {
+  const { data: rules } = useIgnoreRules();
+  const deleteRule = useDeleteIgnoreRule();
+  return (
+    <div className="card">
+      <h3>Regras de ignorar</h3>
+      <p className="muted">
+        Transações com estas descrições entram marcadas como ignoradas (não contam no
+        fluxo). Criadas ao usar o 🚫 em Transações; apagar vale para importações futuras.
+      </p>
+      {(rules ?? []).length === 0 && <p className="muted">Nenhuma regra de ignorar.</p>}
+      {(rules ?? []).length > 0 && (
+        <table>
+          <tbody>
+            {(rules ?? []).map((r) => (
+              <tr key={r.id}>
+                <td style={{ fontFamily: "monospace", fontSize: 13 }}>{r.matcher}</td>
+                <td style={{ width: 90 }}>
+                  <button
+                    onClick={() =>
+                      window.confirm(`Apagar a regra de ignorar "${r.matcher}"?`) &&
                       deleteRule.mutate(r.id)
                     }
                   >

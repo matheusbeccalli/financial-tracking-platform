@@ -97,6 +97,11 @@ export interface Rule {
   category_id: number;
 }
 
+export interface IgnoreRule {
+  id: number;
+  matcher: string;
+}
+
 export interface AppSettings {
   llm_model: string;
   api_key_set: boolean;

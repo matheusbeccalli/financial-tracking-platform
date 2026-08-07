@@ -13,6 +13,7 @@ import type {
   BudgetLine,
   ClassifiedCounts,
   Category,
+  IgnoreRule,
   ImportBatch,
   Rule,
   Summary,
@@ -83,6 +84,12 @@ export const useSettings = () =>
 export const useRules = () =>
   useQuery({ queryKey: ["rules"], queryFn: () => api<Rule[]>("/rules") });
 
+export const useIgnoreRules = () =>
+  useQuery({
+    queryKey: ["ignore-rules"],
+    queryFn: () => api<IgnoreRule[]>("/ignore-rules"),
+  });
+
 function useInvalidatingMutation<TArgs>(fn: (args: TArgs) => Promise<unknown>) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -144,3 +151,8 @@ export const usePatchRule = () =>
 
 export const useDeleteRule = () =>
   useInvalidatingMutation((id: number) => api(`/rules/${id}`, { method: "DELETE" }));
+
+export const useDeleteIgnoreRule = () =>
+  useInvalidatingMutation((id: number) =>
+    api(`/ignore-rules/${id}`, { method: "DELETE" })
+  );
