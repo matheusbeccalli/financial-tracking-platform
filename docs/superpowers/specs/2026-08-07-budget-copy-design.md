@@ -42,8 +42,12 @@ depois.
 - `src/api/hooks.ts`: `useCopyBudget` via `useInvalidatingMutation`
   (`POST /budgets/copy`).
 - `src/pages/Budget.tsx`: no cabeçalho, junto do `MonthPicker`, um `<select>`
-  com opção placeholder "Copiar de…" e os **12 meses anteriores** ao mês
-  visualizado (mais recente primeiro, rótulos `monthLabel`). Ao escolher:
+  com opção placeholder "Copiar de…" e dois grupos: **12 meses anteriores**
+  (mais recente primeiro) e **12 meses seguintes** (mais próximo primeiro),
+  rótulos `monthLabel`. Copiar de mês futuro é intencional (decisão de
+  2026-08-07: ex. ajustes feitos em julho replicados para junho); o mês
+  futuro mantém suas próprias linhas `valid_from`, que continuam valendo
+  dele em diante. Ao escolher:
   `window.confirm("Substituir o orçamento de {M} pelo de {S}?")` → mutation →
   invalidação global (padrão existente) atualiza tabela, saldo projetado e
   histórico; o select volta ao placeholder (value controlado sempre `""`).

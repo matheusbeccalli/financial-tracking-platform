@@ -17,7 +17,8 @@ export default function Budget() {
   const { data: categories } = useCategories();
   const putBudget = usePutBudget();
   const copyBudget = useCopyBudget();
-  const copyMonths = lastNMonths(addMonths(month, -1), 12).reverse();
+  const pastMonths = lastNMonths(addMonths(month, -1), 12).reverse();
+  const futureMonths = Array.from({ length: 12 }, (_, i) => addMonths(month, i + 1));
 
   const budgetById = new Map((lines ?? []).map((l) => [l.category_id, l.amount_cents]));
   const active = (categories ?? []).filter((c) => !c.archived);
@@ -48,11 +49,20 @@ export default function Budget() {
             }}
           >
             <option value="">Copiar de…</option>
-            {copyMonths.map((m) => (
-              <option key={m} value={m}>
-                {monthLabel(m)}
-              </option>
-            ))}
+            <optgroup label="Meses anteriores">
+              {pastMonths.map((m) => (
+                <option key={m} value={m}>
+                  {monthLabel(m)}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Meses seguintes">
+              {futureMonths.map((m) => (
+                <option key={m} value={m}>
+                  {monthLabel(m)}
+                </option>
+              ))}
+            </optgroup>
           </select>
           <MonthPicker month={month} onChange={setMonth} />
         </div>

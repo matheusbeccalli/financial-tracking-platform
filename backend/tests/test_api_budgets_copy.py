@@ -66,3 +66,17 @@ def test_copy_validates_months(client):
         ).status_code
         == 400
     )
+
+
+def test_copy_from_future_month_into_past(client):
+    """Copiar de mês futuro é intencional (ex.: ajustes feitos em julho
+    replicados para junho). O mês futuro mantém suas próprias linhas."""
+    put(client, 1, 100000, "2026-06")
+    put(client, 1, 777700, "2026-07")  # ajuste feito em julho
+
+    r = client.post(
+        "/api/budgets/copy", json={"from_month": "2026-07", "to_month": "2026-06"}
+    )
+    assert r.status_code == 200
+    assert get_map(client, "2026-06")[1] == 777700  # junho recebeu o de julho
+    assert get_map(client, "2026-07")[1] == 777700  # julho segue com o dele
