@@ -33,8 +33,12 @@ function SortableTh({
       onClick={() => onSort(k)}
       style={{ cursor: "pointer", userSelect: "none" }}
       title="Ordenar"
+      aria-sort={
+        active && sort ? (sort.dir === "asc" ? "ascending" : "descending") : undefined
+      }
     >
-      {label} {active ? (sort!.dir === "asc" ? "▲" : "▼") : ""}
+      {label}
+      {active && sort ? (sort.dir === "asc" ? " ▲" : " ▼") : ""}
     </th>
   );
 }
@@ -122,7 +126,7 @@ export default function Transactions() {
         {txs && txs.length > 0 && (
           <p className="muted">
             {summary.count} transações · entradas {formatBRL(summary.entradas)} ·
-            saídas {formatBRL(-summary.saidas)} ·{" "}
+            saídas {formatBRL(-summary.saidas || 0)} ·{" "}
             <span className={summary.saldo > 0 ? "pos" : undefined}>
               saldo {formatBRL(summary.saldo)}
             </span>
