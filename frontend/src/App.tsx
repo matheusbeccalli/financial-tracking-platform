@@ -13,7 +13,7 @@ import Transactions from "./pages/Transactions";
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
   mutationCache: new MutationCache({
-    onError: (error) => showToast((error as Error).message || "Erro inesperado"),
+    onError: (error) => showToast(error.message || "Erro inesperado"),
   }),
 });
 

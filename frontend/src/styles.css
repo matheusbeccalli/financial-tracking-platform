@@ -173,4 +173,7 @@ h3 { font-size: 14px; margin: 0 0 8px; color: var(--ink-2); }
   font-size: 13px;
   box-shadow: 0 2px 10px var(--border);
   cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
 }
