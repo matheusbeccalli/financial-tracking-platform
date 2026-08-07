@@ -1,6 +1,7 @@
 import re
 from datetime import date, datetime
 
+from app.normalize import extract_installment
 from app.parsers import ParsedTransaction
 from app.parsers.csv_generic import _fold, _to_cents
 
@@ -45,8 +46,7 @@ def parse_bradesco_fatura(content: bytes) -> list[ParsedTransaction]:
     if ref is None:
         raise ValueError("Fatura Bradesco sem data de referência (linha 'Data: dd/mm/aaaa')")
 
-    out: list[ParsedTransaction] = []
-    counts: dict[tuple[str, str, int], int] = {}
+    rows: list[tuple[date, str, int]] = []
     for line in lines:
         m = _ROW_RE.match(line)
         if not m:
@@ -64,6 +64,25 @@ def parse_bradesco_fatura(content: bytes) -> list[ParsedTransaction]:
             cents = -_to_cents(parts[3])
         except ValueError:
             continue
+        rows.append((d, desc, cents))
+    if not rows:
+        raise ValueError("Fatura Bradesco sem linhas de transação válidas")
+
+    # Nas linhas parceladas a fatura mostra a data da compra original, mas a
+    # cobrança pertence ao ciclo desta fatura: parcelas fora da janela das
+    # linhas regulares são datadas no início do ciclo. Sem linhas regulares
+    # não há âncora e as datas ficam como estão.
+    regular = [d for d, desc, _ in rows if extract_installment(desc) is None]
+    if regular:
+        start, end = min(regular), max(regular)
+        rows = [
+            (start if extract_installment(desc) and not start <= d <= end else d, desc, cents)
+            for d, desc, cents in rows
+        ]
+
+    out: list[ParsedTransaction] = []
+    counts: dict[tuple[str, str, int], int] = {}
+    for d, desc, cents in rows:
         key = (d.isoformat(), desc, cents)
         counts[key] = counts.get(key, 0) + 1
         out.append(
@@ -74,6 +93,4 @@ def parse_bradesco_fatura(content: bytes) -> list[ParsedTransaction]:
                 fitid=f"bradesco-fatura|{d.isoformat()}|{desc}|{cents}|{counts[key]}",
             )
         )
-    if not out:
-        raise ValueError("Fatura Bradesco sem linhas de transação válidas")
     return out

@@ -10,6 +10,7 @@ FATURA = (
     "Situação da Fatura: PAGO\r"
     "MATHEUS B A SOUZA ;;; 7433\r"
     "Data;Histórico;Valor(US$);Valor(R$);\r"
+    "04/08;PG *CALVIN KLEIN 1/2;0,00;338,75\r"
     "04/08;HIROTA EM CASA ;0,00;20,56\r"
     "04/08;CAFETERIA BSG ;0,00;18,38\r"
     "04/08;CAFETERIA BSG ;0,00;18,38\r"
@@ -40,7 +41,7 @@ def test_sniff_detects_fatura_and_rejects_generic():
 def test_parses_all_transaction_rows_skipping_saldo_anterior():
     txs = parse_bradesco_fatura(FATURA)
     descs = [t.description for t in txs]
-    assert len(txs) == 7
+    assert len(txs) == 8
     assert not any("SALDO ANTERIOR" in d for d in descs)
     assert "MERCADOLIVRE*MERCADOLIVRE" in [d.strip() for d in descs]
 
@@ -49,7 +50,29 @@ def test_year_inferred_from_invoice_date():
     txs = parse_bradesco_fatura(FATURA)
     by_desc = {t.description.strip(): t for t in txs}
     assert by_desc["HIROTA EM CASA"].date == date(2026, 8, 4)
-    assert by_desc["MLP*KABUM KABUM 10/10"].date == date(2025, 10, 28)
+
+
+def test_out_of_cycle_installments_move_to_cycle_start():
+    """Nas parceladas a fatura mostra a data da compra original; a cobrança
+    pertence ao ciclo. Parcelas fora da janela das linhas regulares
+    (15/07-04/08 nesta fixture) vão para o início do ciclo."""
+    txs = parse_bradesco_fatura(FATURA)
+    by_desc = {t.description.strip(): t for t in txs}
+    assert by_desc["MLP*KABUM KABUM 10/10"].date == date(2026, 7, 15)
+    # parcela recém-iniciada dentro do ciclo fica na data original
+    assert by_desc["PG *CALVIN KLEIN 1/2"].date == date(2026, 8, 4)
+
+
+def test_all_installment_file_keeps_original_dates():
+    """Sem linhas regulares não há âncora de ciclo: datas ficam como estão."""
+    only_installments = (
+        "Data: 07/08/2026 12:28:27\r"
+        "Situação da Fatura: PAGO\r"
+        "Data;Histórico;Valor(US$);Valor(R$);\r"
+        "28/10;MLP*KABUM KABUM 10/10;0,00;254,40\r"
+    ).encode("latin-1")
+    txs = parse_bradesco_fatura(only_installments)
+    assert txs[0].date == date(2025, 10, 28)
 
 
 def test_uses_brl_column_and_inverts_sign():
@@ -90,7 +113,7 @@ def test_parse_file_routes_fatura_to_bradesco_parser():
     from app.parsers import parse_file
 
     txs = parse_file("Bradesco_872026_122833 AM.csv", FATURA)
-    assert len(txs) == 7
+    assert len(txs) == 8
     assert txs[0].fitid and txs[0].fitid.startswith("bradesco-fatura|")
 
 

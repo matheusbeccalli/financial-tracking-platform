@@ -61,6 +61,12 @@ de cartão, sinal invertido).
     positivo).
   - **Parcelas:** a descrição é mantida como está; `extract_installment`
     (`normalize.py`) já reconhece o sufixo `N/M` no fluxo de import.
+  - **Data de parcelas (decisão de 2026-08-07):** nas linhas parceladas a
+    fatura mostra a data da compra original, mas a cobrança pertence ao
+    ciclo desta fatura. Parcelas com data fora da janela das linhas
+    regulares (não-parceladas) do arquivo são datadas no **início do
+    ciclo** (menor data regular); parcelas dentro da janela mantêm a data.
+    Arquivo sem linhas regulares não tem âncora: datas ficam como estão.
   - **fitid determinístico:** `bradesco-fatura|<date>|<desc>|<amount>|<n>`,
     onde `<n>` é o índice de ocorrência da tripla (data, descrição, valor)
     dentro do arquivo. Evita colisão de dedupe entre duas compras idênticas
