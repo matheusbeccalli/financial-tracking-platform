@@ -34,3 +34,11 @@ def client(session):
     app.dependency_overrides[get_session] = lambda: session
     with TestClient(app) as c:
         yield c
+
+
+@pytest.fixture(autouse=True)
+def no_real_api_key(monkeypatch):
+    """Testes nunca chamam a API real, mesmo com ANTHROPIC_API_KEY no .env."""
+    from app.config import settings as app_settings
+
+    monkeypatch.setattr(app_settings, "anthropic_api_key", "")
