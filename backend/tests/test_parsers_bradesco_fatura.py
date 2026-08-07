@@ -84,3 +84,19 @@ def test_signature_without_transactions_raises():
     ).encode("latin-1")
     with pytest.raises(ValueError):
         parse_bradesco_fatura(empty)
+
+
+def test_parse_file_routes_fatura_to_bradesco_parser():
+    from app.parsers import parse_file
+
+    txs = parse_file("Bradesco_872026_122833 AM.csv", FATURA)
+    assert len(txs) == 7
+    assert txs[0].fitid and txs[0].fitid.startswith("bradesco-fatura|")
+
+
+def test_parse_file_routes_generic_csv_to_generic_parser():
+    from app.parsers import parse_file
+
+    txs = parse_file("extrato.csv", GENERIC_CSV)
+    assert len(txs) == 1
+    assert txs[0].fitid is None
