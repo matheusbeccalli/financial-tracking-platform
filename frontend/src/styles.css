@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --surface: #fcfcfb;
   --page: #f9f9f7;
   --ink: #0b0b0b;
@@ -13,6 +14,30 @@
   --red: #e34948;
   --good: #006300;
   --critical: #d03b3b;
+  --input-bg: #fff;
+  --warn-bg: #fffaf7;
+  --warn-border: #e8b8a8;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #1a1a18;
+  --page: #121210;
+  --ink: #f0efec;
+  --ink-2: #b3b1aa;
+  --muted: #8b897f;
+  --grid: #32312c;
+  --baseline: #4a4941;
+  --border: rgba(240, 239, 236, 0.12);
+  --blue: #5c9fe8;
+  --blue-dark: #82b6ee;
+  --blue-100: #1d3a5c;
+  --red: #ef6d6c;
+  --good: #5dbb5d;
+  --critical: #ef6d6c;
+  --input-bg: #232320;
+  --warn-bg: #2a201b;
+  --warn-border: #6b4a3a;
 }
 * { box-sizing: border-box; }
 body {
@@ -45,6 +70,7 @@ body {
   padding: 14px 16px;
   margin-bottom: 14px;
 }
+.card.warn { border-color: var(--warn-border); background: var(--warn-bg); }
 .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 .tiles {
   display: grid;
@@ -105,7 +131,8 @@ select, input {
   padding: 6px 8px;
   border-radius: 8px;
   border: 1px solid var(--baseline);
-  background: #fff;
+  background: var(--input-bg);
+  color: var(--ink);
 }
 h2 { font-size: 18px; margin: 0 0 12px; }
 h3 { font-size: 14px; margin: 0 0 8px; color: var(--ink-2); }
