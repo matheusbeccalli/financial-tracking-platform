@@ -35,6 +35,7 @@ export default function Budget() {
           <select
             value=""
             disabled={copyBudget.isPending}
+            aria-label="Copiar orçamento de outro mês"
             onChange={(e) => {
               const from = e.target.value;
               if (!from) return;
