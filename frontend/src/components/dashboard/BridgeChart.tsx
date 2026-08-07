@@ -13,6 +13,7 @@ import {
 import { useBridge } from "../../api/hooks";
 import { formatBRL } from "../../lib/money";
 import { buildWaterfall, type WaterfallBar } from "../../lib/waterfall";
+import { useThemeColors } from "../../theme/ThemeContext";
 
 const PERIODS = [
   ["month", "Mês"],
@@ -20,10 +21,10 @@ const PERIODS = [
   ["12m", "12 meses"],
 ] as const;
 
-const BAR_COLORS = { total: "#898781", up: "#2a78d6", down: "#e34948" } as const;
-
 export default function BridgeChart({ refMonth }: { refMonth: string }) {
   const [period, setPeriod] = useState<"month" | "ytd" | "12m">("month");
+  const colors = useThemeColors();
+  const barColors = { total: colors.muted, up: colors.blue, down: colors.red } as const;
   const { data: b, error } = useBridge(period, refMonth);
   const bars = b ? buildWaterfall(b) : [];
   return (
@@ -52,29 +53,29 @@ export default function BridgeChart({ refMonth }: { refMonth: string }) {
               angle={-30}
               textAnchor="end"
               height={64}
-              tick={{ fontSize: 11, fill: "#898781" }}
-              axisLine={{ stroke: "#c3c2b7" }}
+              tick={{ fontSize: 11, fill: colors.muted }}
+              axisLine={{ stroke: colors.baseline }}
               tickLine={false}
             />
             <YAxis
               tickFormatter={(v) => formatBRL(Number(v))}
               width={92}
-              tick={{ fontSize: 11, fill: "#898781" }}
+              tick={{ fontSize: 11, fill: colors.muted }}
               axisLine={false}
               tickLine={false}
             />
-            <ReferenceLine y={0} stroke="#c3c2b7" />
+            <ReferenceLine y={0} stroke={colors.baseline} />
             <Tooltip content={<WaterfallTooltip />} />
             <Bar dataKey="basePos" stackId="w" fill="transparent" isAnimationActive={false} />
             <Bar dataKey="pos" stackId="w" isAnimationActive={false} radius={[4, 4, 0, 0]}>
               {bars.map((bar, i) => (
-                <Cell key={i} fill={BAR_COLORS[bar.kind]} />
+                <Cell key={i} fill={barColors[bar.kind]} />
               ))}
             </Bar>
             <Bar dataKey="baseNeg" stackId="w" fill="transparent" isAnimationActive={false} />
             <Bar dataKey="neg" stackId="w" isAnimationActive={false} radius={[0, 0, 4, 4]}>
               {bars.map((bar, i) => (
-                <Cell key={i} fill={BAR_COLORS[bar.kind]} />
+                <Cell key={i} fill={barColors[bar.kind]} />
               ))}
             </Bar>
           </BarChart>

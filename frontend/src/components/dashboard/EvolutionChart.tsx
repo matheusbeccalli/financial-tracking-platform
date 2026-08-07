@@ -3,8 +3,10 @@ import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 
 import { useSummaries } from "../../api/hooks";
 import { formatBRL } from "../../lib/money";
 import { lastNMonths, monthLabel } from "../../lib/months";
+import { useThemeColors } from "../../theme/ThemeContext";
 
 export default function EvolutionChart({ month }: { month: string }) {
+  const colors = useThemeColors();
   const months = lastNMonths(month, 6);
   const results = useSummaries(months);
   const data = months.map((m, i) => ({
@@ -18,15 +20,15 @@ export default function EvolutionChart({ month }: { month: string }) {
         <BarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 4 }}>
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 11, fill: "#898781" }}
-            axisLine={{ stroke: "#c3c2b7" }}
+            tick={{ fontSize: 11, fill: colors.muted }}
+            axisLine={{ stroke: colors.baseline }}
             tickLine={false}
           />
           <YAxis hide />
           <Tooltip formatter={(v) => formatBRL(Number(v))} />
           <Bar dataKey="saidas" name="Saídas" radius={[4, 4, 0, 0]} isAnimationActive={false}>
             {data.map((_, i) => (
-              <Cell key={i} fill={i === data.length - 1 ? "#1c5cab" : "#2a78d6"} />
+              <Cell key={i} fill={i === data.length - 1 ? colors.blueDark : colors.blue} />
             ))}
           </Bar>
         </BarChart>

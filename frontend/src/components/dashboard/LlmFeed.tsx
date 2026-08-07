@@ -29,7 +29,7 @@ export default function LlmFeed() {
   }
 
   return (
-    <div className="card" style={{ borderColor: "#e8b8a8", background: "#fffaf7" }}>
+    <div className="card warn">
       <div className="row" style={{ justifyContent: "space-between" }}>
         <h3>🤖 Classificadas pelo LLM recentemente</h3>
         <button onClick={confirmAll} disabled={busy}>
