@@ -42,3 +42,12 @@ def no_real_api_key(monkeypatch):
     from app.config import settings as app_settings
 
     monkeypatch.setattr(app_settings, "anthropic_api_key", "")
+
+
+@pytest.fixture(autouse=True)
+def clean_jobs():
+    from app.services.classify_job import JOBS
+
+    JOBS.clear()
+    yield
+    JOBS.clear()

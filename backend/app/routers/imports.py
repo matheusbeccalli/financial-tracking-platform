@@ -1,9 +1,18 @@
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+)
 from sqlalchemy import select
 
 from app.db import get_session
 from app.models import Account, ImportBatch, Transaction
-from app.services.classifier import classify_new
+from app.services.classifier import apply_rules, classify_new
+from app.services.classify_job import JOBS, job_status, run_classification
 from app.services.importer import import_file, undo_batch
 from app.services.llm import get_llm
 
@@ -11,7 +20,8 @@ router = APIRouter(prefix="/api")
 
 
 @router.post("/imports")
-async def create_import(
+def create_import(
+    background_tasks: BackgroundTasks,
     account_id: int = Form(...),
     file: UploadFile = File(...),
     session=Depends(get_session),
@@ -20,21 +30,33 @@ async def create_import(
         raise HTTPException(404, "Conta não encontrada")
     if not file.filename:
         raise HTTPException(400, "Arquivo sem nome")
-    content = await file.read()
+    content = file.file.read()
     try:
         batch, new = import_file(session, account_id, file.filename, content)
     except ValueError as e:
         session.rollback()
         raise HTTPException(400, str(e))
-    counts = classify_new(session, new, get_llm(session))
+    _, pending = apply_rules(session, new)
     session.commit()
+    if pending and get_llm(session) is not None:
+        JOBS[batch.id] = "running"
+        background_tasks.add_task(run_classification, batch.id)
+    else:
+        JOBS[batch.id] = "done"
     return {
         "batch_id": batch.id,
         "filename": batch.filename,
         "new_count": batch.new_count,
         "dup_count": batch.dup_count,
-        "classified": counts,
+        "classification": job_status(session, batch.id),
     }
+
+
+@router.get("/imports/{batch_id}/classification")
+def get_classification(batch_id: int, session=Depends(get_session)):
+    if not session.get(ImportBatch, batch_id):
+        raise HTTPException(404, "Lote não encontrado")
+    return job_status(session, batch_id)
 
 
 @router.get("/imports")

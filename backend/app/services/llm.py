@@ -60,7 +60,9 @@ def parse_response(text: str) -> dict[int, str]:
 
 class AnthropicLLM:
     def __init__(self, api_key: str, model: str):
-        self.client = anthropic.Anthropic(api_key=api_key)
+        # Sem timeout o SDK espera até ~10min por chamada; LLM é acessório,
+        # falha rápida e sem cascata de retries.
+        self.client = anthropic.Anthropic(api_key=api_key, timeout=120.0, max_retries=1)
         self.model = model
 
     def classify(

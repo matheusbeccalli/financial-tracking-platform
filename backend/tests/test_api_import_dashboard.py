@@ -21,8 +21,13 @@ def test_import_endpoint_returns_summary(client):
     assert r.status_code == 200
     body = r.json()
     assert body["new_count"] == 3 and body["dup_count"] == 0
-    assert body["classified"] == {"regra": 0, "llm": 0, "pendente": 2}
-    # 3 novas, 1 ignorada (pagto fatura) => 2 classificáveis pendentes (sem LLM)
+    # 3 novas, 1 ignorada (pagto fatura) => 2 classificáveis; sem LLM: done na hora
+    assert body["classification"] == {
+        "status": "done",
+        "total": 2,
+        "done": 0,
+        "counts": {"regra": 0, "llm": 0, "pendente": 2},
+    }
 
 
 def test_import_invalid_file_is_400_and_writes_nothing(client, session):
@@ -67,3 +72,33 @@ def test_classify_pending_endpoint_without_llm(client):
     r = client.post("/api/classify/pending")
     assert r.status_code == 200
     assert r.json() == {"regra": 0, "llm": 0, "pendente": 2}
+
+
+def test_classification_endpoint_and_404(client):
+    batch_id = upload(client).json()["batch_id"]
+    r = client.get(f"/api/imports/{batch_id}/classification")
+    assert r.status_code == 200 and r.json()["status"] == "done"
+    assert client.get("/api/imports/999/classification").status_code == 404
+
+
+def test_import_with_llm_schedules_background_classification(client, session, monkeypatch):
+    from sqlalchemy.orm import sessionmaker
+
+    import app.routers.imports as imports_router
+    from app.services import classify_job
+
+    class FakeLLM:
+        def classify(self, items, categories, examples=None):
+            return {item["id"]: categories[0] for item in items}
+
+    fake = FakeLLM()
+    monkeypatch.setattr(imports_router, "get_llm", lambda s: fake)
+    monkeypatch.setattr(classify_job, "get_llm", lambda s: fake)
+    monkeypatch.setattr(
+        classify_job, "SessionLocal", sessionmaker(bind=session.get_bind())
+    )
+
+    body = upload(client).json()
+    assert body["classification"]["status"] == "running"  # snapshot na resposta
+    r = client.get(f"/api/imports/{body['batch_id']}/classification").json()
+    assert r["status"] == "done" and r["counts"]["llm"] == 2 and r["done"] == 2
