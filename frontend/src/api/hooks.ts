@@ -89,7 +89,7 @@ export const useClassification = (
       api<ClassificationProgress>(`/imports/${batchId}/classification`),
     initialData: initial,
     refetchInterval: (query) =>
-      query.state.data?.status === "running" ? 1500 : false,
+      !query.state.error && query.state.data?.status === "running" ? 1500 : false,
   });
 
 export const useSettings = () =>
