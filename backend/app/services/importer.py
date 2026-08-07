@@ -1,7 +1,7 @@
 from sqlalchemy import delete, select
 
 from app.dedupe import make_hash
-from app.models import ImportBatch, Transaction
+from app.models import IgnoreRule, ImportBatch, Transaction
 from app.normalize import extract_installment, normalize_description
 from app.parsers import parse_file
 
@@ -13,6 +13,7 @@ IGNORE_PATTERNS = (
     "PAGAMENTO FATURA",
     "PAGAMENTO DE FATURA",
     "PAGTO CARTAO CREDITO",
+    "GASTO C CREDITO",
     "TRANSFERENCIA ENTRE CONTAS",
     "PAGAMENTO ON LINE",
     "PAGAMENTO ONLINE",
@@ -32,6 +33,7 @@ def import_file(
     session.add(batch)
     session.flush()
 
+    ignore_matchers = {r.matcher for r in session.scalars(select(IgnoreRule))}
     new: list[Transaction] = []
     for p in parsed:
         h = make_hash(account_id, p.fitid, p.date, p.amount_cents, p.description)
@@ -49,7 +51,8 @@ def import_file(
             dedupe_hash=h,
             batch_id=batch.id,
             installment=extract_installment(p.description),
-            ignored=any(pat in norm for pat in IGNORE_PATTERNS),
+            ignored=any(pat in norm for pat in IGNORE_PATTERNS)
+            or norm in ignore_matchers,
         )
         session.add(tx)
         new.append(tx)

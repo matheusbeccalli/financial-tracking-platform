@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from app.models import Category, Rule, Transaction
+from app.models import Category, IgnoreRule, Rule, Transaction
 
 LLM_BATCH_SIZE = 50
 
@@ -47,6 +47,23 @@ def classify_new(session, txs: list[Transaction], llm) -> dict[str, int]:
     else:
         counts["pendente"] += len(pending)
     return counts
+
+
+def apply_ignore(session, tx: Transaction, ignored: bool) -> None:
+    """Marca/desmarca ignorada e aprende: cria/remove a regra de ignorar e
+    aplica retroativamente a todas as transações com a mesma descrição."""
+    tx.ignored = ignored
+    if not tx.normalized:
+        return
+    rule = session.scalar(select(IgnoreRule).where(IgnoreRule.matcher == tx.normalized))
+    if ignored and rule is None:
+        session.add(IgnoreRule(matcher=tx.normalized))
+    elif not ignored and rule is not None:
+        session.delete(rule)
+    for other in session.scalars(
+        select(Transaction).where(Transaction.normalized == tx.normalized)
+    ):
+        other.ignored = ignored
 
 
 def apply_correction(session, tx: Transaction, category_id: int) -> None:

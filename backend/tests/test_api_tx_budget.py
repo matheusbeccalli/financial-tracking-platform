@@ -66,3 +66,25 @@ def test_invalid_month_format_is_400(client):
 def test_month_13_is_400_not_500(client):
     assert client.get("/api/transactions", params={"month": "2026-13"}).status_code == 400
     assert client.get("/api/dashboard/summary", params={"month": "2026-00"}).status_code == 400
+
+
+def test_patch_ignored_creates_ignore_rule_and_retroapplies(client, session):
+    from app.models import IgnoreRule
+
+    tx1 = seed_tx(session)
+    tx2 = seed_tx(session, dedupe_hash="h-uber-2", date=date(2026, 8, 6))
+    r = client.patch(f"/api/transactions/{tx1.id}", json={"ignored": True})
+    assert r.json()["ignored"] is True
+    assert session.scalar(
+        select(Rule.id).where(Rule.matcher == "UBER TRIP")
+    ) is None  # regra de categoria não é criada pelo toggle
+    assert session.scalar(
+        select(IgnoreRule.id).where(IgnoreRule.matcher == "UBER TRIP")
+    ) is not None
+    session.refresh(tx2)
+    assert tx2.ignored is True
+
+    r = client.patch(f"/api/transactions/{tx1.id}", json={"ignored": False})
+    assert r.json()["ignored"] is False
+    session.refresh(tx2)
+    assert tx2.ignored is False

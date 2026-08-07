@@ -52,3 +52,22 @@ def test_correction_sets_manual_and_upserts_rule(session):
     apply_correction(session, tx, saude.id)  # segunda correção atualiza a regra
     rules = session.scalars(select(Rule).where(Rule.matcher == "DROGARIA XPTO")).all()
     assert len(rules) == 1 and rules[0].category_id == saude.id
+
+
+def test_apply_ignore_creates_rule_and_retroapplies(session):
+    from app.models import IgnoreRule
+    from app.services.classifier import apply_ignore
+
+    a = make_tx(session, "Transfe Pix Des: Eu 01/08", "TRANSFE PIX DES EU", cents=-1000)
+    b = make_tx(session, "Transfe Pix Des: Eu 02/08", "TRANSFE PIX DES EU", cents=-2000)
+    apply_ignore(session, a, True)
+    session.flush()
+    assert a.ignored is True and b.ignored is True
+    assert session.scalar(
+        select(IgnoreRule).where(IgnoreRule.matcher == "TRANSFE PIX DES EU")
+    ) is not None
+
+    apply_ignore(session, a, False)
+    session.flush()
+    assert a.ignored is False and b.ignored is False
+    assert session.scalar(select(IgnoreRule)) is None

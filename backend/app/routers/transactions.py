@@ -8,7 +8,7 @@ from app.models import Transaction
 from app.routers.validators import require_month
 from app.schemas import TxPatch
 from app.services.budget import month_bounds
-from app.services.classifier import apply_correction
+from app.services.classifier import apply_correction, apply_ignore
 
 router = APIRouter(prefix="/api/transactions")
 
@@ -55,6 +55,6 @@ def patch_transaction(tx_id: int, payload: TxPatch, session=Depends(get_session)
     if payload.category_id is not None:
         apply_correction(session, tx, payload.category_id)
     if payload.ignored is not None:
-        tx.ignored = payload.ignored
+        apply_ignore(session, tx, payload.ignored)
     session.commit()
     return tx_out(tx)

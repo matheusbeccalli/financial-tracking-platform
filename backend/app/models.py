@@ -52,6 +52,12 @@ class Transaction(Base):
     ignored: Mapped[bool] = mapped_column(default=False)
 
 
+class IgnoreRule(Base):
+    __tablename__ = "ignore_rule"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    matcher: Mapped[str] = mapped_column(unique=True)  # descrição normalizada
+
+
 class Rule(Base):
     __tablename__ = "rule"
     id: Mapped[int] = mapped_column(primary_key=True)

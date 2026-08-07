@@ -72,3 +72,14 @@ def test_settings_reports_api_key_status(client, monkeypatch):
     assert client.get("/api/settings").json()["api_key_set"] is False
     monkeypatch.setattr(cfg, "anthropic_api_key", "sk-teste")
     assert client.get("/api/settings").json()["api_key_set"] is True
+
+
+def test_ignore_rules_list_and_delete(client, session):
+    from app.models import IgnoreRule
+
+    session.add(IgnoreRule(matcher="GASTO QUALQUER"))
+    session.flush()
+    rules = client.get("/api/ignore-rules").json()
+    assert len(rules) == 1 and rules[0]["matcher"] == "GASTO QUALQUER"
+    assert client.delete(f"/api/ignore-rules/{rules[0]['id']}").status_code == 204
+    assert client.get("/api/ignore-rules").json() == []

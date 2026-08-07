@@ -70,3 +70,22 @@ def test_undo_batch_removes_its_transactions(session):
     session.commit()
     assert session.scalar(select(func.count()).select_from(Transaction)) == 0
     assert session.get(ImportBatch, batch.id) is None
+
+
+def test_gasto_c_credito_is_ignored(session):
+    content = load("bradesco_conta.ofx").replace(b"PAGTO FATURA CARTAO", b"Gasto c Credito")
+    import_file(session, 1, "a.ofx", content)
+    session.commit()
+    tx = session.scalar(select(Transaction).where(Transaction.normalized == "GASTO C CREDITO"))
+    assert tx.ignored is True
+
+
+def test_ignore_rule_applies_on_import(session):
+    from app.models import IgnoreRule
+
+    session.add(IgnoreRule(matcher="SUPERMERCADO PAO DE ACUCAR"))
+    session.flush()
+    import_file(session, 1, "a.ofx", load("bradesco_conta.ofx"))
+    session.commit()
+    tx = session.scalar(select(Transaction).where(Transaction.amount_cents == -18740))
+    assert tx.ignored is True

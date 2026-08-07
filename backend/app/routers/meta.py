@@ -3,7 +3,7 @@ from sqlalchemy import select
 
 from app.config import settings as config_settings
 from app.db import get_session
-from app.models import Account, Category, Rule, Setting
+from app.models import Account, Category, IgnoreRule, Rule, Setting
 from app.schemas import AccountIn, AccountPatch, CategoryIn, CategoryPatch, RulePatch, SettingsPut
 from app.seed import DEFAULT_LLM_MODEL
 
@@ -115,6 +115,23 @@ def patch_rule(rule_id: int, payload: RulePatch, session=Depends(get_session)):
     rule.category_id = payload.category_id
     session.commit()
     return {"id": rule.id, "matcher": rule.matcher, "category_id": rule.category_id}
+
+
+@router.get("/ignore-rules")
+def list_ignore_rules(session=Depends(get_session)):
+    return [
+        {"id": r.id, "matcher": r.matcher}
+        for r in session.scalars(select(IgnoreRule))
+    ]
+
+
+@router.delete("/ignore-rules/{rule_id}", status_code=204)
+def delete_ignore_rule(rule_id: int, session=Depends(get_session)):
+    rule = session.get(IgnoreRule, rule_id)
+    if not rule:
+        raise HTTPException(404, "Regra de ignorar não encontrada")
+    session.delete(rule)
+    session.commit()
 
 
 @router.delete("/rules/{rule_id}", status_code=204)
