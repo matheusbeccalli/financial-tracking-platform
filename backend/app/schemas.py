@@ -30,6 +30,11 @@ class BudgetPut(BaseModel):
     valid_from: str  # "YYYY-MM"
 
 
+class BudgetCopy(BaseModel):
+    from_month: str  # "YYYY-MM"
+    to_month: str
+
+
 class AccountIn(BaseModel):
     name: str
     institution: str

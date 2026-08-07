@@ -118,6 +118,11 @@ export const usePatchTx = () =>
       api(`/transactions/${id}`, jsonBody("PATCH", patch))
   );
 
+export const useCopyBudget = () =>
+  useInvalidatingMutation((payload: { from_month: string; to_month: string }) =>
+    api("/budgets/copy", jsonBody("POST", payload))
+  );
+
 export const usePutBudget = () =>
   useInvalidatingMutation(
     (payload: { category_id: number; amount_cents: number; valid_from: string }) =>

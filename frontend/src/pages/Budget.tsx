@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
 
-import { useBudgets, useCategories, usePutBudget, useSummaries } from "../api/hooks";
+import {
+  useBudgets,
+  useCategories,
+  useCopyBudget,
+  usePutBudget,
+  useSummaries,
+} from "../api/hooks";
 import MonthPicker from "../components/MonthPicker";
 import { formatBRL, parseBRL } from "../lib/money";
-import { currentMonth, lastNMonths, monthLabel } from "../lib/months";
+import { addMonths, currentMonth, lastNMonths, monthLabel } from "../lib/months";
 
 export default function Budget() {
   const [month, setMonth] = useState(currentMonth());
   const { data: lines } = useBudgets(month);
   const { data: categories } = useCategories();
   const putBudget = usePutBudget();
+  const copyBudget = useCopyBudget();
+  const copyMonths = lastNMonths(addMonths(month, -1), 12).reverse();
 
   const budgetById = new Map((lines ?? []).map((l) => [l.category_id, l.amount_cents]));
   const active = (categories ?? []).filter((c) => !c.archived);
@@ -23,7 +31,30 @@ export default function Budget() {
     <>
       <div className="row" style={{ justifyContent: "space-between" }}>
         <h2>Orçamento</h2>
-        <MonthPicker month={month} onChange={setMonth} />
+        <div className="row">
+          <select
+            value=""
+            disabled={copyBudget.isPending}
+            onChange={(e) => {
+              const from = e.target.value;
+              if (!from) return;
+              if (
+                window.confirm(
+                  `Substituir o orçamento de ${monthLabel(month)} pelo de ${monthLabel(from)}?`
+                )
+              )
+                copyBudget.mutate({ from_month: from, to_month: month });
+            }}
+          >
+            <option value="">Copiar de…</option>
+            {copyMonths.map((m) => (
+              <option key={m} value={m}>
+                {monthLabel(m)}
+              </option>
+            ))}
+          </select>
+          <MonthPicker month={month} onChange={setMonth} />
+        </div>
       </div>
       <p className="muted">
         Valores salvos valem a partir de {monthLabel(month)} até você mudar de novo. Meses
