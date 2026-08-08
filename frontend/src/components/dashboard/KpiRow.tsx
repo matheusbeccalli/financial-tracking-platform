@@ -21,6 +21,24 @@ export default function KpiRow({ month }: { month: string }) {
         sub={`orçado ${formatBRL(s.saidas.orcado)}`}
       />
       <StatTile
+        label="Investido"
+        value={formatBRL(s.investimentos.real)}
+        sub={
+          s.investimentos.real < 0
+            ? "resgate líquido no mês"
+            : s.investimentos.orcado > 0
+              ? `meta ${formatBRL(s.investimentos.orcado)}`
+              : "sem meta"
+        }
+        tone={
+          s.investimentos.real < 0
+            ? "bad"
+            : s.investimentos.orcado > 0 && s.investimentos.real >= s.investimentos.orcado
+              ? "good"
+              : undefined
+        }
+      />
+      <StatTile
         label="Saldo"
         value={formatBRL(s.saldo.real)}
         sub={`orçado ${formatBRL(s.saldo.orcado)}`}
