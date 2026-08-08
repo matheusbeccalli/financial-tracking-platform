@@ -4,6 +4,7 @@ from sqlalchemy import select
 from app.config import settings as config_settings
 from app.db import get_session
 from app.models import Account, Category, IgnoreRule, Rule, Setting
+from app.models import CATEGORY_KINDS
 from app.normalize import name_sort_key
 from app.schemas import AccountIn, AccountPatch, CategoryIn, CategoryPatch, RulePatch, SettingsPut
 from app.seed import DEFAULT_LLM_MODEL
@@ -56,8 +57,8 @@ def list_categories(session=Depends(get_session)):
 
 @router.post("/categories", status_code=201)
 def create_category(payload: CategoryIn, session=Depends(get_session)):
-    if payload.kind not in ("entrada", "saida"):
-        raise HTTPException(400, "kind deve ser 'entrada' ou 'saida'")
+    if payload.kind not in CATEGORY_KINDS:
+        raise HTTPException(400, "kind deve ser 'entrada', 'saida' ou 'investimento'")
     if session.scalar(select(Category).where(Category.name == payload.name)):
         raise HTTPException(400, f"Categoria '{payload.name}' já existe")
     cat = Category(name=payload.name, kind=payload.kind, color=payload.color)
@@ -71,7 +72,9 @@ def patch_category(cat_id: int, payload: CategoryPatch, session=Depends(get_sess
     cat = session.get(Category, cat_id)
     if not cat:
         raise HTTPException(404, "Categoria não encontrada")
-    for field in ("name", "color", "archived"):
+    if payload.kind is not None and payload.kind not in CATEGORY_KINDS:
+        raise HTTPException(400, "kind deve ser 'entrada', 'saida' ou 'investimento'")
+    for field in ("name", "color", "archived", "kind"):
         value = getattr(payload, field)
         if value is not None:
             setattr(cat, field, value)

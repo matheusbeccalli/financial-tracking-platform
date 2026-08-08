@@ -13,6 +13,7 @@ class CategoryPatch(BaseModel):
     name: Optional[str] = None
     color: Optional[str] = None
     archived: Optional[bool] = None
+    kind: Optional[str] = None  # "entrada" | "saida" | "investimento"
 
 
 class SettingsPut(BaseModel):

@@ -93,3 +93,28 @@ def test_ignore_rules_list_and_delete(client, session):
     assert len(rules) == 1 and rules[0]["matcher"] == "GASTO QUALQUER"
     assert client.delete(f"/api/ignore-rules/{rules[0]['id']}").status_code == 204
     assert client.get("/api/ignore-rules").json() == []
+
+
+def test_create_category_kind_investimento(client):
+    r = client.post("/api/categories", json={"name": "Cripto", "kind": "investimento"})
+    assert r.status_code == 201 and r.json()["kind"] == "investimento"
+
+
+def test_create_category_invalid_kind_is_400(client):
+    r = client.post("/api/categories", json={"name": "X", "kind": "poupanca"})
+    assert r.status_code == 400
+
+
+def test_patch_category_kind(client):
+    cats = client.get("/api/categories").json()
+    invest = next(c for c in cats if c["name"] == "Investimentos")
+    r = client.patch(f"/api/categories/{invest['id']}", json={"kind": "saida"})
+    assert r.status_code == 200 and r.json()["kind"] == "saida"
+    r = client.patch(f"/api/categories/{invest['id']}", json={"kind": "investimento"})
+    assert r.status_code == 200 and r.json()["kind"] == "investimento"
+
+
+def test_patch_category_invalid_kind_is_400(client):
+    cats = client.get("/api/categories").json()
+    r = client.patch(f"/api/categories/{cats[0]['id']}", json={"kind": "poupanca"})
+    assert r.status_code == 400
