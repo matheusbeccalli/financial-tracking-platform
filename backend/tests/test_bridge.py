@@ -71,3 +71,16 @@ def test_bridge_respects_budget_effective_dates_across_period(session):
     b = bridge(session, "ytd", "2026-08")
     # 7 meses a 100000 + 1 mês a 200000, tudo saída
     assert b["start"] == -(7 * 100000 + 200000)
+
+
+def test_bridge_investimento_treated_with_expense_sign(session):
+    invest = cat(session, "Investimentos")
+    session.add(Budget(category_id=invest.id, amount_cents=200000, valid_from="2026-01"))
+    session.flush()
+    add_tx(session, invest.id, -150000, date(2026, 8, 5))  # aportou 50k a menos que a meta
+
+    b = bridge(session, "month", "2026-08")
+    assert b["start"] == -200000  # meta de aporte reduz o saldo projetado
+    step = next(s for s in b["steps"] if s["categoria"] == "Investimentos")
+    assert step["delta"] == 50000  # aportar menos que a meta melhora o saldo de caixa
+    assert b["start"] + sum(s["delta"] for s in b["steps"]) == b["end"]
