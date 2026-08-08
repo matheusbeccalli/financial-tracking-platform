@@ -3,6 +3,7 @@ from sqlalchemy import select
 
 from app.db import get_session
 from app.models import Budget, Category
+from app.normalize import name_sort_key
 from app.routers.validators import require_month
 from app.schemas import BudgetCopy, BudgetPut
 from app.services.budget import budget_map
@@ -15,15 +16,18 @@ def budgets_for_month(month: str, session=Depends(get_session)):
     require_month(month, "month")
     bmap = budget_map(session, month)
     cats = {c.id: c for c in session.scalars(select(Category))}
-    return [
-        {
-            "category_id": cid,
-            "category_name": cats[cid].name,
-            "kind": cats[cid].kind,
-            "amount_cents": cents,
-        }
-        for cid, cents in bmap.items()
-    ]
+    return sorted(
+        (
+            {
+                "category_id": cid,
+                "category_name": cats[cid].name,
+                "kind": cats[cid].kind,
+                "amount_cents": cents,
+            }
+            for cid, cents in bmap.items()
+        ),
+        key=lambda line: (line["kind"], name_sort_key(line["category_name"])),
+    )
 
 
 @router.put("")

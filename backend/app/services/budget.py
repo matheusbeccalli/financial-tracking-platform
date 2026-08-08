@@ -5,6 +5,7 @@ from datetime import date
 from sqlalchemy import select
 
 from app.models import Budget, Category, Transaction
+from app.normalize import name_sort_key
 
 
 def budget_map(session, month: str) -> dict[int, int]:
@@ -88,5 +89,5 @@ def month_summary(session, month: str, today: date | None = None) -> dict:
             "orcado": entradas_orc - saidas_orc,
         },
         "ritmo": ritmo,
-        "categorias": sorted(categorias, key=lambda c: (c["kind"], -c["real"])),
+        "categorias": sorted(categorias, key=lambda c: (c["kind"], name_sort_key(c["nome"]))),
     }

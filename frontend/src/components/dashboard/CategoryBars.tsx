@@ -29,7 +29,7 @@ export default function CategoryBars({ month }: { month: string }) {
 }
 
 function CatBar({ line }: { line: CatLine }) {
-  const over = line.orcado > 0 && line.real > line.orcado;
+  const over = line.real > line.orcado;
   const pct =
     line.orcado > 0
       ? Math.min(100, (line.real / line.orcado) * 100)

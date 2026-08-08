@@ -4,6 +4,7 @@ from sqlalchemy import select
 from app.config import settings as config_settings
 from app.db import get_session
 from app.models import Account, Category, IgnoreRule, Rule, Setting
+from app.normalize import name_sort_key
 from app.schemas import AccountIn, AccountPatch, CategoryIn, CategoryPatch, RulePatch, SettingsPut
 from app.seed import DEFAULT_LLM_MODEL
 
@@ -49,7 +50,8 @@ def _cat_out(c: Category) -> dict:
 
 @router.get("/categories")
 def list_categories(session=Depends(get_session)):
-    return [_cat_out(c) for c in session.scalars(select(Category))]
+    cats = sorted(session.scalars(select(Category)), key=lambda c: name_sort_key(c.name))
+    return [_cat_out(c) for c in cats]
 
 
 @router.post("/categories", status_code=201)

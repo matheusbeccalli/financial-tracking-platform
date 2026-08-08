@@ -8,6 +8,11 @@ def normalize_description(desc: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
+def name_sort_key(name: str) -> str:
+    s = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode()
+    return s.casefold()
+
+
 def extract_installment(desc: str) -> str | None:
     up = desc.upper()
     m = re.search(r"PARC\w*\s*(\d{1,2})\s*/\s*(\d{1,2})", up)

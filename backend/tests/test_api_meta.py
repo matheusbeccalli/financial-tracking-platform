@@ -15,6 +15,16 @@ def test_category_crud(client):
     assert edited["name"] == "Animais" and edited["archived"] is True
 
 
+def test_categories_listed_alphabetically(client):
+    client.post("/api/categories", json={"name": "água", "kind": "saida"})
+    client.post("/api/categories", json={"name": "Zoológico", "kind": "saida"})
+    names = [c["name"] for c in client.get("/api/categories").json()]
+    from app.normalize import name_sort_key
+
+    assert names == sorted(names, key=name_sort_key)
+    assert names.index("água") < names.index("Zoológico")
+
+
 def test_duplicate_category_name_is_400(client):
     assert client.post("/api/categories", json={"name": "Mercado", "kind": "saida"}).status_code == 400
 
