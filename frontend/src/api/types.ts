@@ -5,10 +5,12 @@ export interface Account {
   kind: "corrente" | "cartao";
 }
 
+export type CategoryKind = "entrada" | "saida" | "investimento";
+
 export interface Category {
   id: number;
   name: string;
-  kind: "entrada" | "saida";
+  kind: CategoryKind;
   color: string;
   archived: boolean;
 }
@@ -33,7 +35,7 @@ export interface RealOrc {
 export interface CatLine {
   id: number;
   nome: string;
-  kind: "entrada" | "saida";
+  kind: CategoryKind;
   real: number;
   orcado: number;
 }
@@ -42,6 +44,7 @@ export interface Summary {
   month: string;
   entradas: RealOrc;
   saidas: RealOrc;
+  investimentos: RealOrc;
   saldo: RealOrc;
   ritmo: number | null;
   categorias: CatLine[];
@@ -64,7 +67,7 @@ export interface Bridge {
 export interface BudgetLine {
   category_id: number;
   category_name: string;
-  kind: "entrada" | "saida";
+  kind: CategoryKind;
   amount_cents: number;
 }
 

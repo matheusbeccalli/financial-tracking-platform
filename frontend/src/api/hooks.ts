@@ -11,6 +11,7 @@ import type {
   AppSettings,
   Bridge,
   BudgetLine,
+  CategoryKind,
   ClassificationProgress,
   ClassifiedCounts,
   Category,
@@ -149,8 +150,13 @@ export const useCreateCategory = () =>
 
 export const usePatchCategory = () =>
   useInvalidatingMutation(
-    ({ id, patch }: { id: number; patch: { name?: string; color?: string; archived?: boolean } }) =>
-      api(`/categories/${id}`, jsonBody("PATCH", patch))
+    ({
+      id,
+      patch,
+    }: {
+      id: number;
+      patch: { name?: string; color?: string; archived?: boolean; kind?: CategoryKind };
+    }) => api(`/categories/${id}`, jsonBody("PATCH", patch))
   );
 
 export const useCreateAccount = () =>
