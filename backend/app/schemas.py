@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 class CategoryIn(BaseModel):
     name: str
-    kind: str  # "entrada" | "saida"
+    kind: str  # "entrada" | "saida" | "investimento"
     color: str = "#8888aa"
 
 

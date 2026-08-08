@@ -1,4 +1,5 @@
 import { useCategories } from "../api/hooks";
+import type { CategoryKind } from "../api/types";
 
 export default function CategorySelect({
   value,
@@ -8,7 +9,7 @@ export default function CategorySelect({
 }: {
   value: number | null;
   onChange: (id: number | null) => void;
-  kind?: "entrada" | "saida";
+  kind?: CategoryKind;
   allowEmpty?: boolean;
 }) {
   const { data: categories } = useCategories();

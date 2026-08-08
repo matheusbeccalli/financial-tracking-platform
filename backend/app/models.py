@@ -24,7 +24,7 @@ class Category(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
     color: Mapped[str] = mapped_column(default="#8888aa")
-    kind: Mapped[str]  # "entrada" | "saida"
+    kind: Mapped[str]  # ver CATEGORY_KINDS
     archived: Mapped[bool] = mapped_column(default=False)
 
 
