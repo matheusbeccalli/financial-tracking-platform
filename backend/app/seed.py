@@ -14,10 +14,11 @@ ACCOUNTS = [
 SAIDA = [
     "Mercado", "Restaurantes/Delivery", "Transporte", "Moradia",
     "Contas & Utilidades", "Saúde", "Lazer", "Assinaturas", "Vestuário",
-    "Educação", "Viagem", "Presentes", "Impostos & Taxas", "Investimentos",
+    "Educação", "Viagem", "Presentes", "Impostos & Taxas",
     "Outros",
 ]
 ENTRADA = ["Salário", "Rendimentos", "Outras Entradas"]
+INVESTIMENTO = ["Investimentos"]
 
 
 def seed(session):
@@ -26,5 +27,6 @@ def seed(session):
     if session.scalar(select(func.count()).select_from(Category)) == 0:
         session.add_all(Category(name=n, kind="saida") for n in SAIDA)
         session.add_all(Category(name=n, kind="entrada") for n in ENTRADA)
+        session.add_all(Category(name=n, kind="investimento") for n in INVESTIMENTO)
     if session.get(Setting, "llm_model") is None:
         session.add(Setting(key="llm_model", value=DEFAULT_LLM_MODEL))

@@ -4,6 +4,8 @@ from typing import Optional
 from sqlalchemy import Date, DateTime, ForeignKey, UniqueConstraint, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+CATEGORY_KINDS = ("entrada", "saida", "investimento")
+
 
 class Base(DeclarativeBase):
     pass

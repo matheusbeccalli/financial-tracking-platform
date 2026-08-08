@@ -18,8 +18,12 @@ def test_seed_categories(session):
     entrada = session.scalar(
         select(func.count()).select_from(Category).where(Category.kind == "entrada")
     )
-    assert saida == 15  # inclui Investimentos e Outros
+    investimento = session.scalar(
+        select(func.count()).select_from(Category).where(Category.kind == "investimento")
+    )
+    assert saida == 14  # inclui Outros
     assert entrada == 3
+    assert investimento == 1  # Investimentos
     names = {c.name for c in session.scalars(select(Category))}
     assert {"Investimentos", "Salário", "Mercado"} <= names
 

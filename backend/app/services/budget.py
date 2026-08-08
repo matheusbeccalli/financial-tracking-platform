@@ -49,19 +49,22 @@ def month_summary(session, month: str, today: date | None = None) -> dict:
     bmap = budget_map(session, month)
     real = real_by_category(session, start, end)
 
-    entradas_real = saidas_real = 0
+    entradas_real = saidas_real = invest_real = 0
     for cat_id, cents in real.items():
         if cat_id in ("uncat_in", "uncat_out"):
             continue
         kind = cats[cat_id].kind
         if kind == "entrada":
             entradas_real += cents
+        elif kind == "investimento":
+            invest_real += -cents  # positivo = aportou mais do que resgatou
         else:
             saidas_real += -cents
     entradas_real += real.get("uncat_in", 0)
     saidas_real += -real.get("uncat_out", 0)
     entradas_orc = sum(v for cid, v in bmap.items() if cats[cid].kind == "entrada")
     saidas_orc = sum(v for cid, v in bmap.items() if cats[cid].kind == "saida")
+    invest_orc = sum(v for cid, v in bmap.items() if cats[cid].kind == "investimento")
 
     if saidas_orc > 0:
         dia = today.day if start <= today <= end else end.day
@@ -74,7 +77,9 @@ def month_summary(session, month: str, today: date | None = None) -> dict:
             "id": c.id,
             "nome": c.name,
             "kind": c.kind,
-            "real": abs(real.get(c.id, 0)),
+            # investimento: líquido com sinal (negativo = resgatou mais);
+            # demais: valor absoluto, como antes
+            "real": -real.get(c.id, 0) if c.kind == "investimento" else abs(real.get(c.id, 0)),
             "orcado": bmap.get(c.id, 0),
         }
         for c in cats.values()
@@ -84,9 +89,10 @@ def month_summary(session, month: str, today: date | None = None) -> dict:
         "month": month,
         "entradas": {"real": entradas_real, "orcado": entradas_orc},
         "saidas": {"real": saidas_real, "orcado": saidas_orc},
+        "investimentos": {"real": invest_real, "orcado": invest_orc},
         "saldo": {
-            "real": entradas_real - saidas_real,
-            "orcado": entradas_orc - saidas_orc,
+            "real": entradas_real - saidas_real - invest_real,
+            "orcado": entradas_orc - saidas_orc - invest_orc,
         },
         "ritmo": ritmo,
         "categorias": sorted(categorias, key=lambda c: (c["kind"], name_sort_key(c["nome"]))),
