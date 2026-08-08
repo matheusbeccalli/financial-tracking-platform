@@ -7,9 +7,16 @@ import {
   usePutBudget,
   useSummaries,
 } from "../api/hooks";
+import type { CategoryKind } from "../api/types";
 import MonthPicker from "../components/MonthPicker";
 import { formatBRL, parseBRL } from "../lib/money";
 import { addMonths, currentMonth, lastNMonths, monthLabel } from "../lib/months";
+
+const KIND_LABELS: Record<CategoryKind, string> = {
+  entrada: "Entradas",
+  saida: "Saídas",
+  investimento: "Investimentos",
+};
 
 export default function Budget() {
   const [month, setMonth] = useState(currentMonth());
@@ -22,11 +29,11 @@ export default function Budget() {
 
   const budgetById = new Map((lines ?? []).map((l) => [l.category_id, l.amount_cents]));
   const active = (categories ?? []).filter((c) => !c.archived);
-  const total = (kind: "entrada" | "saida") =>
+  const total = (kind: CategoryKind) =>
     active
       .filter((c) => c.kind === kind)
       .reduce((sum, c) => sum + (budgetById.get(c.id) ?? 0), 0);
-  const saldoProjetado = total("entrada") - total("saida");
+  const saldoProjetado = total("entrada") - total("saida") - total("investimento");
 
   return (
     <>
@@ -72,9 +79,9 @@ export default function Budget() {
         passados mantêm o valor que vigorava na época.
       </p>
       <div className="row" style={{ alignItems: "flex-start" }}>
-        {(["entrada", "saida"] as const).map((kind) => (
+        {(["entrada", "saida", "investimento"] as const).map((kind) => (
           <div key={kind} className="card" style={{ flex: 1, minWidth: 320 }}>
-            <h3>{kind === "entrada" ? "Entradas" : "Saídas"}</h3>
+            <h3>{KIND_LABELS[kind]}</h3>
             <table>
               <tbody>
                 {active
@@ -154,6 +161,7 @@ function BudgetHistory({ month }: { month: string }) {
             <th>Mês</th>
             <th className="num">Entradas (real / orç.)</th>
             <th className="num">Saídas (real / orç.)</th>
+            <th className="num">Investido (real / orç.)</th>
             <th className="num">Saldo (real / orç.)</th>
           </tr>
         </thead>
@@ -168,6 +176,11 @@ function BudgetHistory({ month }: { month: string }) {
                 </td>
                 <td className="num">
                   {s ? `${formatBRL(s.saidas.real)} / ${formatBRL(s.saidas.orcado)}` : "…"}
+                </td>
+                <td className="num">
+                  {s
+                    ? `${formatBRL(s.investimentos.real)} / ${formatBRL(s.investimentos.orcado)}`
+                    : "…"}
                 </td>
                 <td className="num">
                   {s ? `${formatBRL(s.saldo.real)} / ${formatBRL(s.saldo.orcado)}` : "…"}

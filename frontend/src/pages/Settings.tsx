@@ -15,6 +15,7 @@ import {
   useSettings,
   usePutSettings,
 } from "../api/hooks";
+import type { CategoryKind } from "../api/types";
 import CategorySelect from "../components/CategorySelect";
 
 const KNOWN_MODELS = [
@@ -88,7 +89,7 @@ function CategoriesSection() {
   const createCategory = useCreateCategory();
   const patchCategory = usePatchCategory();
   const [name, setName] = useState("");
-  const [kind, setKind] = useState<"entrada" | "saida">("saida");
+  const [kind, setKind] = useState<CategoryKind>("saida");
   const [showArchived, setShowArchived] = useState(false);
   const list = (categories ?? []).filter((c) => showArchived || !c.archived);
   return (
@@ -100,9 +101,10 @@ function CategoriesSection() {
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <select value={kind} onChange={(e) => setKind(e.target.value as "entrada" | "saida")}>
+        <select value={kind} onChange={(e) => setKind(e.target.value as CategoryKind)}>
           <option value="saida">saída</option>
           <option value="entrada">entrada</option>
+          <option value="investimento">investimento</option>
         </select>
         <button
           disabled={!name.trim()}
@@ -146,7 +148,23 @@ function CategoriesSection() {
                 />
               </td>
               <td>
-                <span className="badge">{c.kind}</span>
+                <select
+                  value={c.kind}
+                  aria-label={`Tipo da categoria ${c.name}`}
+                  onChange={(e) => {
+                    const kind = e.target.value as CategoryKind;
+                    if (
+                      window.confirm(
+                        `Mudar "${c.name}" de "${c.kind}" para "${kind}"? Os dashboards de todos os meses, inclusive passados, passam a interpretar a categoria pelo novo tipo.`
+                      )
+                    )
+                      patchCategory.mutate({ id: c.id, patch: { kind } });
+                  }}
+                >
+                  <option value="saida">saída</option>
+                  <option value="entrada">entrada</option>
+                  <option value="investimento">investimento</option>
+                </select>
               </td>
               <td>
                 <button
