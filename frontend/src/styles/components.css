@@ -1,0 +1,348 @@
+/* Primitivos compartilhados. Nada aqui pode depender de uma tela específica. */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  padding: 16px 18px;
+  margin-bottom: var(--gap-section);
+}
+
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+/* Cabeçalho de página: eyebrow + h1 à esquerda, controles à direita. */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+
+.page-header-aside {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-sub {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.5;
+  max-width: 78ch;
+}
+
+/* Segmented control */
+.seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-btn);
+}
+
+.seg-item {
+  font: inherit;
+  font-size: 11px;
+  padding: 3px 9px;
+  border: 0;
+  border-radius: var(--r-seg);
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+
+.seg-item:hover {
+  color: var(--ink-2);
+  background: none;
+}
+
+.seg-item.is-active {
+  background: var(--seg-active);
+  color: var(--ink);
+}
+
+/* Seletor de mês: ‹ ago/26 › */
+.month-picker {
+  display: inline-flex;
+  align-items: stretch;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-control);
+  overflow: hidden;
+}
+
+.month-picker button {
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--ink-2);
+  padding: 5px 9px;
+  cursor: pointer;
+}
+
+.month-picker button:hover {
+  background: var(--hover-ghost);
+  color: var(--ink);
+}
+
+.month-picker .month-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 68px;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  border-left: 1px solid var(--border-strong);
+  border-right: 1px solid var(--border-strong);
+}
+
+/* Chip (clicável) e Pill (rótulo) */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  background: var(--hover-ghost);
+  border: 1px solid transparent;
+  color: var(--ink-2);
+}
+
+button.chip {
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+button.chip:hover {
+  border-color: var(--border-strong);
+  background: var(--hover-ghost);
+  color: var(--ink);
+}
+
+.chip.is-active {
+  background: var(--nav-active);
+  color: var(--ink);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+  border: 1px solid currentColor;
+}
+
+/* Borda tracejada é semântica: "sem valor definido" ou "previsto, não realizado". */
+.pill.dashed {
+  border-style: dashed;
+}
+
+/* Tons — aplicados via `color`, para que barras e bordas herdem com currentColor. */
+.tone-accent {
+  color: var(--accent);
+}
+.tone-warn {
+  color: var(--warn);
+}
+.tone-over {
+  color: var(--over);
+}
+.tone-invest {
+  color: var(--invest);
+}
+.tone-ink {
+  color: var(--ink);
+}
+.tone-ink-2 {
+  color: var(--ink-2);
+}
+.tone-muted {
+  color: var(--muted);
+}
+
+/* Valor monetário */
+.money {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+/* Zero é "—" cinza; dado inexistente é "n/d" itálico — coisas diferentes. */
+.money.is-zero {
+  color: var(--muted);
+}
+
+.money.is-nd {
+  color: var(--muted-2);
+  font-style: italic;
+  font-family: var(--font-ui);
+}
+
+/* Barra de progresso com marca de ritmo */
+.bar {
+  position: relative;
+  width: 100%;
+  background: var(--track);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+
+.bar-value {
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: currentColor;
+}
+
+.bar-value.dashed {
+  background: none;
+  border: 1px dashed currentColor;
+}
+
+.bar-pace {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--pace-mark);
+}
+
+/* Controles */
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-btn);
+  padding: 5px 8px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--focus);
+  border-style: solid;
+}
+
+input.dashed {
+  border-style: dashed;
+}
+
+input.mono {
+  font-family: var(--font-mono);
+}
+
+input.invest:focus {
+  border-color: var(--focus-invest);
+}
+
+button {
+  font-family: inherit;
+  font-size: 12.5px;
+  padding: 5px 11px;
+  border-radius: var(--r-btn);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+
+button:hover {
+  background: var(--hover-ghost);
+  color: var(--ink);
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--page);
+}
+
+button.primary:hover {
+  background: var(--accent);
+  color: var(--page);
+  filter: brightness(1.08);
+}
+
+button.ghost {
+  border-color: transparent;
+  background: none;
+}
+
+button.danger:hover {
+  color: var(--over);
+}
+
+button:disabled {
+  background: var(--hover-ghost);
+  border-color: transparent;
+  color: var(--muted);
+  cursor: default;
+}
+
+button:disabled:hover {
+  background: var(--hover-ghost);
+  color: var(--muted);
+  filter: none;
+}
+
+/* Toasts (comportamento inalterado, cores novas) */
+.toasts {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+  max-width: 360px;
+}
+
+.toast {
+  background: var(--float-bg);
+  color: var(--ink);
+  border: 1px solid var(--over);
+  border-left-width: 3px;
+  border-radius: var(--r-control);
+  padding: 10px 14px;
+  font-size: 12.5px;
+  box-shadow: var(--shadow-float);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+}
+
+.toast:hover {
+  background: var(--float-bg);
+  color: var(--ink);
+}

@@ -1,0 +1,106 @@
+/* Tokens do redesign — ver design_handoff_frontend_redesign/README.md § Design Tokens.
+   O tema desenhado é o escuro; o claro troca apenas os valores, nunca a estrutura.
+   Tokens não previstos na tabela do handoff (--sidebar, --muted-2, --border-strong,
+   --divider, --focus, --seg-active no claro) são derivações do mesmo passo de contraste
+   usado no escuro. */
+
+:root {
+  color-scheme: light;
+
+  --page: #f9f9f7;
+  --sidebar: #f4f4f1;
+  --surface: #ffffff;
+  --surface-2: #f4f4f1;
+
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --muted-2: #a3a19a;
+
+  --border: rgba(11, 11, 11, 0.1);
+  --border-strong: rgba(11, 11, 11, 0.16);
+  --divider: rgba(11, 11, 11, 0.07);
+  --track: #e1e0d9;
+
+  --accent: #178f8e;
+  --warn: #9a7112;
+  --over: #c0392b;
+  --invest: #4550c4;
+  --pace-mark: rgba(11, 11, 11, 0.35);
+
+  --tint-accent: rgba(23, 143, 142, 0.07);
+  --tint-warn: rgba(154, 113, 18, 0.07);
+  --tint-over: rgba(192, 57, 43, 0.07);
+  --tint-invest: rgba(69, 80, 196, 0.07);
+
+  --nav-active: rgba(23, 143, 142, 0.12);
+  --nav-dot: rgba(11, 11, 11, 0.2);
+  --seg-active: #ffffff;
+  --hover-row: rgba(11, 11, 11, 0.03);
+  --hover-ghost: rgba(11, 11, 11, 0.04);
+  --focus: rgba(23, 143, 142, 0.55);
+  --focus-invest: rgba(69, 80, 196, 0.55);
+
+  --float-bg: #ffffff;
+  --float-border: rgba(11, 11, 11, 0.16);
+  --shadow-float: 0 12px 32px rgba(11, 11, 11, 0.18);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --page: #0d0e10;
+  --sidebar: #111316;
+  --surface: #15171a;
+  --surface-2: #0f1114;
+
+  --ink: #edeceb;
+  --ink-2: #a9adb4;
+  --muted: #6f757e;
+  --muted-2: #585e66;
+
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.1);
+  --divider: rgba(255, 255, 255, 0.05);
+  --track: rgba(255, 255, 255, 0.07);
+
+  --accent: #4fd0cf;
+  --warn: #d9b04f;
+  --over: #e2705f;
+  --invest: #9aa6f2;
+  --pace-mark: rgba(255, 255, 255, 0.4);
+
+  --tint-accent: rgba(79, 208, 207, 0.05);
+  --tint-warn: rgba(217, 176, 79, 0.05);
+  --tint-over: rgba(226, 112, 95, 0.05);
+  --tint-invest: rgba(154, 166, 242, 0.05);
+
+  --nav-active: rgba(79, 208, 207, 0.1);
+  --nav-dot: rgba(255, 255, 255, 0.18);
+  --seg-active: rgba(255, 255, 255, 0.09);
+  --hover-row: rgba(255, 255, 255, 0.035);
+  --hover-ghost: rgba(255, 255, 255, 0.04);
+  --focus: rgba(79, 208, 207, 0.55);
+  --focus-invest: rgba(154, 166, 242, 0.55);
+
+  --float-bg: #1b1e22;
+  --float-border: rgba(255, 255, 255, 0.14);
+  --shadow-float: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+/* Tokens que não mudam com o tema. Fica depois dos blocos de cor de propósito:
+   o seletor [data-theme] tem especificidade maior, então as cores continuam
+   vencendo independentemente da ordem. */
+:root {
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --r-card: 12px;
+  --r-control: 8px;
+  --r-btn: 7px;
+  --r-seg: 5px;
+  --r-badge: 4px;
+  --r-pill: 99px;
+
+  --gap-section: 14px;
+}
