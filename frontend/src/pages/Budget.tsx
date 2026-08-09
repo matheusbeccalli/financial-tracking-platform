@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
   useBudgets,
@@ -8,8 +8,9 @@ import {
   useSummaries,
 } from "../api/hooks";
 import type { CategoryKind } from "../api/types";
+import BudgetInput from "../components/BudgetInput";
 import MonthPicker from "../components/MonthPicker";
-import { formatBRL, parseBRL } from "../lib/money";
+import { formatBRL } from "../lib/money";
 import { addMonths, currentMonth, lastNMonths, monthLabel } from "../lib/months";
 
 const KIND_LABELS: Record<CategoryKind, string> = {
@@ -126,26 +127,6 @@ export default function Budget() {
         <BudgetHistory month={month} />
       </div>
     </>
-  );
-}
-
-function BudgetInput({ cents, onSave }: { cents: number; onSave: (c: number) => void }) {
-  const toText = (c: number) => (c ? (c / 100).toFixed(2).replace(".", ",") : "");
-  const [text, setText] = useState(toText(cents));
-  useEffect(() => setText(toText(cents)), [cents]);
-  const commit = () => {
-    const parsed = text.trim() === "" ? 0 : parseBRL(text);
-    if (parsed !== null && parsed >= 0 && parsed !== cents) onSave(parsed);
-  };
-  return (
-    <input
-      style={{ width: 110, textAlign: "right" }}
-      value={text}
-      placeholder="0,00"
-      onChange={(e) => setText(e.target.value)}
-      onBlur={commit}
-      onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-    />
   );
 }
 
