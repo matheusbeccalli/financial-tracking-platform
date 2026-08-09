@@ -25,6 +25,14 @@ export default function Trends() {
   const summaries = results.map((r) => r.data);
   const nCols = pastMonths.length + planMonths.length + 2; // rótulo + média
 
+  const error = results.find((r) => r.error)?.error;
+  if (error)
+    return (
+      <>
+        <h2>Tendências e Projeção</h2>
+        <p className="error">Erro ao carregar resumo: {(error as Error).message}</p>
+      </>
+    );
   if (!categories || summaries.some((s) => s === undefined))
     return (
       <>
@@ -153,6 +161,7 @@ function SectionRows({
               <BudgetInput
                 cents={v}
                 width={90}
+                ariaLabel={`Orçamento de ${row.nome} em ${monthLabel(planMonths[i])}`}
                 onSave={(cents) => onSave(row.id, cents, planMonths[i])}
               />
             </td>
@@ -178,7 +187,11 @@ function SectionRows({
               <span
                 className="badge"
                 style={{ color: "var(--critical)", marginLeft: 4 }}
-                title="destoa da média 6m"
+                title={
+                  kind === "saida"
+                    ? "orçado abaixo da média realizada"
+                    : "orçado acima da média realizada"
+                }
               >
                 ⚠
               </span>
