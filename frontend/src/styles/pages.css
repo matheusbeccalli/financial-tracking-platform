@@ -8,9 +8,15 @@
    ainda vive em EvolutionChart/BridgeChart. Somem no plano 01. */
 :root {
   --grid: var(--divider);
-  --baseline: var(--border-strong);
+  /* --baseline era uma hairline opaca (#c3c2b7 / #4a4941): é o eixo dos gráficos e o
+     único indicador de foco do InlineText em Configurações. Um alias translúcido
+     apagaria os dois, então aponta para --muted. */
+  --baseline: var(--muted);
   --blue: var(--accent);
-  --blue-dark: var(--accent);
+  /* EvolutionChart usa blue-dark só para destacar o mês corrente entre os 6;
+     apontar os dois para --accent deixaria as seis barras idênticas. Precisa ser
+     um valor próprio, não um alias. */
+  --blue-dark: #0d5453;
   --blue-100: var(--nav-active);
   --red: var(--over);
   --good: var(--accent);
@@ -21,7 +27,19 @@
   --on-blue: var(--page);
 }
 
+:root[data-theme="dark"] {
+  --blue-dark: #8fe4e3;
+}
+
 /* ---------- LEGADO: classes das telas ainda não migradas ---------- */
+/* As telas antigas usam h2/h3 como título de bloco e contavam com a margem
+   inferior que o CSS anterior dava. No redesign os títulos ficam em .card-head,
+   sem margem — até lá, a margem volta aqui. */
+h2,
+h3 {
+  margin-bottom: 10px;
+}
+
 .row {
   display: flex;
   gap: 12px;

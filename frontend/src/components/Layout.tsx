@@ -41,7 +41,6 @@ export default function Layout() {
           ))}
         </nav>
         <div className="sidebar-footer">
-          <span>Tema</span>
           <Segmented
             value={mode}
             options={THEME_OPTIONS}

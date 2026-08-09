@@ -22,23 +22,27 @@
   --divider: rgba(11, 11, 11, 0.07);
   --track: #e1e0d9;
 
-  --accent: #178f8e;
-  --warn: #9a7112;
+  /* O handoff pede accent/warn/invest com contraste ≥ 4.5:1 sobre --surface no
+     claro, mas os hex que ele lista não chegam lá: #178f8e dá 3,9:1 sobre branco
+     (3,7:1 como fundo de botão) e #9a7112 dá 4,4:1. Escurecidos até cumprirem a
+     regra que o próprio handoff declara. O escuro fica com os valores originais. */
+  --accent: #137574;
+  --warn: #8a650f;
   --over: #c0392b;
   --invest: #4550c4;
   --pace-mark: rgba(11, 11, 11, 0.35);
 
-  --tint-accent: rgba(23, 143, 142, 0.07);
-  --tint-warn: rgba(154, 113, 18, 0.07);
+  --tint-accent: rgba(19, 117, 116, 0.07);
+  --tint-warn: rgba(138, 101, 15, 0.07);
   --tint-over: rgba(192, 57, 43, 0.07);
   --tint-invest: rgba(69, 80, 196, 0.07);
 
-  --nav-active: rgba(23, 143, 142, 0.12);
+  --nav-active: rgba(19, 117, 116, 0.12);
   --nav-dot: rgba(11, 11, 11, 0.2);
   --seg-active: #ffffff;
   --hover-row: rgba(11, 11, 11, 0.03);
   --hover-ghost: rgba(11, 11, 11, 0.04);
-  --focus: rgba(23, 143, 142, 0.55);
+  --focus: rgba(19, 117, 116, 0.55);
   --focus-invest: rgba(69, 80, 196, 0.55);
 
   --float-bg: #ffffff;

@@ -7,7 +7,10 @@ export default function KpiRow({ month }: { month: string }) {
   if (isLoading) return <p className="muted">Carregando…</p>;
   if (error || !s)
     return <p className="error">Erro ao carregar resumo: {(error as Error)?.message}</p>;
-  const acima = s.ritmo !== null && s.ritmo > 0;
+  // Arredonda uma vez só: derivar o sinal do valor cru e a magnitude do
+  // arredondado produziria "−0 pts" e um "+0 pts" pintado de vermelho.
+  const ritmo = s.ritmo === null ? null : Math.round(s.ritmo);
+  const acima = ritmo !== null && ritmo > 0;
   return (
     <div className="tiles">
       <StatTile
@@ -47,9 +50,9 @@ export default function KpiRow({ month }: { month: string }) {
       <StatTile
         label="Ritmo das saídas"
         value={
-          s.ritmo === null
+          ritmo === null
             ? "—"
-            : `${s.ritmo > 0 ? "+" : s.ritmo < 0 ? "−" : ""}${Math.abs(Math.round(s.ritmo))} pts`
+            : `${ritmo > 0 ? "+" : ritmo < 0 ? "−" : ""}${Math.abs(ritmo)} pts`
         }
         sub={
           s.ritmo === null
