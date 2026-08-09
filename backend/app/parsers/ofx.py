@@ -24,7 +24,6 @@ def parse_ofx(content: bytes) -> list[ParsedTransaction]:
                         date=t.date.date(),
                         description=description,
                         amount_cents=to_cents(t.amount),
-                        fitid=(t.id or "").strip() or None,
                     )
                 )
     except ValueError:

@@ -80,17 +80,7 @@ def parse_bradesco_fatura(content: bytes) -> list[ParsedTransaction]:
             for d, desc, cents in rows
         ]
 
-    out: list[ParsedTransaction] = []
-    counts: dict[tuple[str, str, int], int] = {}
-    for d, desc, cents in rows:
-        key = (d.isoformat(), desc, cents)
-        counts[key] = counts.get(key, 0) + 1
-        out.append(
-            ParsedTransaction(
-                date=d,
-                description=desc,
-                amount_cents=cents,
-                fitid=f"bradesco-fatura|{d.isoformat()}|{desc}|{cents}|{counts[key]}",
-            )
-        )
-    return out
+    return [
+        ParsedTransaction(date=d, description=desc, amount_cents=cents)
+        for d, desc, cents in rows
+    ]

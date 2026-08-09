@@ -83,14 +83,10 @@ def test_uses_brl_column_and_inverts_sign():
     assert by_desc["PAGTO. POR DEB EM C/C"].amount_cents == 2973278
 
 
-def test_fitid_deterministic_with_occurrence_index():
-    txs1 = parse_bradesco_fatura(FATURA)
-    txs2 = parse_bradesco_fatura(FATURA)
-    cafes = [t for t in txs1 if "CAFETERIA" in t.description]
+def test_repeated_identical_rows_are_all_kept():
+    txs = parse_bradesco_fatura(FATURA)
+    cafes = [t for t in txs if "CAFETERIA" in t.description]
     assert len(cafes) == 2
-    assert cafes[0].fitid != cafes[1].fitid
-    assert [t.fitid for t in txs1] == [t.fitid for t in txs2]
-    assert all(t.fitid for t in txs1)
 
 
 def test_missing_invoice_date_header_raises():
@@ -114,7 +110,7 @@ def test_parse_file_routes_fatura_to_bradesco_parser():
 
     txs = parse_file("Bradesco_872026_122833 AM.csv", FATURA)
     assert len(txs) == 8
-    assert txs[0].fitid and txs[0].fitid.startswith("bradesco-fatura|")
+    assert txs[0].amount_cents == -33875  # coluna R$ da fatura, sinal invertido
 
 
 def test_parse_file_routes_generic_csv_to_generic_parser():
@@ -122,4 +118,4 @@ def test_parse_file_routes_generic_csv_to_generic_parser():
 
     txs = parse_file("extrato.csv", GENERIC_CSV)
     assert len(txs) == 1
-    assert txs[0].fitid is None
+    assert txs[0].description == "SUPERMERCADO PAO DE ACUCAR"

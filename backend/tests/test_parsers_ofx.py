@@ -20,7 +20,6 @@ def test_parse_bradesco_conta():
         date=date(2026, 7, 3),
         description="SUPERMERCADO PAO DE ACUCAR 123456",
         amount_cents=-18740,
-        fitid="N1001",
     )
     assert txs[1].amount_cents == 850000  # crédito de salário
 

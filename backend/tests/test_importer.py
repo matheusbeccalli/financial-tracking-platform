@@ -33,6 +33,82 @@ def test_reimport_is_fully_deduplicated(session):
     assert session.scalar(select(func.count()).select_from(Transaction)) == 3
 
 
+def test_reimport_with_regenerated_fitids_is_deduplicated(session):
+    """O Bradesco gera FITIDs novos a cada exportação do OFX; a deduplicação
+    não pode confiar neles."""
+    import_file(session, 1, "a.ofx", load("bradesco_conta.ofx"))
+    session.commit()
+    content = (
+        load("bradesco_conta.ofx")
+        .replace(b"N1001", b"X9001")
+        .replace(b"N1002", b"X9002")
+        .replace(b"N1003", b"X9003")
+    )
+    batch2, new2 = import_file(session, 1, "b.ofx", content)
+    session.commit()
+    assert batch2.new_count == 0 and batch2.dup_count == 3
+    assert new2 == []
+    assert session.scalar(select(func.count()).select_from(Transaction)) == 3
+
+
+def test_identical_rows_in_one_file_are_kept_and_dedupe_on_reimport(session):
+    """Duas compras iguais no mesmo dia são transações distintas; na
+    reimportação (mesmo com FITIDs regenerados) ambas contam como duplicadas."""
+    line = (
+        b"<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20260703<TRNAMT>-187.40"
+        b"<FITID>N1001<MEMO>SUPERMERCADO PAO DE ACUCAR 123456</STMTTRN>"
+    )
+    twin = line.replace(b"N1001", b"N1004")
+    content = load("bradesco_conta.ofx").replace(line, line + b"\n" + twin)
+    batch, _ = import_file(session, 1, "a.ofx", content)
+    session.commit()
+    assert batch.new_count == 4 and batch.dup_count == 0
+    batch2, _ = import_file(session, 1, "b.ofx", content.replace(b"N100", b"X900"))
+    session.commit()
+    assert batch2.new_count == 0 and batch2.dup_count == 4
+    assert session.scalar(select(func.count()).select_from(Transaction)) == 4
+
+
+def test_hash_uses_raw_description_so_installments_stay_distinct(session):
+    """Parcelas em faturas consecutivas têm a mesma data e valor, diferindo só
+    no sufixo cru ("1/10" vs "2/10") — que a normalização apaga. O hash precisa
+    da descrição crua para não colapsá-las."""
+    line = (
+        b"<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20260703<TRNAMT>-187.40"
+        b"<FITID>N1001<MEMO>SUPERMERCADO PAO DE ACUCAR 123456</STMTTRN>"
+    )
+    a = line.replace(b"SUPERMERCADO PAO DE ACUCAR 123456", b"LOJA X 1/10")
+    b = a.replace(b"1/10", b"2/10").replace(b"N1001", b"N1004")
+    content = load("bradesco_conta.ofx").replace(line, a + b"\n" + b)
+    batch, _ = import_file(session, 1, "a.ofx", content)
+    session.commit()
+    assert batch.new_count == 4 and batch.dup_count == 0
+    batch2, _ = import_file(session, 1, "b.ofx", content)
+    session.commit()
+    assert batch2.new_count == 0 and batch2.dup_count == 4
+
+
+def test_extra_occurrence_in_new_file_is_imported(session):
+    """Base com 2 ocorrências de uma chave; arquivo novo traz 3: a terceira é
+    compra nova, as duas primeiras são duplicadas."""
+    line = (
+        b"<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20260703<TRNAMT>-187.40"
+        b"<FITID>N1001<MEMO>SUPERMERCADO PAO DE ACUCAR 123456</STMTTRN>"
+    )
+    twin = line.replace(b"N1001", b"N1004")
+    triplet = line.replace(b"N1001", b"N1005")
+    two = load("bradesco_conta.ofx").replace(line, line + b"\n" + twin)
+    three = load("bradesco_conta.ofx").replace(
+        line, line + b"\n" + twin + b"\n" + triplet
+    )
+    import_file(session, 1, "a.ofx", two)
+    session.commit()
+    batch2, new2 = import_file(session, 1, "b.ofx", three)
+    session.commit()
+    assert batch2.new_count == 1 and batch2.dup_count == 4
+    assert len(new2) == 1 and new2[0].amount_cents == -18740
+
+
 def test_fatura_payment_is_ignored_and_installment_extracted(session):
     import_file(session, 1, "a.ofx", load("bradesco_conta.ofx"))
     import_file(session, 4, "b.ofx", load("inter_cartao.ofx"))

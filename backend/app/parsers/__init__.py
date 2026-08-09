@@ -7,7 +7,6 @@ class ParsedTransaction:
     date: date
     description: str
     amount_cents: int
-    fitid: str | None = None
 
 
 def parse_file(filename: str, content: bytes) -> list["ParsedTransaction"]:

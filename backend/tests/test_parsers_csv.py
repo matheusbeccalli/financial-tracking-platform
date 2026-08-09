@@ -23,7 +23,6 @@ def test_parse_csv_with_preamble_and_brazilian_numbers():
     assert txs[0].date == date(2026, 7, 1)
     assert txs[0].amount_cents == -4500
     assert txs[1].amount_cents == 850000
-    assert txs[0].fitid is None
 
 
 def test_parse_csv_latin1_header_historico():

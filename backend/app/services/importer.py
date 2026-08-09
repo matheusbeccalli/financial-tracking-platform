@@ -35,8 +35,11 @@ def import_file(
 
     ignore_matchers = {r.matcher for r in session.scalars(select(IgnoreRule))}
     new: list[Transaction] = []
+    seen: dict[tuple, int] = {}
     for p in parsed:
-        h = make_hash(account_id, p.fitid, p.date, p.amount_cents, p.description)
+        key = (p.date, p.amount_cents, p.description.strip().upper())
+        seen[key] = seen.get(key, 0) + 1
+        h = make_hash(account_id, p.date, p.amount_cents, p.description, seen[key])
         exists = session.scalar(select(Transaction.id).where(Transaction.dedupe_hash == h))
         if exists:
             batch.dup_count += 1

@@ -3,20 +3,26 @@ from datetime import date
 from app.dedupe import make_hash
 
 
-def test_fitid_wins_over_fields():
-    a = make_hash(1, "FIT123", date(2026, 7, 1), -100, "X")
-    b = make_hash(1, "FIT123", date(2026, 7, 2), -999, "Y")
-    assert a == b
-
-
-def test_fallback_uses_fields():
-    a = make_hash(1, None, date(2026, 7, 1), -100, "MERCADO")
-    b = make_hash(1, None, date(2026, 7, 1), -100, "MERCADO")
-    c = make_hash(1, None, date(2026, 7, 1), -101, "MERCADO")
+def test_same_fields_same_hash():
+    a = make_hash(1, date(2026, 7, 1), -100, "MERCADO")
+    b = make_hash(1, date(2026, 7, 1), -100, "MERCADO")
+    c = make_hash(1, date(2026, 7, 1), -101, "MERCADO")
     assert a == b and a != c
 
 
+def test_description_case_and_spaces_are_normalized():
+    a = make_hash(1, date(2026, 7, 1), -100, " Mercado ")
+    b = make_hash(1, date(2026, 7, 1), -100, "MERCADO")
+    assert a == b
+
+
+def test_seq_distinguishes_repeated_occurrences():
+    a = make_hash(1, date(2026, 7, 1), -100, "MERCADO", seq=1)
+    b = make_hash(1, date(2026, 7, 1), -100, "MERCADO", seq=2)
+    assert a != b
+
+
 def test_account_scopes_hash():
-    a = make_hash(1, "FIT123", date(2026, 7, 1), -100, "X")
-    b = make_hash(2, "FIT123", date(2026, 7, 1), -100, "X")
+    a = make_hash(1, date(2026, 7, 1), -100, "X")
+    b = make_hash(2, date(2026, 7, 1), -100, "X")
     assert a != b
