@@ -1,43 +1,56 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 
+import type { ThemeMode } from "../theme/theme";
 import { useTheme } from "../theme/ThemeContext";
+import Segmented from "./Segmented";
 
 const LINKS = [
-  ["/", "📊", "Dashboard"],
-  ["/transacoes", "💳", "Transações"],
-  ["/orcamento", "🎯", "Orçamento"],
-  ["/tendencias", "📈", "Tendências"],
-  ["/importar", "📥", "Importar"],
-  ["/config", "⚙️", "Configurações"],
+  ["/", "Dashboard"],
+  ["/transacoes", "Transações"],
+  ["/orcamento", "Orçamento"],
+  ["/tendencias", "Tendências"],
+  ["/importar", "Importar"],
+  ["/config", "Configurações"],
 ] as const;
 
-const MODE_LABELS = {
-  system: ["🖥️", "Tema: sistema"],
-  light: ["☀️", "Tema: claro"],
-  dark: ["🌙", "Tema: escuro"],
-} as const;
+// O handoff desenha dois estados (escuro | claro); o app tem três modos e o
+// automático é o padrão — mantido como primeiro item do mesmo controle.
+const THEME_OPTIONS: readonly { value: ThemeMode; label: string }[] = [
+  { value: "system", label: "auto" },
+  { value: "light", label: "claro" },
+  { value: "dark", label: "escuro" },
+];
 
 export default function Layout() {
-  const { mode, cycle } = useTheme();
+  const { mode, setMode } = useTheme();
   const { pathname } = useLocation();
-  const [modeIcon, modeLabel] = MODE_LABELS[mode];
-  const wide = pathname === "/tendencias"; // matriz de 14 colunas precisa da tela toda
+  const wide = pathname === "/tendencias"; // matriz de meses precisa da tela toda
   return (
-    <div className="layout">
+    <div className="app">
       <aside className="sidebar">
-        <h1>Finanças</h1>
-        <nav>
-          {LINKS.map(([to, icon, label]) => (
+        <div className="brand">
+          <div className="brand-mark" />
+          <div className="brand-name">Finanças</div>
+        </div>
+        <nav className="nav">
+          {LINKS.map(([to, label]) => (
             <NavLink key={to} to={to} end={to === "/"}>
-              {icon} {label}
+              <span className="nav-dot" />
+              {label}
             </NavLink>
           ))}
         </nav>
-        <button className="theme-toggle" onClick={cycle} title="Alternar tema">
-          {modeIcon} {modeLabel}
-        </button>
+        <div className="sidebar-footer">
+          <span>Tema</span>
+          <Segmented
+            value={mode}
+            options={THEME_OPTIONS}
+            onChange={setMode}
+            ariaLabel="Tema"
+          />
+        </div>
       </aside>
-      <main className={wide ? "content content-wide" : "content"}>
+      <main className={wide ? "main main--wide" : "main"}>
         <Outlet />
       </main>
     </div>

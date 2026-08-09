@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { nextMode, parseMode, resolveTheme } from "./theme";
+import { parseMode, resolveTheme } from "./theme";
 
 describe("resolveTheme", () => {
   it("system segue a preferência do SO", () => {
@@ -12,14 +12,6 @@ describe("resolveTheme", () => {
     expect(resolveTheme("dark", false)).toBe("dark");
     expect(resolveTheme("light", false)).toBe("light");
     expect(resolveTheme("dark", true)).toBe("dark");
-  });
-});
-
-describe("nextMode", () => {
-  it("cicla system → light → dark → system", () => {
-    expect(nextMode("system")).toBe("light");
-    expect(nextMode("light")).toBe("dark");
-    expect(nextMode("dark")).toBe("system");
   });
 });
 

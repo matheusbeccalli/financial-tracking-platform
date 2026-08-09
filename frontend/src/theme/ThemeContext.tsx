@@ -1,6 +1,5 @@
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -8,14 +7,14 @@ import {
   type ReactNode,
 } from "react";
 
-import { nextMode, parseMode, resolveTheme, type ResolvedTheme, type ThemeMode } from "./theme";
+import { parseMode, resolveTheme, type ResolvedTheme, type ThemeMode } from "./theme";
 
 const STORAGE_KEY = "theme";
 
 interface ThemeContextValue {
   mode: ThemeMode;
   resolved: ResolvedTheme;
-  cycle: () => void;
+  setMode: (mode: ThemeMode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -64,9 +63,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.dataset.theme = resolved;
   }
 
-  const cycle = useCallback(() => setMode(nextMode), []);
-
-  const value = useMemo(() => ({ mode, resolved, cycle }), [mode, resolved, cycle]);
+  const value = useMemo(() => ({ mode, resolved, setMode }), [mode, resolved]);
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
