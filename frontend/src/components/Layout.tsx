@@ -6,6 +6,7 @@ const LINKS = [
   ["/", "📊", "Dashboard"],
   ["/transacoes", "💳", "Transações"],
   ["/orcamento", "🎯", "Orçamento"],
+  ["/tendencias", "📈", "Tendências"],
   ["/importar", "📥", "Importar"],
   ["/config", "⚙️", "Configurações"],
 ] as const;

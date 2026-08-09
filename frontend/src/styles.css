@@ -177,3 +177,11 @@ h3 { font-size: 14px; margin: 0 0 8px; color: var(--ink-2); }
   width: 100%;
   font-family: inherit;
 }
+
+.trends-wrap { overflow-x: auto; }
+.trends-wrap th, .trends-wrap td { white-space: nowrap; }
+.trends-wrap th.sticky, .trends-wrap td.sticky {
+  position: sticky; left: 0; background: var(--surface); z-index: 1; text-align: left;
+}
+.trends-wrap th.cur, .trends-wrap td.cur { background: var(--grid); }
+.trends-wrap td.section { padding-top: 14px; font-weight: 700; }

@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Imports from "./pages/Imports";
 import Settings from "./pages/Settings";
 import Transactions from "./pages/Transactions";
+import Trends from "./pages/Trends";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/transacoes" element={<Transactions />} />
             <Route path="/orcamento" element={<Budget />} />
+            <Route path="/tendencias" element={<Trends />} />
             <Route path="/importar" element={<Imports />} />
             <Route path="/config" element={<Settings />} />
             <Route path="*" element={<Navigate to="/" replace />} />
