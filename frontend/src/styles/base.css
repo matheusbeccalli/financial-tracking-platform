@@ -85,7 +85,14 @@ h3 {
   min-height: 100vh;
 }
 
+/* Rail fixo: sem o sticky, a sidebar estica com a página e o rodapé de tema
+   só aparece depois de rolar até o fim do conteúdo. */
 .sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
   background: var(--sidebar);
   border-right: 1px solid var(--border);
   padding: 18px 12px;
