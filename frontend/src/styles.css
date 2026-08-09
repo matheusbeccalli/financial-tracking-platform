@@ -77,6 +77,7 @@ body {
 }
 .theme-toggle:hover { border-color: var(--border); }
 .content { flex: 1; padding: 20px 24px; max-width: 1100px; }
+.content-wide { max-width: none; min-width: 0; }
 .card {
   background: var(--surface);
   border: 1px solid var(--border);

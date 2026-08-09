@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 
 import { useTheme } from "../theme/ThemeContext";
 
@@ -19,7 +19,9 @@ const MODE_LABELS = {
 
 export default function Layout() {
   const { mode, cycle } = useTheme();
+  const { pathname } = useLocation();
   const [modeIcon, modeLabel] = MODE_LABELS[mode];
+  const wide = pathname === "/tendencias"; // matriz de 14 colunas precisa da tela toda
   return (
     <div className="layout">
       <aside className="sidebar">
@@ -35,7 +37,7 @@ export default function Layout() {
           {modeIcon} {modeLabel}
         </button>
       </aside>
-      <main className="content">
+      <main className={wide ? "content content-wide" : "content"}>
         <Outlet />
       </main>
     </div>
