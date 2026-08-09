@@ -7,7 +7,7 @@ export default function KpiRow({ month }: { month: string }) {
   if (isLoading) return <p className="muted">Carregando…</p>;
   if (error || !s)
     return <p className="error">Erro ao carregar resumo: {(error as Error)?.message}</p>;
-  const acima = s.ritmo !== null && s.ritmo > 1;
+  const acima = s.ritmo !== null && s.ritmo > 0;
   return (
     <div className="tiles">
       <StatTile
@@ -46,8 +46,16 @@ export default function KpiRow({ month }: { month: string }) {
       />
       <StatTile
         label="Ritmo das saídas"
-        value={s.ritmo === null ? "—" : `${Math.round(s.ritmo * 100)}%`}
-        sub={s.ritmo === null ? "sem orçamento" : acima ? "acima do sustentável" : "dentro do mês"}
+        value={
+          s.ritmo === null
+            ? "—"
+            : `${s.ritmo > 0 ? "+" : s.ritmo < 0 ? "−" : ""}${Math.abs(Math.round(s.ritmo))} pts`
+        }
+        sub={
+          s.ritmo === null
+            ? "sem orçamento"
+            : `gastou ${Math.round((s.saidas.real / s.saidas.orcado) * 100)}% do orçado com ${Math.round((s.dias.decorridos / s.dias.no_mes) * 100)}% do mês corrido`
+        }
         tone={acima ? "bad" : undefined}
       />
     </div>

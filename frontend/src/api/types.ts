@@ -40,13 +40,20 @@ export interface CatLine {
   orcado: number;
 }
 
+export interface Dias {
+  decorridos: number;
+  no_mes: number;
+}
+
 export interface Summary {
   month: string;
   entradas: RealOrc;
   saidas: RealOrc;
   investimentos: RealOrc;
   saldo: RealOrc;
+  /** Pontos percentuais: % do orçado consumido − % do mês decorrido. Negativo = folga. */
   ritmo: number | null;
+  dias: Dias;
   categorias: CatLine[];
 }
 

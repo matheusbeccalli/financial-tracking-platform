@@ -37,6 +37,7 @@ function mkSummary(
     investimentos: ro(opts.investimentos),
     saldo: ro(opts.saldo),
     ritmo: null,
+    dias: { decorridos: 0, no_mes: 30 },
     categorias: opts.categorias ?? [],
   };
 }
