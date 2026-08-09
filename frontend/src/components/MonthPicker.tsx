@@ -8,13 +8,13 @@ export default function MonthPicker({
   onChange: (m: string) => void;
 }) {
   return (
-    <div className="row">
+    <div className="month-picker">
       <button aria-label="Mês anterior" onClick={() => onChange(addMonths(month, -1))}>
-        ◀
+        ‹
       </button>
-      <strong style={{ minWidth: 70, textAlign: "center" }}>{monthLabel(month)}</strong>
+      <span className="month-label">{monthLabel(month)}</span>
       <button aria-label="Próximo mês" onClick={() => onChange(addMonths(month, 1))}>
-        ▶
+        ›
       </button>
     </div>
   );

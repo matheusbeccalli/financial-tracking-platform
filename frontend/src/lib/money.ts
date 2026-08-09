@@ -13,3 +13,16 @@ export function parseBRL(input: string): number | null {
   const normalized = s.replace(/\./g, "").replace(",", ".");
   return Math.round(Number(normalized) * 100);
 }
+
+// U+2212: o traço de menos do design, não o hífen que o toLocaleString usa.
+const MINUS = "−";
+
+/**
+ * Valor com sinal explícito. Negativo sempre ganha "−"; positivo só ganha "+"
+ * quando o sinal é a informação (investimento: aporte vs. resgate).
+ */
+export function formatSigned(cents: number, alwaysSign = false): string {
+  const abs = formatBRL(Math.abs(cents));
+  if (cents < 0) return MINUS + abs;
+  return alwaysSign && cents > 0 ? `+${abs}` : abs;
+}

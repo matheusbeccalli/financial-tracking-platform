@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatBRL, parseBRL } from "./money";
+import { formatBRL, formatSigned, parseBRL } from "./money";
 
 // toLocaleString pt-BR usa espaco nao-quebravel (U+00A0) entre R$ e o numero
 const clean = (s: string) => s.replace(/\u00a0/g, " ");
@@ -27,5 +27,18 @@ describe("parseBRL", () => {
     expect(parseBRL("1.5")).toBeNull();
     expect(parseBRL("1.500")).toBe(150000);
     expect(parseBRL("1.234.567,89")).toBe(123456789);
+  });
+});
+
+describe("formatSigned", () => {
+  it("usa o traço tipográfico no negativo", () => {
+    expect(clean(formatSigned(-459928))).toBe("−R$ 4.599,28");
+  });
+  it("com alwaysSign, positivo ganha +", () => {
+    expect(clean(formatSigned(5048, true))).toBe("+R$ 50,48");
+    expect(clean(formatSigned(5048))).toBe("R$ 50,48");
+  });
+  it("zero nunca ganha sinal", () => {
+    expect(clean(formatSigned(0, true))).toBe("R$ 0,00");
   });
 });
