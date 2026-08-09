@@ -52,8 +52,9 @@ def test_month_summary_cash_flow(session):
     assert s["investimentos"] == {"real": 200000, "orcado": 200000}
     # saldo continua sendo a variação real de caixa — idêntico ao valor pré-mudança
     assert s["saldo"] == {"real": 526000, "orcado": 500000}
-    # ritmo agora só olha saídas de consumo: (124000/150000) / (15/31)
-    assert abs(s["ritmo"] - (124000 / 150000) / (15 / 31)) < 0.001
+    # ritmo em pontos percentuais: % do orçado consumido − % do mês decorrido
+    assert abs(s["ritmo"] - ((124000 / 150000) * 100 - (15 / 31) * 100)) < 0.001
+    assert s["dias"] == {"decorridos": 15, "no_mes": 31}
     linha_mercado = next(c for c in s["categorias"] if c["id"] == mercado.id)
     assert linha_mercado == {
         "id": mercado.id, "nome": "Mercado", "kind": "saida",
@@ -108,3 +109,20 @@ def test_investimentos_sem_meta(session):
     s = month_summary(session, "2026-08", today=date(2026, 8, 15))
     assert s["investimentos"] == {"real": 100000, "orcado": 0}
     assert s["ritmo"] is None  # sem orçamento de saídas
+
+
+def test_ritmo_negativo_significa_folga(session):
+    mercado = cat(session, "Mercado")
+    session.add(Budget(category_id=mercado.id, amount_cents=150000, valid_from="2026-01"))
+    session.flush()
+    add_tx(session, mercado.id, -15000)  # 10% do orçado
+    s = month_summary(session, "2026-08", today=date(2026, 8, 16))  # ~51,6% do mês
+    assert s["ritmo"] < 0
+    assert abs(s["ritmo"] - (10.0 - (16 / 31) * 100)) < 0.001
+
+
+def test_dias_em_mes_passado_e_futuro(session):
+    passado = month_summary(session, "2026-07", today=date(2026, 8, 15))
+    assert passado["dias"] == {"decorridos": 31, "no_mes": 31}
+    futuro = month_summary(session, "2026-09", today=date(2026, 8, 15))
+    assert futuro["dias"] == {"decorridos": 0, "no_mes": 30}

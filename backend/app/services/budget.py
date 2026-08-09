@@ -66,9 +66,19 @@ def month_summary(session, month: str, today: date | None = None) -> dict:
     saidas_orc = sum(v for cid, v in bmap.items() if cats[cid].kind == "saida")
     invest_orc = sum(v for cid, v in bmap.items() if cats[cid].kind == "investimento")
 
+    # Dias decorridos do mês de referência: 0 se o mês ainda não começou,
+    # mês inteiro se já terminou.
+    if today < start:
+        decorridos = 0
+    elif today > end:
+        decorridos = end.day
+    else:
+        decorridos = today.day
+
+    # Ritmo em pontos percentuais: quanto do orçado já foi consumido menos
+    # quanto do mês já passou. Negativo = folga.
     if saidas_orc > 0:
-        dia = today.day if start <= today <= end else end.day
-        ritmo = (saidas_real / saidas_orc) / (dia / end.day)
+        ritmo = (saidas_real / saidas_orc) * 100 - (decorridos / end.day) * 100
     else:
         ritmo = None
 
@@ -95,5 +105,6 @@ def month_summary(session, month: str, today: date | None = None) -> dict:
             "orcado": entradas_orc - saidas_orc - invest_orc,
         },
         "ritmo": ritmo,
+        "dias": {"decorridos": decorridos, "no_mes": end.day},
         "categorias": sorted(categorias, key=lambda c: (c["kind"], name_sort_key(c["nome"]))),
     }
