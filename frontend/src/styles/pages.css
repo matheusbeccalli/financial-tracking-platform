@@ -345,3 +345,179 @@ th.num {
   gap: 12px;
   font-size: 12px;
 }
+
+.burning-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--muted);
+  margin: 10px 0 2px;
+}
+
+.burning-legend-tick {
+  width: 1px;
+  height: 9px;
+  background: var(--pace-mark);
+}
+
+.burning-row {
+  display: grid;
+  grid-template-columns: 1fr 210px;
+  align-items: center;
+  gap: 16px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.burning-row:last-child {
+  border-bottom: 0;
+}
+
+.burning-row-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.burning-row-bar {
+  margin-top: 7px;
+}
+
+.burning-row-values {
+  text-align: right;
+  font-size: 13.5px;
+}
+
+.burning-row-pct {
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+/* Barra hachurada = gastou sem orçamento definido. */
+.bar-hatch {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-pill);
+  background: repeating-linear-gradient(115deg, currentColor 0 6px, transparent 6px 12px);
+  opacity: 0.55;
+}
+
+.burning-low {
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  padding-top: 12px;
+}
+
+.burning-low-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px 24px;
+  margin-top: 8px;
+}
+
+.burning-low-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--divider);
+}
+
+.burning-low-kind {
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+.burning-toggle {
+  width: 100%;
+  margin-top: 12px;
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-control);
+  color: var(--ink-2);
+  font-size: 12px;
+  padding: 8px;
+}
+
+.invest-block {
+  margin-top: 14px;
+  padding: 13px 14px;
+  border-radius: 10px;
+  background: var(--tint-invest);
+  border: 1px solid var(--invest-border);
+}
+
+.invest-block-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.invest-block-title {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.invest-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.15fr 1fr;
+  gap: 16px;
+  margin-top: 12px;
+  align-items: start;
+}
+
+.invest-metric-value {
+  margin-top: 3px;
+  font-size: 16px;
+}
+
+.invest-metric-value .money {
+  font-size: 16px;
+}
+
+.invest-metric-row {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.invest-metric-liquid {
+  border-left: 1px solid var(--invest-border);
+  padding-left: 14px;
+}
+
+.invest-bidi {
+  position: relative;
+  margin-top: 12px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--track);
+  overflow: hidden;
+}
+
+.invest-bidi-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.invest-bidi-zero {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--pace-mark);
+}
+
+.invest-bidi-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: var(--muted);
+  margin-top: 5px;
+}

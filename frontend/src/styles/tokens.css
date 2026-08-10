@@ -44,6 +44,7 @@
   --hover-ghost: rgba(11, 11, 11, 0.04);
   --focus: rgba(19, 117, 116, 0.55);
   --focus-invest: rgba(69, 80, 196, 0.55);
+  --invest-border: rgba(69, 80, 196, 0.22);
 
   --float-bg: #ffffff;
   --float-border: rgba(11, 11, 11, 0.16);
@@ -86,6 +87,7 @@
   --hover-ghost: rgba(255, 255, 255, 0.04);
   --focus: rgba(79, 208, 207, 0.55);
   --focus-invest: rgba(154, 166, 242, 0.55);
+  --invest-border: rgba(154, 166, 242, 0.22);
 
   --float-bg: #1b1e22;
   --float-border: rgba(255, 255, 255, 0.14);

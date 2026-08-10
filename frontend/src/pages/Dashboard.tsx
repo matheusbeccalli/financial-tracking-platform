@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { useSummary } from "../api/hooks";
 import BridgeChart from "../components/dashboard/BridgeChart";
-import CategoryBars from "../components/dashboard/CategoryBars";
+import BurningCard from "../components/dashboard/BurningCard";
 import EvolutionChart from "../components/dashboard/EvolutionChart";
 import KpiStrip from "../components/dashboard/KpiStrip";
 import LlmStrip from "../components/dashboard/LlmStrip";
@@ -28,9 +28,7 @@ export default function Dashboard() {
 
       <LlmStrip />
       <div className="row" style={{ alignItems: "stretch" }}>
-        <div className="card" style={{ flex: 2, minWidth: 340 }}>
-          <CategoryBars month={month} />
-        </div>
+        <div style={{ flex: 2, minWidth: 340 }}>{s && <BurningCard s={s} month={month} />}</div>
         <div className="card" style={{ flex: 1, minWidth: 260 }}>
           <EvolutionChart month={month} />
         </div>
