@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildWaterfall } from "./waterfall";
+import { buildWaterfall, waterfallLayout } from "./waterfall";
 
 const bridge = {
   period: "month",
@@ -53,5 +53,59 @@ describe("buildWaterfall", () => {
     expect(bars[1]).toMatchObject({
       label: "Lazer", basePos: 0, pos: 0, baseNeg: -10000, neg: -30000, kind: "down",
     });
+  });
+});
+
+describe("waterfallLayout", () => {
+  it("posiciona cada barra em % do domínio, com o topo em 0%", () => {
+    const bars = buildWaterfall({
+      period: "month",
+      ref: "2026-08",
+      months: ["2026-08"],
+      start: 1000,
+      steps: [
+        { categoria: "A", delta: -400 },
+        { categoria: "B", delta: 200 },
+      ],
+      end: 800,
+    });
+    const layout = waterfallLayout(bars);
+    expect(layout).toHaveLength(4);
+    // domínio 0..1000 ⇒ a barra do total "Orçado" ocupa a altura toda
+    expect(layout[0]).toMatchObject({ topPct: 0, heightPct: 100, kind: "total" });
+    // A vai de 1000 a 600 ⇒ topo em 0%, altura 40%
+    expect(layout[1]).toMatchObject({ topPct: 0, heightPct: 40, kind: "down" });
+    // B vai de 600 a 800 ⇒ topo em 20%, altura 20%
+    expect(layout[2]).toMatchObject({ topPct: 20, heightPct: 20, kind: "up" });
+  });
+
+  it("domínio que atravessa o zero mantém as proporções", () => {
+    const bars = buildWaterfall({
+      period: "month",
+      ref: "2026-08",
+      months: ["2026-08"],
+      start: 100,
+      steps: [{ categoria: "A", delta: -300 }],
+      end: -200,
+    });
+    const layout = waterfallLayout(bars);
+    // domínio -200..100 (300 de amplitude); "Orçado" ocupa de 100 a 0 ⇒ 33,3%
+    expect(layout[0].heightPct).toBeCloseTo(33.33, 2);
+    expect(layout[0].topPct).toBe(0);
+    expect(layout[2].heightPct).toBeCloseTo(66.67, 2);
+  });
+
+  it("tudo zerado não gera NaN", () => {
+    const bars = buildWaterfall({
+      period: "month",
+      ref: "2026-08",
+      months: ["2026-08"],
+      start: 0,
+      steps: [],
+      end: 0,
+    });
+    const layout = waterfallLayout(bars);
+    expect(layout[0].heightPct).toBe(0);
+    expect(layout[0].topPct).toBe(0);
   });
 });
