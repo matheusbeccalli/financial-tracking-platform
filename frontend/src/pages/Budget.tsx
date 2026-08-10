@@ -1,176 +1,84 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   useBudgets,
   useCategories,
   useCopyBudget,
   usePutBudget,
-  useSummaries,
+  useSummary,
 } from "../api/hooks";
-import type { CategoryKind } from "../api/types";
-import BudgetInput from "../components/BudgetInput";
+import BudgetHistoryCard from "../components/budget/BudgetHistoryCard";
+import BudgetKpis from "../components/budget/BudgetKpis";
+import BudgetRail from "../components/budget/BudgetRail";
+import CopyFromButton from "../components/budget/CopyFromButton";
+import ExpensesCard from "../components/budget/ExpensesCard";
 import MonthPicker from "../components/MonthPicker";
-import { formatBRL } from "../lib/money";
-import { addMonths, currentMonth, lastNMonths, monthLabel } from "../lib/months";
-
-const KIND_LABELS: Record<CategoryKind, string> = {
-  entrada: "Entradas",
-  saida: "Saídas",
-  investimento: "Investimentos",
-};
+import PageHeader from "../components/PageHeader";
+import { budgetTotals, expenseRows, type BudgetSort } from "../lib/budget";
+import { currentMonth, monthLabel, monthTitle } from "../lib/months";
 
 export default function Budget() {
   const [month, setMonth] = useState(currentMonth());
+  const [sort, setSort] = useState<BudgetSort>("valor");
+
   const { data: lines } = useBudgets(month);
   const { data: categories } = useCategories();
+  // O realizado entra aqui por causa de dois pontos do design: "R$ 93 já gastos" nas
+  // categorias sem orçamento e "Realizado em ago" no card de investimentos.
+  const { data: summary } = useSummary(month);
   const putBudget = usePutBudget();
   const copyBudget = useCopyBudget();
-  const pastMonths = lastNMonths(addMonths(month, -1), 12).reverse();
-  const futureMonths = Array.from({ length: 12 }, (_, i) => addMonths(month, i + 1));
 
-  const budgetById = new Map((lines ?? []).map((l) => [l.category_id, l.amount_cents]));
-  const active = (categories ?? []).filter((c) => !c.archived);
-  const total = (kind: CategoryKind) =>
-    active
-      .filter((c) => c.kind === kind)
-      .reduce((sum, c) => sum + (budgetById.get(c.id) ?? 0), 0);
-  const saldoProjetado = total("entrada") - total("saida") - total("investimento");
-
-  return (
-    <>
-      <div className="row" style={{ justifyContent: "space-between" }}>
-        <h2>Orçamento</h2>
-        <div className="row">
-          <select
-            value=""
-            disabled={copyBudget.isPending}
-            aria-label="Copiar orçamento de outro mês"
-            onChange={(e) => {
-              const from = e.target.value;
-              if (!from) return;
-              if (
-                window.confirm(
-                  `Substituir o orçamento de ${monthLabel(month)} pelo de ${monthLabel(from)}?`
-                )
-              )
-                copyBudget.mutate({ from_month: from, to_month: month });
-            }}
-          >
-            <option value="">Copiar de…</option>
-            <optgroup label="Meses anteriores">
-              {pastMonths.map((m) => (
-                <option key={m} value={m}>
-                  {monthLabel(m)}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label="Meses seguintes">
-              {futureMonths.map((m) => (
-                <option key={m} value={m}>
-                  {monthLabel(m)}
-                </option>
-              ))}
-            </optgroup>
-          </select>
-          <MonthPicker month={month} onChange={setMonth} />
-        </div>
-      </div>
-      <p className="muted">
-        Valores salvos valem a partir de {monthLabel(month)} até você mudar de novo. Meses
-        passados mantêm o valor que vigorava na época.
-      </p>
-      <div className="row" style={{ alignItems: "flex-start" }}>
-        {(["entrada", "saida", "investimento"] as const).map((kind) => (
-          <div key={kind} className="card" style={{ flex: 1, minWidth: 320 }}>
-            <h3>{KIND_LABELS[kind]}</h3>
-            <table>
-              <tbody>
-                {active
-                  .filter((c) => c.kind === kind)
-                  .map((c) => (
-                    <tr key={c.id}>
-                      <td>{c.name}</td>
-                      <td className="num" style={{ width: 130 }}>
-                        <BudgetInput
-                          cents={budgetById.get(c.id) ?? 0}
-                          onSave={(cents) =>
-                            putBudget.mutate({
-                              category_id: c.id,
-                              amount_cents: cents,
-                              valid_from: month,
-                            })
-                          }
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                <tr>
-                  <td>
-                    <b>Total</b>
-                  </td>
-                  <td className="num">
-                    <b>{formatBRL(total(kind))}</b>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        ))}
-      </div>
-      <div className="card">
-        Saldo líquido projetado:{" "}
-        <b style={{ color: saldoProjetado >= 0 ? "var(--good)" : "var(--critical)" }}>
-          {formatBRL(saldoProjetado)}
-        </b>
-      </div>
-      <div className="card">
-        <BudgetHistory month={month} />
-      </div>
-    </>
+  const orcado = useMemo(
+    () => new Map((lines ?? []).map((l) => [l.category_id, l.amount_cents])),
+    [lines]
   );
-}
+  const real = useMemo(
+    () => new Map((summary?.categorias ?? []).map((c) => [c.id, c.real])),
+    [summary]
+  );
 
-function BudgetHistory({ month }: { month: string }) {
-  const months = lastNMonths(month, 6);
-  const results = useSummaries(months);
+  const ativas = useMemo(() => (categories ?? []).filter((c) => !c.archived), [categories]);
+  const view = useMemo(
+    () => expenseRows(ativas, orcado, real, sort),
+    [ativas, orcado, real, sort]
+  );
+  const totals = useMemo(() => budgetTotals(ativas, orcado), [ativas, orcado]);
+
+  const salvar = (categoryId: number, cents: number) =>
+    putBudget.mutate({ category_id: categoryId, amount_cents: cents, valid_from: month });
+
   return (
     <>
-      <h3>Histórico — real vs. orçado</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Mês</th>
-            <th className="num">Entradas (real / orç.)</th>
-            <th className="num">Saídas (real / orç.)</th>
-            <th className="num">Investido (real / orç.)</th>
-            <th className="num">Saldo (real / orç.)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {months.map((m, i) => {
-            const s = results[i].data;
-            return (
-              <tr key={m}>
-                <td>{monthLabel(m)}</td>
-                <td className="num">
-                  {s ? `${formatBRL(s.entradas.real)} / ${formatBRL(s.entradas.orcado)}` : "…"}
-                </td>
-                <td className="num">
-                  {s ? `${formatBRL(s.saidas.real)} / ${formatBRL(s.saidas.orcado)}` : "…"}
-                </td>
-                <td className="num">
-                  {s
-                    ? `${formatBRL(s.investimentos.real)} / ${formatBRL(s.investimentos.orcado)}`
-                    : "…"}
-                </td>
-                <td className="num">
-                  {s ? `${formatBRL(s.saldo.real)} / ${formatBRL(s.saldo.orcado)}` : "…"}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <PageHeader
+        eyebrow="Orçamento"
+        title={monthTitle(month)}
+        subtitle={`Valores valem a partir de ${monthLabel(month)} até você mudar de novo. Meses passados mantêm o valor que vigorava na época.`}
+      >
+        <CopyFromButton
+          month={month}
+          disabled={copyBudget.isPending}
+          onCopy={(from) => copyBudget.mutate({ from_month: from, to_month: month })}
+        />
+        <MonthPicker month={month} onChange={setMonth} />
+      </PageHeader>
+
+      <BudgetKpis t={totals} />
+
+      <section className="budget-grid-main">
+        <ExpensesCard view={view} sort={sort} onSort={setSort} onSave={salvar} />
+        <BudgetRail
+          month={month}
+          entradas={ativas.filter((c) => c.kind === "entrada")}
+          investimentos={ativas.filter((c) => c.kind === "investimento")}
+          orcado={orcado}
+          investRealizado={summary?.investimentos.real ?? 0}
+          totals={totals}
+          onSave={salvar}
+        />
+      </section>
+
+      <BudgetHistoryCard month={month} />
     </>
   );
 }

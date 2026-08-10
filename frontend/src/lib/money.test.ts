@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatBRL, formatK, formatSigned, parseBRL } from "./money";
+import { formatBRL, formatK, formatSigned, formatUnits, parseBRL } from "./money";
 
 // toLocaleString pt-BR usa espaco nao-quebravel (U+00A0) entre R$ e o numero
 const clean = (s: string) => s.replace(/\u00a0/g, " ");
@@ -51,5 +51,16 @@ describe("formatK", () => {
   });
   it("zero não vira 0,0k", () => {
     expect(formatK(0)).toBe("0");
+  });
+});
+
+describe("formatUnits", () => {
+  it("sem R$ e sem centavos, com separador de milhar", () => {
+    expect(formatUnits(5171200)).toBe("51.712");
+    expect(formatUnits(459928)).toBe("4.599");
+  });
+  it("arredonda em vez de virar 0,0k como o formatK", () => {
+    expect(formatUnits(1)).toBe("0");
+    expect(formatUnits(-5048)).toBe("-50");
   });
 });

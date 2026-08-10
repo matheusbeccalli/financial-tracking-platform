@@ -32,3 +32,12 @@ export function formatK(cents: number): string {
   if (cents === 0) return "0";
   return `${(cents / 100000).toFixed(1).replace(".", ",")}k`;
 }
+
+/**
+ * Valor sem "R$" e sem centavos: 5171200 → "51.712". Para denominadores e tabelas
+ * densas, onde o "R$" repetido só ocupa espaço. Diferente de `formatK`, que serve
+ * para eixos de gráfico e perde precisão embaixo de mil.
+ */
+export function formatUnits(cents: number): string {
+  return (cents / 100).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
+}

@@ -1,14 +1,10 @@
 import type { Summary } from "../../api/types";
 import { investLabel } from "../../lib/dashboard";
-import { formatBRL } from "../../lib/money";
+import { formatBRL, formatUnits } from "../../lib/money";
 import { pctRaw } from "../../lib/pct";
 import Money from "../Money";
 import Pill from "../Pill";
 import ProgressBar from "../ProgressBar";
-
-/** Denominador das barras dos KPIs: "0% de 51.712" — sem "R$", só o número. */
-const semMoeda = (cents: number) =>
-  (cents / 100).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
 
 export default function KpiStrip({ s }: { s: Summary }) {
   // Percentuais sem teto: a legenda do ritmo compara com `ritmo`, que vem cru do
@@ -29,7 +25,7 @@ export default function KpiStrip({ s }: { s: Summary }) {
         <div className="kpi-bar">
           <ProgressBar pct={entradasPct} height={3} ariaLabel="Entradas realizadas" />
           <span className="kpi-bar-note mono">
-            {Math.round(entradasPct)}% de {semMoeda(s.entradas.orcado)}
+            {Math.round(entradasPct)}% de {formatUnits(s.entradas.orcado)}
           </span>
         </div>
       </div>
@@ -47,7 +43,7 @@ export default function KpiStrip({ s }: { s: Summary }) {
             ariaLabel="Saídas realizadas"
           />
           <span className="kpi-bar-note mono">
-            {Math.round(saidasPct)}% de {semMoeda(s.saidas.orcado)}
+            {Math.round(saidasPct)}% de {formatUnits(s.saidas.orcado)}
           </span>
         </div>
       </div>

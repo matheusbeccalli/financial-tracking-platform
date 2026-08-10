@@ -80,20 +80,28 @@ export default function BudgetRail({
           )}
         </div>
         <div className="budget-rail-total budget-invest-real">
-          <span className="tone-muted">Realizado em {monthLabel(month)}</span>
-          <Money cents={investRealizado} alwaysSign tone="invest" />
+          <span className="tone-muted">
+            {investRealizado < 0 ? "Resgate líquido em" : "Realizado em"} {monthLabel(month)}
+          </span>
+          <Money
+            cents={investRealizado}
+            alwaysSign
+            tone={investRealizado < 0 ? "over" : "invest"}
+          />
         </div>
         <div className="budget-invest-bar">
           <ProgressBar
             pct={pctMeta}
-            tone="invest"
+            tone={investRealizado < 0 ? "over" : "invest"}
             height={5}
             ariaLabel="Aporte realizado sobre a meta"
           />
         </div>
         <div className="sub">
           {totals.investimento > 0
-            ? `${Math.round(pctMeta)}% da meta do mês`
+            ? investRealizado < 0
+              ? "resgatou mais do que aportou no mês"
+              : `${Math.round(pctMeta)}% da meta do mês`
             : "sem meta definida"}
         </div>
       </div>

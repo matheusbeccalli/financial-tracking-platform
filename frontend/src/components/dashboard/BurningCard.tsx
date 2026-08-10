@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import type { Summary } from "../../api/types";
 import { burningRows } from "../../lib/dashboard";
-import { formatBRL } from "../../lib/money";
+import { formatBRL, formatUnits } from "../../lib/money";
 import Money from "../Money";
 import Pill from "../Pill";
 import ProgressBar from "../ProgressBar";
@@ -15,10 +15,6 @@ const SORT_OPTIONS = [
   { value: "risco" as const, label: "Risco" },
   { value: "valor" as const, label: "Valor" },
 ];
-
-/** Denominador da linha: "/ 1.500" — sem "R$", como no design. */
-const semMoeda = (cents: number) =>
-  (cents / 100).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
 
 export default function BurningCard({ s, month }: { s: Summary; month: string }) {
   const [sort, setSort] = useState<Sort>("risco");
@@ -78,7 +74,7 @@ export default function BurningCard({ s, month }: { s: Summary; month: string })
             <div className="burning-row-values mono">
               <div>
                 {formatBRL(r.real)}
-                {!r.semOrcamento && <span className="tone-muted"> / {semMoeda(r.orcado)}</span>}
+                {!r.semOrcamento && <span className="tone-muted"> / {formatUnits(r.orcado)}</span>}
               </div>
               <div className={`burning-row-pct tone-${r.semOrcamento ? "muted" : r.tone}`}>
                 {r.semOrcamento ? "defina um orçado" : `${Math.round(r.pct)}% consumido`}
@@ -106,7 +102,7 @@ export default function BurningCard({ s, month }: { s: Summary; month: string })
                 </span>
                 <span className="mono tone-ink-2">
                   <Money cents={c.real} zeroDash /> /{" "}
-                  {c.orcado > 0 ? semMoeda(c.orcado) : "—"}
+                  {c.orcado > 0 ? formatUnits(c.orcado) : "—"}
                 </span>
               </div>
             ))}

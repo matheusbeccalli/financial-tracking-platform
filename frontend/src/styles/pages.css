@@ -1321,3 +1321,26 @@ th.num {
   padding-top: 10px;
   border-top: 1px solid var(--border);
 }
+
+.budget-grid-main {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: var(--gap-section);
+  align-items: start;
+  margin-bottom: var(--gap-section);
+}
+
+/* Janela estreita: rail abaixo e categorias numa coluna só. */
+@media (max-width: 1180px) {
+  .budget-grid-main {
+    grid-template-columns: 1fr;
+  }
+
+  .budget-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .budget-rail {
+    position: static;
+  }
+}

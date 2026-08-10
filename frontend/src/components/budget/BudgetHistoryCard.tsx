@@ -1,6 +1,6 @@
 import { useSummaries } from "../../api/hooks";
 import type { RealOrc } from "../../api/types";
-import { formatK } from "../../lib/money";
+import { formatUnits } from "../../lib/money";
 import { lastNMonths, monthLabel } from "../../lib/months";
 import type { Tone } from "../../lib/tone";
 
@@ -67,14 +67,14 @@ export default function BudgetHistoryCard({ month }: { month: string }) {
   );
 }
 
-/** `4.599 / 55.217` — realizado em destaque, orçado em cinza, ambos compactos. */
+/** `4.599 / 55.217` — realizado em destaque, orçado em cinza, ambos sem centavos. */
 function Celula({ v, tone }: { v: RealOrc; tone?: Tone }) {
   return (
     <div className="mono">
       <span className={v.real !== 0 && tone ? `tone-${tone}` : undefined}>
-        {formatK(v.real)}
+        {formatUnits(v.real)}
       </span>
-      <span className="tone-muted"> / {formatK(v.orcado)}</span>
+      <span className="tone-muted"> / {formatUnits(v.orcado)}</span>
     </div>
   );
 }
