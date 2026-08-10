@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { addMonths, lastNMonths, monthLabel } from "./months";
+import { addMonths, lastNMonths, monthLabel, monthTitle } from "./months";
 
 describe("addMonths", () => {
   it("navega entre meses e anos", () => {
@@ -19,5 +19,12 @@ describe("monthLabel", () => {
 describe("lastNMonths", () => {
   it("retorna janela terminando no mês dado", () => {
     expect(lastNMonths("2026-03", 3)).toEqual(["2026-01", "2026-02", "2026-03"]);
+  });
+});
+
+describe("monthTitle", () => {
+  it("escreve o mês por extenso", () => {
+    expect(monthTitle("2026-08")).toBe("Agosto 2026");
+    expect(monthTitle("2026-01")).toBe("Janeiro 2026");
   });
 });

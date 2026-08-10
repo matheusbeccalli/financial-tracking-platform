@@ -21,3 +21,14 @@ export function monthLabel(month: string): string {
 export function lastNMonths(month: string, n: number): string[] {
   return Array.from({ length: n }, (_, i) => addMonths(month, i - n + 1));
 }
+
+const MONTH_FULL = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
+
+/** "2026-08" → "Agosto 2026", para o h1 das telas mensais. */
+export function monthTitle(month: string): string {
+  const [y, m] = month.split("-");
+  return `${MONTH_FULL[Number(m) - 1]} ${y}`;
+}

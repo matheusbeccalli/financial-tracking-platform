@@ -1,22 +1,31 @@
 import { useState } from "react";
 
+import { useSummary } from "../api/hooks";
 import BridgeChart from "../components/dashboard/BridgeChart";
 import CategoryBars from "../components/dashboard/CategoryBars";
 import EvolutionChart from "../components/dashboard/EvolutionChart";
-import KpiRow from "../components/dashboard/KpiRow";
+import KpiStrip from "../components/dashboard/KpiStrip";
 import LlmFeed from "../components/dashboard/LlmFeed";
+import MonthProgress from "../components/dashboard/MonthProgress";
 import MonthPicker from "../components/MonthPicker";
-import { currentMonth } from "../lib/months";
+import PageHeader from "../components/PageHeader";
+import { currentMonth, monthTitle } from "../lib/months";
 
 export default function Dashboard() {
   const [month, setMonth] = useState(currentMonth());
+  const { data: s, error } = useSummary(month);
+
   return (
     <>
-      <div className="row" style={{ justifyContent: "space-between" }}>
-        <h2>Dashboard</h2>
+      <PageHeader eyebrow="Dashboard" title={monthTitle(month)}>
+        {s && <MonthProgress dias={s.dias} />}
         <MonthPicker month={month} onChange={setMonth} />
-      </div>
-      <KpiRow month={month} />
+      </PageHeader>
+
+      {error && <p className="error">Erro ao carregar resumo: {(error as Error).message}</p>}
+      {!s && !error && <p className="muted">Carregando…</p>}
+      {s && <KpiStrip s={s} />}
+
       <LlmFeed />
       <div className="row" style={{ alignItems: "stretch" }}>
         <div className="card" style={{ flex: 2, minWidth: 340 }}>
