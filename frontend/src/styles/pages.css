@@ -1278,3 +1278,46 @@ th.num {
   padding-top: 8px;
   border-top: 1px solid var(--border);
 }
+
+.budget-hist-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.budget-hist-row {
+  display: grid;
+  grid-template-columns: 64px repeat(4, 1fr);
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--divider);
+  font-size: 12.5px;
+  align-items: baseline;
+}
+
+.budget-hist-row > div:not(:first-child) {
+  text-align: right;
+}
+
+.budget-hist-head-row {
+  padding: 12px 0 7px;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.budget-hist-row.is-current {
+  background: var(--tint-accent);
+  border-bottom: 0;
+  border-radius: 0 0 var(--r-control) var(--r-control);
+  font-weight: 500;
+}
+
+.budget-hist-note {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
