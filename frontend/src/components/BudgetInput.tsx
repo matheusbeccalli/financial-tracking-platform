@@ -7,11 +7,13 @@ export default function BudgetInput({
   onSave,
   width = 110,
   ariaLabel,
+  className,
 }: {
   cents: number;
   onSave: (c: number) => void;
   width?: number;
   ariaLabel?: string;
+  className?: string;
 }) {
   const toText = (c: number) => (c ? (c / 100).toFixed(2).replace(".", ",") : "");
   const [text, setText] = useState(toText(cents));
@@ -22,6 +24,7 @@ export default function BudgetInput({
   };
   return (
     <input
+      className={className}
       aria-label={ariaLabel}
       style={{ width, textAlign: "right" }}
       value={text}

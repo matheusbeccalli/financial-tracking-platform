@@ -1109,3 +1109,93 @@ th.num {
   padding: 0;
   cursor: inherit;
 }
+
+/* Duas colunas de categorias: 22 linhas numa coluna só viraria uma rolagem enorme. */
+.budget-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 26px;
+}
+
+.budget-row {
+  display: grid;
+  grid-template-columns: 1fr 108px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.budget-row--vazia {
+  padding: 7px 0;
+}
+
+.budget-row-main {
+  min-width: 0;
+}
+
+.budget-row-name {
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.budget-row--vazia .budget-row-name {
+  color: var(--muted);
+}
+
+.budget-row-gasto {
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+.budget-peso {
+  margin-top: 6px;
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: var(--track);
+}
+
+.budget-peso-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  opacity: 0.4;
+}
+
+.budget-peso-fill.is-forte {
+  opacity: 1;
+}
+
+.budget-sem-orcamento {
+  margin-top: 16px;
+  padding-top: 13px;
+  border-top: 1px solid var(--border);
+}
+
+.budget-sem-orcamento .label {
+  margin-bottom: 8px;
+}
+
+/* Categoria sem orçamento mas com gasto: a borda avisa antes do número. */
+.budget-input-alerta {
+  border-color: var(--warn);
+}
+
+.budget-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-strong);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.budget-total .mono {
+  font-size: 16px;
+  font-weight: 500;
+}
