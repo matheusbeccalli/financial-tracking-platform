@@ -1,6 +1,6 @@
 import type { Summary } from "../../api/types";
+import { investLabel, pctRaw } from "../../lib/dashboard";
 import { formatBRL } from "../../lib/money";
-import { pctOf } from "../../lib/pct";
 import Money from "../Money";
 import Pill from "../Pill";
 import ProgressBar from "../ProgressBar";
@@ -10,10 +10,12 @@ const semMoeda = (cents: number) =>
   (cents / 100).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
 
 export default function KpiStrip({ s }: { s: Summary }) {
-  const entradasPct = pctOf(s.entradas.real, s.entradas.orcado);
-  const saidasPct = pctOf(s.saidas.real, s.saidas.orcado);
+  // Percentuais sem teto: a legenda do ritmo compara com `ritmo`, que vem cru do
+  // backend — travar em 100 aqui faria "gastou 100% ... com 32%" contradizer "+186 pts".
+  const entradasPct = pctRaw(s.entradas.real, s.entradas.orcado);
+  const saidasPct = pctRaw(s.saidas.real, s.saidas.orcado);
   const pacePct = s.dias.no_mes > 0 ? (s.dias.decorridos / s.dias.no_mes) * 100 : 0;
-  const aporte = s.investimentos.real >= 0;
+  const invest = investLabel(s.investimentos.real);
   const ritmo = s.ritmo === null ? null : Math.round(s.ritmo);
 
   return (
@@ -55,8 +57,12 @@ export default function KpiStrip({ s }: { s: Summary }) {
           Investido
         </div>
         <div className="kpi-value kpi-value-row">
-          <Money cents={s.investimentos.real} alwaysSign tone={aporte ? "invest" : "over"} />
-          <Pill tone={aporte ? "invest" : "over"}>{aporte ? "aporte" : "resgate"}</Pill>
+          <Money
+            cents={s.investimentos.real}
+            alwaysSign
+            tone={invest ? invest.tone : "muted"}
+          />
+          {invest && <Pill tone={invest.tone}>{invest.label}</Pill>}
         </div>
         <div className="kpi-note">líquido do mês · fora do orçamento</div>
       </div>

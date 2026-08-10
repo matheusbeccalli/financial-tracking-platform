@@ -80,3 +80,16 @@ export function waterfallLayout(bars: WaterfallBar[]): WaterfallLayoutBar[] {
     heightPct: span > 0 ? ((hiOf(b) - loOf(b)) / span) * 100 : 0,
   }));
 }
+
+/**
+ * Posição do zero no gráfico, em % do topo. `null` quando o domínio não atravessa o
+ * zero — aí o piso do gráfico já é o próprio zero e a linha seria redundante.
+ */
+export function waterfallZeroPct(bars: WaterfallBar[]): number | null {
+  const hiOf = (b: WaterfallBar) => (b.pos > 0 ? b.basePos + b.pos : b.baseNeg);
+  const loOf = (b: WaterfallBar) => (b.neg < 0 ? b.baseNeg + b.neg : b.basePos);
+  const max = Math.max(0, ...bars.map(hiOf));
+  const min = Math.min(0, ...bars.map(loOf));
+  if (min >= 0 || max <= min) return null;
+  return (max / (max - min)) * 100;
+}

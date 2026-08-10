@@ -1,5 +1,5 @@
 import { useCategories, useTransactions } from "../../api/hooks";
-import { investBidi, investSummary } from "../../lib/dashboard";
+import { investBidi, investLabel, investSummary } from "../../lib/dashboard";
 import Money from "../Money";
 import Pill from "../Pill";
 
@@ -17,7 +17,7 @@ export default function InvestBlock({ month, meta }: { month: string; meta: numb
   );
   const v = investSummary(txs, investIds, meta);
   const bar = investBidi(v.liquido, v.meta);
-  const aporte = v.liquido >= 0;
+  const invest = investLabel(v.liquido);
 
   return (
     <div className="invest-block">
@@ -49,11 +49,15 @@ export default function InvestBlock({ month, meta }: { month: string; meta: numb
         <div className="invest-metric-liquid">
           <div className="label">Líquido</div>
           <div className="invest-metric-value invest-metric-row">
-            <Money cents={v.liquido} alwaysSign tone={aporte ? "invest" : "over"} />
-            <Pill tone={aporte ? "invest" : "over"}>{aporte ? "aporte" : "resgate"}</Pill>
+            <Money cents={v.liquido} alwaysSign tone={invest ? invest.tone : "muted"} />
+            {invest && <Pill tone={invest.tone}>{invest.label}</Pill>}
           </div>
           <div className="sub">
-            {aporte ? "patrimônio cresceu no mês" : "patrimônio encolheu no mês"}
+            {invest === null
+              ? "sem movimento de investimento no mês"
+              : v.liquido > 0
+                ? "patrimônio cresceu no mês"
+                : "patrimônio encolheu no mês"}
           </div>
         </div>
         <div>
@@ -73,7 +77,7 @@ export default function InvestBlock({ month, meta }: { month: string; meta: numb
           style={{
             left: `${bar.leftPct}%`,
             width: `${bar.widthPct}%`,
-            background: aporte ? "var(--invest)" : "var(--over)",
+            background: v.liquido < 0 ? "var(--over)" : "var(--invest)",
           }}
         />
         <span className="invest-bidi-zero" />

@@ -90,7 +90,7 @@ export default function BurningCard({ s, month }: { s: Summary; month: string })
 
       {expanded && v.lowRows.length > 0 && (
         <div className="burning-low">
-          <div className="label">Movimento baixo</div>
+          <div className="label">Demais categorias</div>
           <div className="burning-low-grid">
             {v.lowRows.map((c) => (
               <div key={c.id} className="burning-low-row">
@@ -117,7 +117,7 @@ export default function BurningCard({ s, month }: { s: Summary; month: string })
       {v.lowRows.length > 0 && (
         <button className="burning-toggle" onClick={() => setExpanded(!expanded)}>
           {expanded
-            ? `Ocultar as ${v.lowRows.length} categorias sem movimento`
+            ? `Ocultar as outras ${v.lowRows.length} categorias`
             : `Ver todas as ${v.rows.length + v.lowRows.length} categorias`}
         </button>
       )}

@@ -521,13 +521,13 @@ th.num {
   gap: 12px;
 }
 
-.months-chart {
+.months-plot {
+  position: relative;
+  height: 132px;
   display: flex;
   align-items: flex-end;
   gap: 10px;
-  height: 132px;
-  margin-top: 16px;
-  position: relative;
+  margin-top: 22px;
 }
 
 .months-media {
@@ -539,16 +539,17 @@ th.num {
 }
 
 .months-col {
+  position: relative;
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
   height: 100%;
-  justify-content: flex-end;
 }
 
 .months-col-value {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-bottom: 4px;
+  text-align: center;
   font-size: 10px;
   color: var(--muted);
 }
@@ -558,7 +559,10 @@ th.num {
 }
 
 .months-col-bar {
-  width: 100%;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   min-height: 1px;
   background: var(--track);
   border-radius: 3px 3px 0 0;
@@ -568,12 +572,20 @@ th.num {
   background: var(--accent);
 }
 
-.months-col-label {
+.months-labels {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.months-labels span {
+  flex: 1;
+  text-align: center;
   font-size: 10.5px;
   color: var(--muted);
 }
 
-.months-col-label.is-current {
+.months-labels .is-current {
   color: var(--ink);
   font-weight: 500;
 }
@@ -757,4 +769,13 @@ th.num {
 
 .dash-col > .card:last-child {
   margin-bottom: 0;
+}
+
+.bridge-zero {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border-strong);
+  pointer-events: none;
 }

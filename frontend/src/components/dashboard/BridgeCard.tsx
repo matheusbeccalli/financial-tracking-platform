@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { useBridge } from "../../api/hooks";
 import { formatBRL } from "../../lib/money";
-import { buildWaterfall, waterfallLayout } from "../../lib/waterfall";
+import { buildWaterfall, waterfallLayout, waterfallZeroPct } from "../../lib/waterfall";
 import Segmented from "../Segmented";
 
 type Period = "month" | "ytd" | "12m";
@@ -39,7 +39,7 @@ export default function BridgeCard({ refMonth }: { refMonth: string }) {
       {error && <p className="error">Erro ao carregar bridge: {(error as Error).message}</p>}
       {!data && !error && <p className="muted">Carregando…</p>}
 
-      {data && <Waterfall bars={waterfallLayout(buildWaterfall(data))} />}
+      {data && <Waterfall bridge={buildWaterfall(data)} />}
 
       <div className="bridge-legend">
         <span>
@@ -59,7 +59,9 @@ export default function BridgeCard({ refMonth }: { refMonth: string }) {
   );
 }
 
-function Waterfall({ bars }: { bars: ReturnType<typeof waterfallLayout> }) {
+function Waterfall({ bridge }: { bridge: ReturnType<typeof buildWaterfall> }) {
+  const bars = waterfallLayout(bridge);
+  const zeroPct = waterfallZeroPct(bridge);
   const cols = { gridTemplateColumns: `repeat(${bars.length}, 1fr)` };
   return (
     <>
@@ -70,6 +72,11 @@ function Waterfall({ bars }: { bars: ReturnType<typeof waterfallLayout> }) {
           <span style={{ top: "50%" }} />
           <span style={{ top: "75%" }} />
         </div>
+        {/* Com realizado negativo o piso do gráfico deixa de ser o zero; sem esta
+            linha não dá para ler as barras contra o eixo. */}
+        {zeroPct !== null && (
+          <div className="bridge-zero" style={{ top: `${zeroPct}%` }} aria-hidden="true" />
+        )}
         {bars.map((b, i) => (
           <div key={`${b.label}-${i}`} className="bridge-col">
             <span

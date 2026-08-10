@@ -2,6 +2,15 @@ import type { CatLine, Dias, Tx } from "../api/types";
 import { clampPct, pctOf } from "./pct";
 import type { Tone } from "./tone";
 
+/**
+ * Percentual SEM teto. `pctOf` satura em 100, o que serve para largura de barra mas
+ * mente no texto: "100% consumido" para quem gastou 250% do orçado esconde o estouro.
+ * Quem desenha barra é que clampa.
+ */
+export function pctRaw(part: number, total: number): number {
+  return total > 0 ? (part / total) * 100 : 0;
+}
+
 const MAX_ROWS = 8; // linhas na lista principal de "onde o dinheiro está queimando"
 const MAX_SLICES = 6; // fatias nomeadas no donut; o resto vira "Demais"
 const CHIP_THRESHOLD = 1.25; // a partir de quantas vezes o ritmo o chip aparece
@@ -73,8 +82,11 @@ export function burningRows(
   });
 
   const rows = scored.slice(0, MAX_ROWS).map(({ line, semOrcamento, ratio }): BurningRow => {
+    const pct = semOrcamento ? 100 : pctRaw(line.real, line.orcado);
+    const estourou = !semOrcamento && pct > 100;
     let chip: BurningChip | null = null;
     if (semOrcamento) chip = { label: "sem orçamento", tone: "over" };
+    else if (estourou) chip = { label: "estourou o orçado", tone: "over" };
     else if (ratio >= CHIP_THRESHOLD)
       chip = { label: `${formatMultiplier(ratio)}× o ritmo`, tone: "warn" };
     return {
@@ -82,14 +94,16 @@ export function burningRows(
       nome: line.nome,
       real: line.real,
       orcado: line.orcado,
-      pct: semOrcamento ? 100 : pctOf(line.real, line.orcado),
+      pct,
       pacePct,
-      tone: semOrcamento ? "over" : ratio > 1 ? "warn" : "accent",
+      tone: semOrcamento || estourou ? "over" : ratio > 1 ? "warn" : "accent",
       chip,
       semOrcamento,
     };
   });
 
+  // `outras` junta o que sobrou das 8 primeiras linhas com tudo que não é saída
+  // com movimento — não é "sem movimento", é "o resto".
   const overflow = scored.slice(MAX_ROWS).map((s) => s.line);
   return {
     rows,
@@ -123,6 +137,14 @@ export function donutSlices(categorias: CatLine[], totalSaidas: number): DonutVi
   const nomeadas = saidas.slice(0, MAX_SLICES).map((c) => ({ nome: c.nome, cents: c.real }));
   const resto = saidas.slice(MAX_SLICES).reduce((sum, c) => sum + c.real, 0);
   const partes = resto > 0 ? [...nomeadas, { nome: "Demais", cents: resto }] : nomeadas;
+
+  // `saidas.real` do backend soma lançamentos sem categoria e categorias arquivadas,
+  // que não têm linha em `categorias`. Sem esta fatia o conic-gradient pararia antes
+  // de 100% e o CSS esticaria a última cor até o fim, desenhando-a maior do que o
+  // percentual escrito ao lado dela.
+  const somaFatias = partes.reduce((sum, p) => sum + p.cents, 0);
+  const foraDeCategoria = totalSaidas - somaFatias;
+  if (foraDeCategoria > 0) partes.push({ nome: "Sem categoria", cents: foraDeCategoria });
 
   let cursor = 0;
   const slices = partes.map((p, index) => {
@@ -162,9 +184,13 @@ export function monthsBars(months: string[], saidas: number[], dias: Dias): Mont
   const media = saidas.length
     ? Math.round(saidas.reduce((a, b) => a + b, 0) / saidas.length)
     : 0;
+  // Projetar só faz sentido num mês em curso. Mês fechado tem decorridos == no_mes
+  // (projeção seria o próprio realizado, com a legenda "mês em curso" mentindo);
+  // mês futuro tem decorridos == 0.
+  const emCurso = dias.decorridos > 0 && dias.decorridos < dias.no_mes;
   const pace = paceFraction(dias);
   const atual = saidas[saidas.length - 1] ?? 0;
-  return { bars, media, maior, projecao: pace > 0 ? Math.round(atual / pace) : null };
+  return { bars, media, maior, projecao: emCurso && pace > 0 ? Math.round(atual / pace) : null };
 }
 
 export interface NotRealizedView {
@@ -259,4 +285,12 @@ export function investBidi(
   if (escala <= 0) return { leftPct: 50, widthPct: 0 };
   const widthPct = Math.min(50, (Math.abs(liquido) / escala) * 50);
   return { leftPct: liquido < 0 ? 50 - widthPct : 50, widthPct };
+}
+
+/** Rótulo do líquido investido. Zero não é aporte nem resgate. */
+export function investLabel(liquido: number): { label: string; tone: Tone } | null {
+  if (liquido === 0) return null;
+  return liquido > 0
+    ? { label: "aporte", tone: "invest" }
+    : { label: "resgate", tone: "over" };
 }

@@ -6,10 +6,12 @@ import {
   donutSlices,
   formatMultiplier,
   investBidi,
+  investLabel,
   investSummary,
   monthsBars,
   notRealized,
   paceFraction,
+  pctRaw,
 } from "./dashboard";
 
 const line = (
@@ -88,6 +90,13 @@ describe("burningRows", () => {
     expect(r.rows[0].orcado).toBe(0);
   });
 
+  it("estouro do orçado não é travado em 100% e vira tom over", () => {
+    const r = burningRows([line(1, "Vestuário", 250000, 100000)], DIAS);
+    expect(r.rows[0].pct).toBe(250);
+    expect(r.rows[0].tone).toBe("over");
+    expect(r.rows[0].chip).toEqual({ label: "estourou o orçado", tone: "over" });
+  });
+
   it("limita a lista principal a 8 linhas e joga o resto no bloco baixo", () => {
     const many = Array.from({ length: 12 }, (_, i) =>
       line(i + 1, `Cat ${i}`, (12 - i) * 1000, 100000)
@@ -123,6 +132,14 @@ describe("donutSlices", () => {
   it("sem saídas devolve lista vazia", () => {
     expect(donutSlices([], 0).slices).toEqual([]);
   });
+
+  it("saídas fora de `categorias` viram fatia própria e fecham em 100%", () => {
+    // total inclui lançamentos sem categoria / arquivados que não têm linha
+    const d = donutSlices([line(1, "A", 7000, 0)], 10000);
+    expect(d.slices.map((s) => s.nome)).toEqual(["A", "Sem categoria"]);
+    expect(d.slices[1].pct).toBe(30);
+    expect(d.slices[1].to).toBe(100);
+  });
 });
 
 describe("monthsBars", () => {
@@ -146,6 +163,11 @@ describe("monthsBars", () => {
     const b = monthsBars(["2026-08"], [0], { decorridos: 0, no_mes: 31 });
     expect(b.projecao).toBeNull();
     expect(b.bars[0].heightPct).toBe(0);
+  });
+
+  it("mês já fechado não projeta", () => {
+    const b = monthsBars(["2026-07"], [970000], { decorridos: 31, no_mes: 31 });
+    expect(b.projecao).toBeNull();
   });
 });
 
@@ -243,5 +265,22 @@ describe("investBidi", () => {
   });
   it("sem meta nem líquido não desenha nada", () => {
     expect(investBidi(0, 0)).toEqual({ leftPct: 50, widthPct: 0 });
+  });
+});
+
+describe("pctRaw", () => {
+  it("não satura em 100", () => {
+    expect(pctRaw(250000, 100000)).toBe(250);
+    expect(pctRaw(1000, 0)).toBe(0);
+  });
+});
+
+describe("investLabel", () => {
+  it("zero não é aporte nem resgate", () => {
+    expect(investLabel(0)).toBeNull();
+  });
+  it("sinal define rótulo e tom", () => {
+    expect(investLabel(5048)).toEqual({ label: "aporte", tone: "invest" });
+    expect(investLabel(-5048)).toEqual({ label: "resgate", tone: "over" });
   });
 });

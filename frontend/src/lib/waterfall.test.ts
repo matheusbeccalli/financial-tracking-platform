@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildWaterfall, waterfallLayout } from "./waterfall";
+import { buildWaterfall, waterfallLayout, waterfallZeroPct } from "./waterfall";
 
 const bridge = {
   period: "month",
@@ -107,5 +107,24 @@ describe("waterfallLayout", () => {
     const layout = waterfallLayout(bars);
     expect(layout[0].heightPct).toBe(0);
     expect(layout[0].topPct).toBe(0);
+  });
+});
+
+describe("waterfallZeroPct", () => {
+  it("null quando o domínio não atravessa o zero", () => {
+    const bars = buildWaterfall({
+      period: "month", ref: "2026-08", months: ["2026-08"],
+      start: 1000, steps: [{ categoria: "A", delta: -200 }], end: 800,
+    });
+    expect(waterfallZeroPct(bars)).toBeNull();
+  });
+
+  it("posiciona o zero quando o realizado fica negativo", () => {
+    const bars = buildWaterfall({
+      period: "month", ref: "2026-08", months: ["2026-08"],
+      start: 100, steps: [{ categoria: "A", delta: -300 }], end: -200,
+    });
+    // domínio -200..100 ⇒ zero a 100/300 do topo
+    expect(waterfallZeroPct(bars)).toBeCloseTo(33.33, 2);
   });
 });
