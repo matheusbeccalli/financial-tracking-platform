@@ -26,3 +26,9 @@ export function formatSigned(cents: number, alwaysSign = false): string {
   if (cents < 0) return MINUS + abs;
   return alwaysSign && cents > 0 ? `+${abs}` : abs;
 }
+
+/** Valor compacto para eixos e legendas: 460000 → "4,6k". Zero é só "0". */
+export function formatK(cents: number): string {
+  if (cents === 0) return "0";
+  return `${(cents / 100000).toFixed(1).replace(".", ",")}k`;
+}

@@ -3,7 +3,8 @@ import { useState } from "react";
 import { useSummary } from "../api/hooks";
 import BridgeChart from "../components/dashboard/BridgeChart";
 import BurningCard from "../components/dashboard/BurningCard";
-import EvolutionChart from "../components/dashboard/EvolutionChart";
+import DonutCard from "../components/dashboard/DonutCard";
+import MonthsCard from "../components/dashboard/MonthsCard";
 import KpiStrip from "../components/dashboard/KpiStrip";
 import LlmStrip from "../components/dashboard/LlmStrip";
 import MonthProgress from "../components/dashboard/MonthProgress";
@@ -29,8 +30,13 @@ export default function Dashboard() {
       <LlmStrip />
       <div className="row" style={{ alignItems: "stretch" }}>
         <div style={{ flex: 2, minWidth: 340 }}>{s && <BurningCard s={s} month={month} />}</div>
-        <div className="card" style={{ flex: 1, minWidth: 260 }}>
-          <EvolutionChart month={month} />
+        <div style={{ flex: 1, minWidth: 260 }}>
+          {s && (
+            <>
+              <DonutCard s={s} month={month} />
+              <MonthsCard month={month} dias={s.dias} />
+            </>
+          )}
         </div>
       </div>
       <div className="card">

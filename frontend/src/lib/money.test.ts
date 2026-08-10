@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatBRL, formatSigned, parseBRL } from "./money";
+import { formatBRL, formatK, formatSigned, parseBRL } from "./money";
 
 // toLocaleString pt-BR usa espaco nao-quebravel (U+00A0) entre R$ e o numero
 const clean = (s: string) => s.replace(/\u00a0/g, " ");
@@ -40,5 +40,16 @@ describe("formatSigned", () => {
   });
   it("zero nunca ganha sinal", () => {
     expect(clean(formatSigned(0, true))).toBe("R$ 0,00");
+  });
+});
+
+describe("formatK", () => {
+  it("compacta em milhares com uma casa", () => {
+    expect(formatK(460000)).toBe("4,6k");
+    expect(formatK(980000)).toBe("9,8k");
+    expect(formatK(40000)).toBe("0,4k");
+  });
+  it("zero não vira 0,0k", () => {
+    expect(formatK(0)).toBe("0");
   });
 });

@@ -46,6 +46,14 @@
   --focus-invest: rgba(69, 80, 196, 0.55);
   --invest-border: rgba(69, 80, 196, 0.22);
 
+  --donut-1: #137574;
+  --donut-2: #2f7f93;
+  --donut-3: #8a650f;
+  --donut-4: #5a6067;
+  --donut-5: #6e747b;
+  --donut-6: #838990;
+  --donut-7: #989ea5;
+
   --float-bg: #ffffff;
   --float-border: rgba(11, 11, 11, 0.16);
   --shadow-float: 0 12px 32px rgba(11, 11, 11, 0.18);
@@ -88,6 +96,14 @@
   --focus: rgba(79, 208, 207, 0.55);
   --focus-invest: rgba(154, 166, 242, 0.55);
   --invest-border: rgba(154, 166, 242, 0.22);
+
+  --donut-1: #4fd0cf;
+  --donut-2: #3fa8bd;
+  --donut-3: #d9b04f;
+  --donut-4: #8b8f96;
+  --donut-5: #5f6a72;
+  --donut-6: #4b565e;
+  --donut-7: #3a444b;
 
   --float-bg: #1b1e22;
   --float-border: rgba(255, 255, 255, 0.14);
