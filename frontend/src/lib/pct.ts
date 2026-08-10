@@ -8,3 +8,12 @@ export function clampPct(value: number): number {
 export function pctOf(part: number, total: number): number {
   return total > 0 ? clampPct((part / total) * 100) : 0;
 }
+
+/**
+ * Percentual SEM teto. `pctOf` satura em 100, o que serve para largura de barra mas
+ * mente no texto: "100% consumido" para quem gastou 250% do orçado esconde o estouro.
+ * Quem desenha barra é que clampa.
+ */
+export function pctRaw(part: number, total: number): number {
+  return total > 0 ? (part / total) * 100 : 0;
+}

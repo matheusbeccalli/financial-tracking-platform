@@ -1,6 +1,7 @@
 import type { Summary } from "../../api/types";
-import { investLabel, pctRaw } from "../../lib/dashboard";
+import { investLabel } from "../../lib/dashboard";
 import { formatBRL } from "../../lib/money";
+import { pctRaw } from "../../lib/pct";
 import Money from "../Money";
 import Pill from "../Pill";
 import ProgressBar from "../ProgressBar";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { clampPct, pctOf } from "./pct";
+import { clampPct, pctOf, pctRaw } from "./pct";
 
 describe("clampPct", () => {
   it("mantém o valor dentro de 0–100", () => {
@@ -24,5 +24,12 @@ describe("pctOf", () => {
   });
   it("estouro satura em 100", () => {
     expect(pctOf(200000, 150000)).toBe(100);
+  });
+});
+
+describe("pctRaw", () => {
+  it("não satura em 100", () => {
+    expect(pctRaw(250000, 100000)).toBe(250);
+    expect(pctRaw(1000, 0)).toBe(0);
   });
 });

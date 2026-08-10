@@ -1,15 +1,6 @@
 import type { CatLine, Dias, Tx } from "../api/types";
-import { clampPct, pctOf } from "./pct";
+import { clampPct, pctOf, pctRaw } from "./pct";
 import type { Tone } from "./tone";
-
-/**
- * Percentual SEM teto. `pctOf` satura em 100, o que serve para largura de barra mas
- * mente no texto: "100% consumido" para quem gastou 250% do orçado esconde o estouro.
- * Quem desenha barra é que clampa.
- */
-export function pctRaw(part: number, total: number): number {
-  return total > 0 ? (part / total) * 100 : 0;
-}
 
 const MAX_ROWS = 8; // linhas na lista principal de "onde o dinheiro está queimando"
 const MAX_SLICES = 6; // fatias nomeadas no donut; o resto vira "Demais"

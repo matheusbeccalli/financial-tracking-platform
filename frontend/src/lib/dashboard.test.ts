@@ -11,7 +11,6 @@ import {
   monthsBars,
   notRealized,
   paceFraction,
-  pctRaw,
 } from "./dashboard";
 
 const line = (
@@ -265,13 +264,6 @@ describe("investBidi", () => {
   });
   it("sem meta nem líquido não desenha nada", () => {
     expect(investBidi(0, 0)).toEqual({ leftPct: 50, widthPct: 0 });
-  });
-});
-
-describe("pctRaw", () => {
-  it("não satura em 100", () => {
-    expect(pctRaw(250000, 100000)).toBe(250);
-    expect(pctRaw(1000, 0)).toBe(0);
   });
 });
 
