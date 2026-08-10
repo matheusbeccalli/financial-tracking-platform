@@ -82,3 +82,41 @@ export function sortTxs(
   };
   return [...txs].sort(cmp);
 }
+
+/**
+ * "A classificar" é o que o LLM chutou e ninguém confirmou (`source === "llm"`);
+ * "sem categoria" é o que nem regra nem LLM resolveram.
+ */
+export type TxStatus = "todas" | "llm" | "sem-categoria";
+
+export interface TxFilterState {
+  accountId: number | null;
+  categoryId: number | null;
+  status: TxStatus;
+}
+
+export function filterTxs(txs: Tx[], f: TxFilterState): Tx[] {
+  return txs.filter((t) => {
+    if (f.accountId !== null && t.account_id !== f.accountId) return false;
+    if (f.categoryId !== null && t.category_id !== f.categoryId) return false;
+    if (f.status === "llm" && t.source !== "llm") return false;
+    if (f.status === "sem-categoria" && t.category_id !== null) return false;
+    return true;
+  });
+}
+
+export function accountCounts(txs: Tx[]): Map<number, number> {
+  const counts = new Map<number, number>();
+  for (const t of txs) counts.set(t.account_id, (counts.get(t.account_id) ?? 0) + 1);
+  return counts;
+}
+
+export function statusCounts(txs: Tx[]): { llm: number; semCategoria: number } {
+  let llm = 0;
+  let semCategoria = 0;
+  for (const t of txs) {
+    if (t.source === "llm") llm += 1;
+    if (t.category_id === null) semCategoria += 1;
+  }
+  return { llm, semCategoria };
+}

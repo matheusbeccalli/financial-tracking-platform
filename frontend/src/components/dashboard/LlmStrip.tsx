@@ -3,11 +3,9 @@ import { Link } from "react-router-dom";
 
 import { useCategories, useFeed, usePatchTx } from "../../api/hooks";
 import { formatBRL } from "../../lib/money";
+import { dayMonth } from "../../lib/months";
 
 const PREVIEW = 3;
-
-/** "2026-08-06" → "06/08" */
-const diaMes = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 
 export default function LlmStrip() {
   const { data: feed } = useFeed();
@@ -43,7 +41,7 @@ export default function LlmStrip() {
             <div className="llm-card-main">
               <div className="llm-card-desc">{t.description}</div>
               <div className="llm-card-meta mono">
-                {diaMes(t.date)} ·{" "}
+                {dayMonth(t.date)} ·{" "}
                 {formatBRL(Math.abs(t.amount_cents)).replace("R$", "").trim()}
               </div>
             </div>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Tx } from "../api/types";
-import { sortTxs, summarize } from "./txTable";
+import { accountCounts, filterTxs, sortTxs, statusCounts, summarize } from "./txTable";
 
 function tx(partial: Partial<Tx> & { id: number }): Tx {
   return {
@@ -80,5 +80,67 @@ describe("sortTxs", () => {
     expect(sortTxs(txs, "account", "asc", LOOKUPS).map((t) => t.id)).toEqual([2, 3, 1]);
     expect(sortTxs(txs, "category", "asc", LOOKUPS).map((t) => t.id)).toEqual([2, 1, 3]);
     expect(sortTxs(txs, "category", "desc", LOOKUPS).map((t) => t.id)).toEqual([1, 2, 3]);
+  });
+});
+
+describe("filterTxs", () => {
+  const txs = [
+    tx({ id: 1, account_id: 1, category_id: 10, source: "regra" }),
+    tx({ id: 2, account_id: 1, category_id: null, source: null }),
+    tx({ id: 3, account_id: 2, category_id: 11, source: "llm" }),
+    tx({ id: 4, account_id: 2, category_id: 10, source: "llm" }),
+  ];
+  const todos = { accountId: null, categoryId: null, status: "todas" as const };
+
+  it("sem filtro devolve tudo", () => {
+    expect(filterTxs(txs, todos)).toHaveLength(4);
+  });
+
+  it("filtra por conta", () => {
+    expect(filterTxs(txs, { ...todos, accountId: 2 }).map((t) => t.id)).toEqual([3, 4]);
+  });
+
+  it("filtra por categoria", () => {
+    expect(filterTxs(txs, { ...todos, categoryId: 10 }).map((t) => t.id)).toEqual([1, 4]);
+  });
+
+  it("status llm pega o que o LLM classificou e ninguém confirmou", () => {
+    expect(filterTxs(txs, { ...todos, status: "llm" }).map((t) => t.id)).toEqual([3, 4]);
+  });
+
+  it("status sem-categoria pega o que não tem categoria", () => {
+    expect(filterTxs(txs, { ...todos, status: "sem-categoria" }).map((t) => t.id)).toEqual([2]);
+  });
+
+  it("combina os filtros", () => {
+    expect(
+      filterTxs(txs, { accountId: 2, categoryId: 10, status: "llm" }).map((t) => t.id)
+    ).toEqual([4]);
+  });
+});
+
+describe("accountCounts", () => {
+  it("conta lançamentos por conta", () => {
+    const counts = accountCounts([
+      tx({ id: 1, account_id: 1 }),
+      tx({ id: 2, account_id: 1 }),
+      tx({ id: 3, account_id: 2 }),
+    ]);
+    expect(counts.get(1)).toBe(2);
+    expect(counts.get(2)).toBe(1);
+    expect(counts.get(9)).toBeUndefined();
+  });
+});
+
+describe("statusCounts", () => {
+  it("conta a classificar e sem categoria", () => {
+    const c = statusCounts([
+      tx({ id: 1, category_id: 10, source: "regra" }),
+      tx({ id: 2, category_id: null, source: null }),
+      tx({ id: 3, category_id: 11, source: "llm" }),
+      tx({ id: 4, category_id: null, source: "llm" }),
+    ]);
+    expect(c.llm).toBe(2);
+    expect(c.semCategoria).toBe(2);
   });
 });

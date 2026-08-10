@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { addMonths, lastNMonths, monthLabel, monthName, monthTitle } from "./months";
+import { addMonths, dayMonth, lastNMonths, monthLabel, monthName, monthTitle } from "./months";
 
 describe("addMonths", () => {
   it("navega entre meses e anos", () => {
@@ -33,5 +33,12 @@ describe("monthName", () => {
   it("devolve o mês em minúsculas para uso em frase", () => {
     expect(monthName("2026-08")).toBe("agosto");
     expect(monthName("2026-03")).toBe("março");
+  });
+});
+
+describe("dayMonth", () => {
+  it("formata a data ISO como dia/mês", () => {
+    expect(dayMonth("2026-08-04")).toBe("04/08");
+    expect(dayMonth("2026-12-31")).toBe("31/12");
   });
 });

@@ -37,3 +37,8 @@ export function monthTitle(month: string): string {
 export function monthName(month: string): string {
   return MONTH_FULL[Number(month.split("-")[1]) - 1].toLowerCase();
 }
+
+/** "2026-08-04" → "04/08". Data curta em mono, como o design pede nas tabelas. */
+export function dayMonth(iso: string): string {
+  return `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
+}
