@@ -44,6 +44,7 @@
   --focus: rgba(19, 117, 116, 0.55);
   --focus-invest: rgba(69, 80, 196, 0.55);
   --invest-border: rgba(69, 80, 196, 0.22);
+  --row-selected: rgba(19, 117, 116, 0.1);
 
   --donut-1: #137574;
   --donut-2: #2f7f93;
@@ -96,6 +97,7 @@
   --focus: rgba(79, 208, 207, 0.55);
   --focus-invest: rgba(154, 166, 242, 0.55);
   --invest-border: rgba(154, 166, 242, 0.22);
+  --row-selected: rgba(79, 208, 207, 0.08);
 
   --donut-1: #4fd0cf;
   --donut-2: #3fa8bd;

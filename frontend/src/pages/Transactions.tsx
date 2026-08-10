@@ -1,67 +1,42 @@
 import { useMemo, useState } from "react";
 
 import { useAccounts, useCategories, usePatchTx, useTransactions } from "../api/hooks";
-import CategorySelect from "../components/CategorySelect";
 import MonthPicker from "../components/MonthPicker";
-import { formatBRL } from "../lib/money";
-import { currentMonth } from "../lib/months";
-import { sortTxs, summarize, type SortDir, type SortKey } from "../lib/txTable";
-
-const SOURCE_LABEL: Record<string, string> = {
-  regra: "regra",
-  llm: "🤖 llm",
-  manual: "manual",
-};
-
-function SortableTh({
-  label,
-  k,
-  sort,
-  onSort,
-  className,
-}: {
-  label: string;
-  k: SortKey;
-  sort: { key: SortKey; dir: SortDir } | null;
-  onSort: (k: SortKey) => void;
-  className?: string;
-}) {
-  const active = sort?.key === k;
-  return (
-    <th
-      className={className}
-      onClick={() => onSort(k)}
-      style={{ cursor: "pointer", userSelect: "none" }}
-      title="Ordenar"
-      aria-sort={
-        active && sort ? (sort.dir === "asc" ? "ascending" : "descending") : undefined
-      }
-    >
-      {label}
-      {active && sort ? (sort.dir === "asc" ? " ▲" : " ▼") : ""}
-    </th>
-  );
-}
+import PageHeader from "../components/PageHeader";
+import FilterBar from "../components/transactions/FilterBar";
+import TotalsStrip from "../components/transactions/TotalsStrip";
+import TxTable from "../components/transactions/TxTable";
+import { currentMonth, monthTitle } from "../lib/months";
+import {
+  filterTxs,
+  sortTxs,
+  summarize,
+  type SortDir,
+  type SortKey,
+  type TxStatus,
+} from "../lib/txTable";
 
 export default function Transactions() {
   const [month, setMonth] = useState(currentMonth());
-  const [accountId, setAccountId] = useState<number | "">("");
+  const [accountId, setAccountId] = useState<number | null>(null);
   const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [status, setStatus] = useState<TxStatus>("todas");
   const [text, setText] = useState("");
   const [query, setQuery] = useState("");
   const [showIgnored, setShowIgnored] = useState(false);
+  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir } | null>(null);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
 
   const { data: accounts } = useAccounts();
-  const { data: txs, isLoading, error } = useTransactions({
-    month,
-    account_id: accountId === "" ? undefined : accountId,
-    category_id: categoryId ?? undefined,
-    q: query || undefined,
-    include_ignored: showIgnored,
-  });
-  const patchTx = usePatchTx();
   const { data: categories } = useCategories();
-  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir } | null>(null);
+  const patchTx = usePatchTx();
+  // Conta, categoria e estado são filtrados no cliente: os chips precisam da
+  // contagem de cada opção, e para isso é preciso ter o mês inteiro em mãos.
+  const {
+    data: txs,
+    isLoading,
+    error,
+  } = useTransactions({ month, q: query || undefined, include_ignored: showIgnored });
 
   const lookups = useMemo(
     () => ({
@@ -70,11 +45,16 @@ export default function Transactions() {
     }),
     [accounts, categories]
   );
-  const rows = useMemo(
-    () => (txs && sort ? sortTxs(txs, sort.key, sort.dir, lookups) : txs ?? []),
-    [txs, sort, lookups]
+
+  const visiveis = useMemo(
+    () => filterTxs(txs ?? [], { accountId, categoryId, status }),
+    [txs, accountId, categoryId, status]
   );
-  const summary = useMemo(() => summarize(txs ?? []), [txs]);
+  const rows = useMemo(
+    () => (sort ? sortTxs(visiveis, sort.key, sort.dir, lookups) : visiveis),
+    [visiveis, sort, lookups]
+  );
+  const totais = useMemo(() => summarize(visiveis), [visiveis]);
 
   function toggleSort(key: SortKey) {
     setSort((s) =>
@@ -82,130 +62,68 @@ export default function Transactions() {
     );
   }
 
-  const accountName = lookups.accountName;
+  function toggleSelected(id: number) {
+    setSelected((s) => {
+      const next = new Set(s);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    setSelected((s) =>
+      rows.length > 0 && rows.every((t) => s.has(t.id))
+        ? new Set()
+        : new Set(rows.map((t) => t.id))
+    );
+  }
 
   return (
     <>
-      <div className="row" style={{ justifyContent: "space-between" }}>
-        <h2>Transações</h2>
+      <PageHeader eyebrow="Transações" title={monthTitle(month)}>
         <MonthPicker month={month} onChange={setMonth} />
-      </div>
-      <div className="card row">
-        <select
-          value={accountId}
-          onChange={(e) => setAccountId(e.target.value ? Number(e.target.value) : "")}
-        >
-          <option value="">Todas as contas</option>
-          {(accounts ?? []).map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </select>
-        <CategorySelect value={categoryId} onChange={setCategoryId} allowEmpty />
-        <input
-          placeholder="Buscar descrição…"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && setQuery(text)}
+      </PageHeader>
+
+      <FilterBar
+        txs={txs ?? []}
+        accounts={accounts ?? []}
+        accountId={accountId}
+        onAccount={setAccountId}
+        categoryId={categoryId}
+        onCategory={setCategoryId}
+        status={status}
+        onStatus={setStatus}
+        text={text}
+        onText={setText}
+        onSearch={() => setQuery(text)}
+        showIgnored={showIgnored}
+        onShowIgnored={setShowIgnored}
+        total={visiveis.length}
+      />
+
+      <TotalsStrip s={totais} />
+
+      {isLoading && <p className="muted">Carregando…</p>}
+      {error && <p className="error">{(error as Error).message}</p>}
+      {!isLoading && !error && rows.length === 0 && (
+        <div className="card muted">Nenhuma transação no filtro.</div>
+      )}
+      {rows.length > 0 && (
+        <TxTable
+          rows={rows}
+          accountName={lookups.accountName}
+          selected={selected}
+          onToggle={toggleSelected}
+          onToggleAll={toggleAll}
+          onCategory={(t, id) =>
+            id !== null && patchTx.mutate({ id: t.id, patch: { category_id: id } })
+          }
+          onIgnore={(t) => patchTx.mutate({ id: t.id, patch: { ignored: !t.ignored } })}
+          sort={sort}
+          onSort={toggleSort}
         />
-        <button onClick={() => setQuery(text)}>Filtrar</button>
-        <label className="row" style={{ gap: 6 }}>
-          <input
-            type="checkbox"
-            checked={showIgnored}
-            onChange={(e) => setShowIgnored(e.target.checked)}
-          />
-          mostrar ignoradas
-        </label>
-      </div>
-      <div className="card">
-        {isLoading && <p className="muted">Carregando…</p>}
-        {error && <p className="error">{(error as Error).message}</p>}
-        {txs && txs.length === 0 && <p className="muted">Nenhuma transação no filtro.</p>}
-        {txs && txs.length > 0 && (
-          <p className="muted">
-            {summary.count} transações · entradas {formatBRL(summary.entradas)} ·
-            saídas {formatBRL(-summary.saidas || 0)} ·{" "}
-            <span className={summary.saldo > 0 ? "pos" : undefined}>
-              saldo {formatBRL(summary.saldo)}
-            </span>
-            {summary.temIgnoradas && " (ignoradas fora da soma)"}
-          </p>
-        )}
-        {txs && txs.length > 0 && (
-          <table>
-            <thead>
-              <tr>
-                <SortableTh label="Data" k="date" sort={sort} onSort={toggleSort} />
-                <SortableTh label="Descrição" k="description" sort={sort} onSort={toggleSort} />
-                <SortableTh label="Conta" k="account" sort={sort} onSort={toggleSort} />
-                <SortableTh
-                  label="Valor"
-                  k="amount_cents"
-                  sort={sort}
-                  onSort={toggleSort}
-                  className="num"
-                />
-                <SortableTh label="Categoria" k="category" sort={sort} onSort={toggleSort} />
-                <SortableTh label="Origem" k="source" sort={sort} onSort={toggleSort} />
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((t) => (
-                <tr key={t.id} style={t.ignored ? { opacity: 0.5 } : undefined}>
-                  <td className="muted">{t.date}</td>
-                  <td>
-                    {t.description}
-                    {t.installment && (
-                      <span className="badge" style={{ marginLeft: 6 }}>
-                        {t.installment}
-                      </span>
-                    )}
-                  </td>
-                  <td className="muted">{accountName.get(t.account_id) ?? t.account_id}</td>
-                  <td className={`num${t.amount_cents > 0 ? " pos" : ""}`}>
-                    {formatBRL(t.amount_cents)}
-                  </td>
-                  <td>
-                    <CategorySelect
-                      value={t.category_id}
-                      onChange={(id) =>
-                        id !== null &&
-                        patchTx.mutate({ id: t.id, patch: { category_id: id } })
-                      }
-                    />
-                  </td>
-                  <td>
-                    {t.source ? (
-                      <span className="badge">{SOURCE_LABEL[t.source]}</span>
-                    ) : (
-                      <span className="badge" style={{ color: "var(--critical)" }}>
-                        a classificar
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    <button
-                      title={
-                        t.ignored
-                          ? "Voltar a contar (remove a regra de ignorar)"
-                          : "Ignorar (cria regra: futuras com esta descrição também)"
-                      }
-                      onClick={() =>
-                        patchTx.mutate({ id: t.id, patch: { ignored: !t.ignored } })
-                      }
-                    >
-                      {t.ignored ? "↩" : "🚫"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      )}
     </>
   );
 }
