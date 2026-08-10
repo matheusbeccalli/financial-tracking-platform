@@ -4,11 +4,11 @@ import { useSummary } from "../api/hooks";
 import BridgeCard from "../components/dashboard/BridgeCard";
 import BurningCard from "../components/dashboard/BurningCard";
 import DonutCard from "../components/dashboard/DonutCard";
-import MonthsCard from "../components/dashboard/MonthsCard";
-import NotRealizedCard from "../components/dashboard/NotRealizedCard";
 import KpiStrip from "../components/dashboard/KpiStrip";
 import LlmStrip from "../components/dashboard/LlmStrip";
 import MonthProgress from "../components/dashboard/MonthProgress";
+import MonthsCard from "../components/dashboard/MonthsCard";
+import NotRealizedCard from "../components/dashboard/NotRealizedCard";
 import MonthPicker from "../components/MonthPicker";
 import PageHeader from "../components/PageHeader";
 import { currentMonth, monthTitle } from "../lib/months";
@@ -26,22 +26,22 @@ export default function Dashboard() {
 
       {error && <p className="error">Erro ao carregar resumo: {(error as Error).message}</p>}
       {!s && !error && <p className="muted">Carregando…</p>}
-      {s && <KpiStrip s={s} />}
 
-      <LlmStrip />
-      <div className="row" style={{ alignItems: "stretch" }}>
-        <div style={{ flex: 2, minWidth: 340 }}>{s && <BurningCard s={s} month={month} />}</div>
-        <div style={{ flex: 1, minWidth: 260 }}>
-          {s && (
-            <>
+      {s && (
+        <>
+          <KpiStrip s={s} />
+          <LlmStrip />
+          <section className="dash-grid">
+            <BurningCard s={s} month={month} />
+            <div className="dash-col">
               <DonutCard s={s} month={month} />
               <MonthsCard month={month} dias={s.dias} />
               <NotRealizedCard s={s} month={month} />
-            </>
-          )}
-        </div>
-      </div>
-      <BridgeCard refMonth={month} />
+            </div>
+          </section>
+          <BridgeCard refMonth={month} />
+        </>
+      )}
     </>
   );
 }

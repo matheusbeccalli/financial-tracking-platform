@@ -740,3 +740,21 @@ th.num {
   width: 8px;
   height: 8px;
 }
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: var(--gap-section);
+  align-items: start;
+}
+
+/* Janela estreita: uma coluna só, como o handoff prevê para os grids. */
+@media (max-width: 1180px) {
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dash-col > .card:last-child {
+  margin-bottom: 0;
+}
