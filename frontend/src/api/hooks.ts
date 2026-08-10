@@ -119,6 +119,39 @@ export const usePatchTx = () =>
       api(`/transactions/${id}`, jsonBody("PATCH", patch))
   );
 
+export interface TxPatch {
+  category_id?: number;
+  ignored?: boolean;
+}
+
+/**
+ * Aplica o mesmo patch a vários lançamentos. Não existe endpoint em lote, então são
+ * N requisições — mas com **uma** invalidação ao final: `useInvalidatingMutation`
+ * invalida a cada `onSuccess`, e o React Query espera essa promise, o que
+ * transformaria um lote de 40 em 40 refetches da lista inteira, em série.
+ * Se uma falhar, informa quantas chegaram a valer antes de parar.
+ */
+export const useBatchPatchTx = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ ids, patch }: { ids: number[]; patch: TxPatch }) => {
+      let feitas = 0;
+      try {
+        for (const id of ids) {
+          await api(`/transactions/${id}`, jsonBody("PATCH", patch));
+          feitas += 1;
+        }
+      } catch (e) {
+        const motivo = e instanceof Error ? e.message : String(e);
+        throw new Error(
+          `Aplicado em ${feitas} de ${ids.length} lançamentos; parou em: ${motivo}`
+        );
+      }
+    },
+    onSettled: () => queryClient.invalidateQueries(),
+  });
+};
+
 export const useCopyBudget = () =>
   useInvalidatingMutation((payload: { from_month: string; to_month: string }) =>
     api("/budgets/copy", jsonBody("POST", payload))

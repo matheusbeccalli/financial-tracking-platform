@@ -381,3 +381,12 @@ button:disabled:hover {
 .cat-chip:focus-within {
   border-color: var(--focus);
 }
+
+.cat-chip.is-disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.cat-chip.is-disabled .cat-chip-select {
+  cursor: default;
+}

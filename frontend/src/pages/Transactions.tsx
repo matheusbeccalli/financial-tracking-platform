@@ -1,6 +1,12 @@
 import { useMemo, useState } from "react";
 
-import { useAccounts, useCategories, usePatchTx, useTransactions } from "../api/hooks";
+import {
+  useAccounts,
+  useBatchPatchTx,
+  useCategories,
+  usePatchTx,
+  useTransactions,
+} from "../api/hooks";
 import MonthPicker from "../components/MonthPicker";
 import PageHeader from "../components/PageHeader";
 import SelectionBar from "../components/transactions/SelectionBar";
@@ -27,11 +33,11 @@ export default function Transactions() {
   const [showIgnored, setShowIgnored] = useState(false);
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir } | null>(null);
   const [selected, setSelected] = useState<Set<number>>(new Set());
-  const [busy, setBusy] = useState(false);
 
   const { data: accounts } = useAccounts();
   const { data: categories } = useCategories();
   const patchTx = usePatchTx();
+  const batchPatch = useBatchPatchTx();
   // Conta, categoria e estado são filtrados no cliente: os chips precisam da
   // contagem de cada opção, e para isso é preciso ter o mês inteiro em mãos.
   const {
@@ -57,6 +63,13 @@ export default function Transactions() {
     [visiveis, sort, lookups]
   );
   const totais = useMemo(() => summarize(visiveis), [visiveis]);
+  // A seleção guarda ids, e as linhas visíveis mudam com mês, busca e filtros. Agir
+  // sobre `selected` cru aplicaria a ação em lançamentos de outro mês, invisíveis na
+  // tela. A seleção efetiva é sempre a interseção com o que está à vista.
+  const selecionadas = useMemo(
+    () => rows.filter((t) => selected.has(t.id)),
+    [rows, selected]
+  );
 
   function toggleSort(key: SortKey) {
     setSort((s) =>
@@ -64,18 +77,12 @@ export default function Transactions() {
     );
   }
 
-  // Não existe PATCH em lote na API: N requisições sequenciais, e a invalidação
-  // global do react-query refaz a lista uma vez ao final.
-  async function aplicarEmLote(patch: { category_id?: number; ignored?: boolean }) {
-    setBusy(true);
-    try {
-      for (const id of selected) {
-        await patchTx.mutateAsync({ id, patch });
-      }
-      setSelected(new Set());
-    } finally {
-      setBusy(false);
-    }
+  function aplicarEmLote(patch: { category_id?: number; ignored?: boolean }) {
+    if (batchPatch.isPending) return;
+    batchPatch.mutate(
+      { ids: selecionadas.map((t) => t.id), patch },
+      { onSettled: () => setSelected(new Set()) }
+    );
   }
 
   function toggleSelected(id: number) {
@@ -88,8 +95,8 @@ export default function Transactions() {
   }
 
   function toggleAll() {
-    setSelected((s) =>
-      rows.length > 0 && rows.every((t) => s.has(t.id))
+    setSelected(
+      rows.length > 0 && selecionadas.length === rows.length
         ? new Set()
         : new Set(rows.map((t) => t.id))
     );
@@ -118,7 +125,7 @@ export default function Transactions() {
         total={visiveis.length}
       />
 
-      <TotalsStrip s={totais} />
+      {!isLoading && !error && <TotalsStrip s={totais} />}
 
       {isLoading && <p className="muted">Carregando…</p>}
       {error && <p className="error">{(error as Error).message}</p>}
@@ -142,8 +149,8 @@ export default function Transactions() {
       )}
 
       <SelectionBar
-        count={selected.size}
-        busy={busy}
+        count={selecionadas.length}
+        busy={batchPatch.isPending}
         onCategorizar={(categoryId) => aplicarEmLote({ category_id: categoryId })}
         onIgnorar={() => aplicarEmLote({ ignored: true })}
         onLimpar={() => setSelected(new Set())}

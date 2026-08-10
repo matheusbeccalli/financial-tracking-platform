@@ -26,6 +26,7 @@ export default function SelectionBar({
           onChange={(id) => id !== null && onCategorizar(id)}
           emptyLabel={busy ? "Categorizando…" : "Categorizar"}
           ariaLabel="Categorizar as transações selecionadas"
+          disabled={busy}
         />
       </span>
       <button className="ghost tx-selbar-ignore" onClick={onIgnorar} disabled={busy}>
