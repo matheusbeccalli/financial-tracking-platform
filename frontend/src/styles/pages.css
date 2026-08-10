@@ -1016,3 +1016,44 @@ th.num {
   font-size: 11.5px;
   color: var(--muted);
 }
+
+/* Única sombra do sistema: a barra flutuante. */
+.tx-selbar {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--float-bg);
+  border: 1px solid var(--float-border);
+  border-radius: 11px;
+  padding: 10px 14px;
+  box-shadow: var(--shadow-float);
+  z-index: 20;
+}
+
+.tx-selbar-count {
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.tx-selbar-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border-strong);
+}
+
+/* O chip da barra é a ação primária: teal, não o cinza padrão do chip. */
+.tx-selbar-cat .chip {
+  background: var(--nav-active);
+  border-color: var(--focus);
+  color: var(--accent);
+  font-size: 12.5px;
+  padding: 6px 12px;
+}
+
+.tx-selbar-ignore:hover {
+  color: var(--over);
+}

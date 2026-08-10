@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useAccounts, useCategories, usePatchTx, useTransactions } from "../api/hooks";
 import MonthPicker from "../components/MonthPicker";
 import PageHeader from "../components/PageHeader";
+import SelectionBar from "../components/transactions/SelectionBar";
 import FilterBar from "../components/transactions/FilterBar";
 import TotalsStrip from "../components/transactions/TotalsStrip";
 import TxTable from "../components/transactions/TxTable";
@@ -26,6 +27,7 @@ export default function Transactions() {
   const [showIgnored, setShowIgnored] = useState(false);
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir } | null>(null);
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [busy, setBusy] = useState(false);
 
   const { data: accounts } = useAccounts();
   const { data: categories } = useCategories();
@@ -60,6 +62,20 @@ export default function Transactions() {
     setSort((s) =>
       s?.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }
     );
+  }
+
+  // Não existe PATCH em lote na API: N requisições sequenciais, e a invalidação
+  // global do react-query refaz a lista uma vez ao final.
+  async function aplicarEmLote(patch: { category_id?: number; ignored?: boolean }) {
+    setBusy(true);
+    try {
+      for (const id of selected) {
+        await patchTx.mutateAsync({ id, patch });
+      }
+      setSelected(new Set());
+    } finally {
+      setBusy(false);
+    }
   }
 
   function toggleSelected(id: number) {
@@ -124,6 +140,14 @@ export default function Transactions() {
           onSort={toggleSort}
         />
       )}
+
+      <SelectionBar
+        count={selected.size}
+        busy={busy}
+        onCategorizar={(categoryId) => aplicarEmLote({ category_id: categoryId })}
+        onIgnorar={() => aplicarEmLote({ ignored: true })}
+        onLimpar={() => setSelected(new Set())}
+      />
     </>
   );
 }
