@@ -5,6 +5,7 @@ import BridgeChart from "../components/dashboard/BridgeChart";
 import BurningCard from "../components/dashboard/BurningCard";
 import DonutCard from "../components/dashboard/DonutCard";
 import MonthsCard from "../components/dashboard/MonthsCard";
+import NotRealizedCard from "../components/dashboard/NotRealizedCard";
 import KpiStrip from "../components/dashboard/KpiStrip";
 import LlmStrip from "../components/dashboard/LlmStrip";
 import MonthProgress from "../components/dashboard/MonthProgress";
@@ -35,6 +36,7 @@ export default function Dashboard() {
             <>
               <DonutCard s={s} month={month} />
               <MonthsCard month={month} dias={s.dias} />
+              <NotRealizedCard s={s} month={month} />
             </>
           )}
         </div>

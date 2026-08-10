@@ -32,3 +32,8 @@ export function monthTitle(month: string): string {
   const [y, m] = month.split("-");
   return `${MONTH_FULL[Number(m) - 1]} ${y}`;
 }
+
+/** "2026-08" → "agosto", para uso no meio de frases. */
+export function monthName(month: string): string {
+  return MONTH_FULL[Number(month.split("-")[1]) - 1].toLowerCase();
+}

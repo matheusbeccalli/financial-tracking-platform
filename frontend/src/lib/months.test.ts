@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { addMonths, lastNMonths, monthLabel, monthTitle } from "./months";
+import { addMonths, lastNMonths, monthLabel, monthName, monthTitle } from "./months";
 
 describe("addMonths", () => {
   it("navega entre meses e anos", () => {
@@ -26,5 +26,12 @@ describe("monthTitle", () => {
   it("escreve o mês por extenso", () => {
     expect(monthTitle("2026-08")).toBe("Agosto 2026");
     expect(monthTitle("2026-01")).toBe("Janeiro 2026");
+  });
+});
+
+describe("monthName", () => {
+  it("devolve o mês em minúsculas para uso em frase", () => {
+    expect(monthName("2026-08")).toBe("agosto");
+    expect(monthName("2026-03")).toBe("março");
   });
 });

@@ -658,3 +658,76 @@ th.num {
   border-top: 1px solid var(--border);
   padding-top: 10px;
 }
+
+.notreal-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notreal-total {
+  font-size: 23px;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+.notreal-total .money {
+  font-size: 23px;
+  font-weight: 500;
+}
+
+.notreal-rows {
+  display: flex;
+  flex-direction: column;
+  margin-top: 14px;
+}
+
+.notreal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--divider);
+  font-size: 12.5px;
+}
+
+.notreal-row:last-child {
+  border-bottom: 0;
+}
+
+.notreal-row-value {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+/* Traço tracejado no lugar da barra: orçado sem realizado. */
+.notreal-dash {
+  width: 34px;
+  height: 5px;
+  border-radius: var(--r-pill);
+  border: 1px dashed var(--border-strong);
+}
+
+.notreal-foot {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+}
+
+.notreal-foot > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.notreal-foot-total {
+  font-weight: 600;
+  padding-top: 7px;
+  border-top: 1px solid var(--border);
+}
