@@ -22,7 +22,7 @@
 
 ### Semântica dos dois chips de estado
 
-- **"A classificar N"** (`--warn`) = `source === "llm"`: o LLM chutou e ninguém confirmou. É a mesma contagem que a faixa do Dashboard mostra em "revisar N →".
+- **"A classificar N"** (`--warn`) = `source === "llm"`: o LLM chutou e ninguém confirmou. **Não** é a mesma contagem do "revisar N →" do Dashboard: aquele vem de `/dashboard/feed`, que é global e limitado a 20, sem recorte de mês (`routers/dashboard.py:22-30`). Este conta só o mês aberto.
 - **"Sem categoria N"** = `category_id === null`: nem regra nem LLM acertaram.
 
 ---
@@ -1214,8 +1214,8 @@ Com backend (8000) e vite (5173) rodando — o uvicorn **não** precisa reinicia
 2. **Busca:** digitar e apertar Enter filtra; o contador à direita acompanha.
 3. **Chips de conta:** mostram a contagem por conta; clicar filtra e clicar de novo
    limpa; "Todas as contas" volta ao conjunto completo.
-4. **Chips de estado:** "A classificar N" em amarelo com a mesma contagem que a faixa do
-   Dashboard; "Sem categoria N"; ambos alternam.
+4. **Chips de estado:** "A classificar N" em amarelo (conta só o mês, ao contrário do
+   "revisar N" do Dashboard, que é global); "Sem categoria N"; ambos alternam.
 5. **Filtro por categoria** reduz a lista; "Todas as categorias" limpa.
 6. **Totais** batem com a lista filtrada (entradas em teal, saldo negativo em vermelho).
 7. **Tabela:** clicar num cabeçalho ordena e inverte; o chip de categoria abre a lista
