@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { useSummary } from "../api/hooks";
-import BridgeChart from "../components/dashboard/BridgeChart";
+import BridgeCard from "../components/dashboard/BridgeCard";
 import BurningCard from "../components/dashboard/BurningCard";
 import DonutCard from "../components/dashboard/DonutCard";
 import MonthsCard from "../components/dashboard/MonthsCard";
@@ -41,9 +41,7 @@ export default function Dashboard() {
           )}
         </div>
       </div>
-      <div className="card">
-        <BridgeChart refMonth={month} />
-      </div>
+      <BridgeCard refMonth={month} />
     </>
   );
 }

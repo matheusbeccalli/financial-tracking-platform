@@ -55,10 +55,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const resolved = resolveTheme(mode, systemDark);
 
-  // Escrita idempotente durante o render: useThemeColors lê getComputedStyle
-  // no render dos consumidores deste mesmo passe — um efeito só rodaria
-  // depois que a árvore inteira renderizasse, deixando os gráficos um tema
-  // atrasado.
+  // Escrita idempotente durante o render, não num efeito: o tema precisa estar
+  // no DOM antes que os filhos deste mesmo passe pintem.
   if (document.documentElement.dataset.theme !== resolved) {
     document.documentElement.dataset.theme = resolved;
   }
@@ -71,28 +69,4 @@ export function useTheme(): ThemeContextValue {
   const ctx = useContext(ThemeContext);
   if (!ctx) throw new Error("useTheme requer ThemeProvider");
   return ctx;
-}
-
-export interface ThemeColors {
-  muted: string;
-  baseline: string;
-  blue: string;
-  blueDark: string;
-  red: string;
-}
-
-export function useThemeColors(): ThemeColors {
-  const { resolved } = useTheme();
-  return useMemo(() => {
-    const style = getComputedStyle(document.documentElement);
-    const v = (name: string) => style.getPropertyValue(name).trim();
-    return {
-      muted: v("--muted"),
-      baseline: v("--baseline"),
-      blue: v("--blue"),
-      blueDark: v("--blue-dark"),
-      red: v("--red"),
-    };
-    // resolved na dependência: recalcular quando o tema efetivo muda
-  }, [resolved]);
 }
