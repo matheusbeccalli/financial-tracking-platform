@@ -19,5 +19,8 @@ dist/
 # Artefatos do brainstorming visual
 .superpowers/
 
+# Bundle de referência do redesign (protótipos .dc.html) — fica só local
+design_handoff_frontend_redesign/
+
 # VS Code
 .vscode/

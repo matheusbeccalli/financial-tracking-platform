@@ -9,7 +9,7 @@
 **Tech Stack:** React 19 + TypeScript + Vite + TanStack Query, CSS puro com variáveis; FastAPI + pytest no backend. Sem dependências novas — `recharts` continua instalado neste plano e sai no plano 01.
 
 **Spec:** `docs/superpowers/specs/2026-08-09-frontend-redesign-design.md`
-**Referência visual:** `design_handoff_frontend_redesign/README.md` e os `.dc.html`
+**Referência visual:** bundle de handoff local (não versionado) — ver a spec acima
 
 **Baseline antes de começar:** frontend 41 testes, backend 108 testes (em `64733f3`), ambos
 verdes.
@@ -236,11 +236,10 @@ O script inline de tema (linhas 7-14) fica como está — ele já grava `data-th
 Create `frontend/src/styles/tokens.css`:
 
 ```css
-/* Tokens do redesign — ver design_handoff_frontend_redesign/README.md § Design Tokens.
-   O tema desenhado é o escuro; o claro troca apenas os valores, nunca a estrutura.
-   Tokens não previstos na tabela do handoff (--sidebar, --muted-2, --border-strong,
-   --divider, --focus, --seg-active no claro) são derivações do mesmo passo de contraste
-   usado no escuro. */
+/* Tokens do redesign. O tema escuro é o desenhado; o claro troca apenas os valores,
+   nunca a estrutura — mesmos raios, mesma escala tipográfica, mesmo espaçamento.
+   No claro, accent/warn são escurecidos até ≥ 4.5:1 sobre --surface, o que vale tanto
+   para texto quanto para fundo de botão preenchido. */
 
 :root {
   color-scheme: light;

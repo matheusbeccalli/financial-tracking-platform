@@ -2,7 +2,10 @@
 
 **Data:** 2026-08-09
 **Status:** aprovado
-**Fonte de verdade visual:** `design_handoff_frontend_redesign/README.md` + os 6 `.dc.html`
+**Fonte de verdade visual:** bundle de handoff com um `README.md` e 6 protótipos
+`.dc.html` (um por tela). O bundle **não é versionado** — fica na cópia local de trabalho,
+sob `design_handoff_frontend_redesign/`, ignorado pelo git. Quem for retomar este trabalho
+precisa do bundle em mãos; nenhum arquivo do repositório aponta para ele.
 
 Este documento **não repete** a spec visual do handoff — ele registra as decisões tomadas
 ao reconciliar aquele handoff com o estado real do `main`, e o fatiamento em planos. Para

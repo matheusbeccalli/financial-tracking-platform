@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Redesenhar o Dashboard conforme `design_handoff_frontend_redesign/Dashboard.dc.html` — strip de KPIs, faixa do LLM, card "Onde o dinheiro está queimando" com marca de ritmo e bloco de Investimentos, donut de composição, barras de 6 meses, card "Orçado, ainda não realizado" e bridge em waterfall — e remover o `recharts` do projeto.
+**Goal:** Redesenhar o Dashboard conforme o protótipo `Dashboard.dc.html` do bundle de handoff (local, não versionado) — strip de KPIs, faixa do LLM, card "Onde o dinheiro está queimando" com marca de ritmo e bloco de Investimentos, donut de composição, barras de 6 meses, card "Orçado, ainda não realizado" e bridge em waterfall — e remover o `recharts` do projeto.
 
 **Architecture:** Toda a lógica de cálculo vai para um módulo puro `lib/dashboard.ts` testado com vitest; os componentes só formatam e posicionam. Os gráficos passam a ser CSS puro (`conic-gradient` no donut, `div`s posicionadas no waterfall e nas barras), o que elimina o `recharts` e o helper `useThemeColors` que existia só para alimentá-lo. Cada task substitui um pedaço do dashboard e religa o `Dashboard.tsx` na hora, então o app fica utilizável em todos os commits.
 

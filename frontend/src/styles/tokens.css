@@ -1,8 +1,7 @@
-/* Tokens do redesign — ver design_handoff_frontend_redesign/README.md § Design Tokens.
-   O tema desenhado é o escuro; o claro troca apenas os valores, nunca a estrutura.
-   Tokens não previstos na tabela do handoff (--sidebar, --muted-2, --border-strong,
-   --divider, --focus, --seg-active no claro) são derivações do mesmo passo de contraste
-   usado no escuro. */
+/* Tokens do redesign. O tema escuro é o desenhado; o claro troca apenas os valores,
+   nunca a estrutura — mesmos raios, mesma escala tipográfica, mesmo espaçamento.
+   No claro, accent/warn são escurecidos até ≥ 4.5:1 sobre --surface, o que vale tanto
+   para texto quanto para fundo de botão preenchido. */
 
 :root {
   color-scheme: light;
