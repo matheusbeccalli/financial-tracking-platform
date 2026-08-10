@@ -1199,3 +1199,82 @@ th.num {
   font-size: 16px;
   font-weight: 500;
 }
+
+.budget-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-section);
+  position: sticky;
+  top: 20px;
+}
+
+.budget-rail .card {
+  margin-bottom: 0;
+}
+
+.budget-rail-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.budget-rail-row {
+  display: grid;
+  grid-template-columns: 1fr 112px;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+}
+
+.budget-rail-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.budget-invest-card {
+  border-color: var(--invest-border);
+}
+
+.budget-invest-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.budget-invest-real {
+  font-weight: 400;
+}
+
+.budget-invest-bar {
+  margin-top: 9px;
+  margin-bottom: 6px;
+}
+
+.budget-fecha {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 12.5px;
+}
+
+.budget-fecha > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.budget-fecha-sub,
+.budget-fecha-total {
+  font-weight: 600;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
