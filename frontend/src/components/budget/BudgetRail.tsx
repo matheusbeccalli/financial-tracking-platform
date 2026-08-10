@@ -2,7 +2,7 @@ import type { Category } from "../../api/types";
 import type { BudgetTotals } from "../../lib/budget";
 import { formatBRL } from "../../lib/money";
 import { monthLabel } from "../../lib/months";
-import { pctOf } from "../../lib/pct";
+import { pctRaw } from "../../lib/pct";
 import BudgetInput from "../BudgetInput";
 import Money from "../Money";
 import ProgressBar from "../ProgressBar";
@@ -25,7 +25,10 @@ export default function BudgetRail({
   totals: BudgetTotals;
   onSave: (categoryId: number, cents: number) => void;
 }) {
-  const pctMeta = pctOf(investRealizado, totals.investimento);
+  // Sem teto: aportar o dobro da meta tem de ler "179%", não "100%". Quem clampa
+  // é a ProgressBar, que já faz isso internamente.
+  const pctMeta = pctRaw(investRealizado, totals.investimento);
+  const nadaOrcado = totals.entradas === 0 && totals.saidas === 0 && totals.investimento === 0;
 
   return (
     <div className="budget-rail">
@@ -139,11 +142,15 @@ export default function BudgetRail({
           </div>
         </div>
         <p className="note">
-          {totals.operacional < 0
-            ? `O orçamento não fecha antes do aporte: são ${formatBRL(-totals.operacional)} a cortar nas saídas.`
-            : totals.liquido < 0
-              ? `O operacional fecha, mas o aporte de ${formatBRL(totals.investimento)} não cabe — sobra ${formatBRL(totals.operacional)}.`
-              : "O orçamento fecha com folga, já contando o aporte planejado."}
+          {nadaOrcado
+            ? "Nada orçado neste mês ainda — preencha as linhas ou use \u201cCopiar de\u2026\u201d."
+            : totals.operacional < 0
+              ? `O orçamento não fecha antes do aporte: são ${formatBRL(-totals.operacional)} a cortar nas saídas.`
+              : totals.liquido < 0
+                ? `O operacional fecha, mas o aporte de ${formatBRL(totals.investimento)} não cabe — sobra ${formatBRL(totals.operacional)}.`
+                : totals.liquido === 0
+                  ? "O orçamento fecha exatamente no zero, já contando o aporte planejado."
+                  : "O orçamento fecha com folga, já contando o aporte planejado."}
         </p>
       </div>
     </div>

@@ -21,11 +21,19 @@ export default function Budget() {
   const [month, setMonth] = useState(currentMonth());
   const [sort, setSort] = useState<BudgetSort>("valor");
 
-  const { data: lines } = useBudgets(month);
-  const { data: categories } = useCategories();
+  const budgets = useBudgets(month);
+  const cats = useCategories();
   // O realizado entra aqui por causa de dois pontos do design: "R$ 93 já gastos" nas
   // categorias sem orçamento e "Realizado em ago" no card de investimentos.
-  const { data: summary } = useSummary(month);
+  const resumo = useSummary(month);
+  const lines = budgets.data;
+  const categories = cats.data;
+  const summary = resumo.data;
+  // Sem orçamento ou sem categorias não há o que editar; sem o resumo dá para editar,
+  // só faltam os avisos de gasto. Um erro engolido aqui renderizaria um orçamento
+  // vazio e convincente, indistinguível de um mês que nunca foi preenchido.
+  const erroBase = budgets.error ?? cats.error;
+  const carregando = !erroBase && (!lines || !categories);
   const putBudget = usePutBudget();
   const copyBudget = useCopyBudget();
 
@@ -48,7 +56,7 @@ export default function Budget() {
   const salvar = (categoryId: number, cents: number) =>
     putBudget.mutate({ category_id: categoryId, amount_cents: cents, valid_from: month });
 
-  return (
+  const header = (
     <>
       <PageHeader
         eyebrow="Orçamento"
@@ -62,6 +70,35 @@ export default function Budget() {
         />
         <MonthPicker month={month} onChange={setMonth} />
       </PageHeader>
+    </>
+  );
+
+  if (erroBase)
+    return (
+      <>
+        {header}
+        <p className="error">Erro ao carregar o orçamento: {(erroBase as Error).message}</p>
+      </>
+    );
+
+  if (carregando)
+    return (
+      <>
+        {header}
+        <p className="muted">Carregando…</p>
+      </>
+    );
+
+  return (
+    <>
+      {header}
+
+      {resumo.error && (
+        <p className="error">
+          O realizado do mês não carregou ({(resumo.error as Error).message}); o orçamento
+          continua editável, mas sem os avisos de gasto.
+        </p>
+      )}
 
       <BudgetKpis t={totals} />
 

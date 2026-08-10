@@ -22,42 +22,48 @@ export default function BudgetHistoryCard({ month }: { month: string }) {
         <p className="error">Erro ao carregar o histórico: {(error as Error).message}</p>
       )}
 
-      <div className="budget-hist">
-        <div className="budget-hist-row budget-hist-head-row">
-          <div>Mês</div>
-          <div>Entradas</div>
-          <div>Saídas</div>
-          <div>Investido</div>
-          <div>Saldo</div>
-        </div>
-        {months.map((m, i) => {
-          const s = results[i].data;
-          const atual = i === months.length - 1;
-          return (
-            <div key={m} className={atual ? "budget-hist-row is-current" : "budget-hist-row"}>
-              <div className="mono tone-ink-2">{monthLabel(m)}</div>
-              {s ? (
-                <>
-                  <Celula v={s.entradas} />
-                  <Celula v={s.saidas} />
-                  <Celula
-                    v={s.investimentos}
-                    tone={s.investimentos.real < 0 ? "over" : "invest"}
-                  />
-                  <Celula v={s.saldo} tone={s.saldo.real < 0 ? "over" : "accent"} />
-                </>
-              ) : (
-                <>
-                  <div className="mono tone-muted">…</div>
-                  <div className="mono tone-muted">…</div>
-                  <div className="mono tone-muted">…</div>
-                  <div className="mono tone-muted">…</div>
-                </>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      {/* Tabela de verdade, não um grid de divs: cada célula é um par
+          "realizado / orçado" e só se lê associada ao cabeçalho da coluna. */}
+      <table className="budget-hist">
+        <thead>
+          <tr>
+            <th>Mês</th>
+            <th>Entradas</th>
+            <th>Saídas</th>
+            <th>Investido</th>
+            <th>Saldo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {months.map((m, i) => {
+            const s = results[i].data;
+            const atual = i === months.length - 1;
+            return (
+              <tr key={m} className={atual ? "is-current" : undefined}>
+                <td className="mono tone-ink-2">{monthLabel(m)}</td>
+                {s ? (
+                  <>
+                    <Celula v={s.entradas} />
+                    <Celula v={s.saidas} />
+                    <Celula
+                      v={s.investimentos}
+                      tone={s.investimentos.real < 0 ? "over" : "invest"}
+                    />
+                    <Celula v={s.saldo} tone={s.saldo.real < 0 ? "over" : "accent"} />
+                  </>
+                ) : (
+                  <>
+                    <td className="mono tone-muted">…</td>
+                    <td className="mono tone-muted">…</td>
+                    <td className="mono tone-muted">…</td>
+                    <td className="mono tone-muted">…</td>
+                  </>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
 
       <p className="note budget-hist-note">
         Meses com investido negativo tiveram resgate líquido — o saldo positivo nesses meses
@@ -70,11 +76,11 @@ export default function BudgetHistoryCard({ month }: { month: string }) {
 /** `4.599 / 55.217` — realizado em destaque, orçado em cinza, ambos sem centavos. */
 function Celula({ v, tone }: { v: RealOrc; tone?: Tone }) {
   return (
-    <div className="mono">
+    <td className="mono">
       <span className={v.real !== 0 && tone ? `tone-${tone}` : undefined}>
         {formatUnits(v.real)}
       </span>
       <span className="tone-muted"> / {formatUnits(v.orcado)}</span>
-    </div>
+    </td>
   );
 }

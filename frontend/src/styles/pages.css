@@ -1286,34 +1286,44 @@ th.num {
   gap: 16px;
 }
 
-.budget-hist-row {
-  display: grid;
-  grid-template-columns: 64px repeat(4, 1fr);
-  gap: 12px;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--divider);
-  font-size: 12.5px;
-  align-items: baseline;
+.budget-hist {
+  table-layout: fixed;
+  margin-top: 4px;
 }
 
-.budget-hist-row > div:not(:first-child) {
+.budget-hist th:first-child,
+.budget-hist td:first-child {
+  width: 64px;
+}
+
+.budget-hist th:not(:first-child),
+.budget-hist td:not(:first-child) {
   text-align: right;
 }
 
-.budget-hist-head-row {
-  padding: 12px 0 7px;
-  font-size: 10px;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--muted);
+.budget-hist th {
+  padding: 12px 6px 7px;
   border-bottom: 1px solid var(--border);
 }
 
-.budget-hist-row.is-current {
+.budget-hist td {
+  padding: 9px 6px;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--divider);
+}
+
+.budget-hist tr.is-current td {
   background: var(--tint-accent);
   border-bottom: 0;
-  border-radius: 0 0 var(--r-control) var(--r-control);
   font-weight: 500;
+}
+
+.budget-hist tr.is-current td:first-child {
+  border-radius: 0 0 0 var(--r-control);
+}
+
+.budget-hist tr.is-current td:last-child {
+  border-radius: 0 0 var(--r-control) 0;
 }
 
 .budget-hist-note {
