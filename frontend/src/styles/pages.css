@@ -1057,3 +1057,55 @@ th.num {
 .tx-selbar-ignore:hover {
   color: var(--over);
 }
+
+/* ---------- Orçamento ---------- */
+.budget-kpis {
+  grid-template-columns: 1fr 1fr 1.15fr 1fr;
+}
+
+.budget-kpis .kpi-value .money {
+  font-size: 22px;
+}
+
+.kpi--negativo {
+  background: var(--tint-over);
+}
+
+.copy-from {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  padding: 7px 12px;
+  border-radius: var(--r-control);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.copy-from:hover {
+  background: var(--hover-ghost);
+  color: var(--ink);
+}
+
+.copy-from:focus-within {
+  border-color: var(--focus);
+}
+
+.copy-from.is-disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.copy-from-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: 0;
+  padding: 0;
+  cursor: inherit;
+}
