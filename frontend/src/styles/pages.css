@@ -274,3 +274,74 @@ th.num {
 .kpi-note {
   margin-top: 9px;
 }
+
+.llm-strip {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--warn);
+  border-radius: var(--r-card);
+  padding: 13px 18px;
+  margin-bottom: var(--gap-section);
+}
+
+.llm-strip-head {
+  flex: none;
+}
+
+.llm-strip-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.llm-strip-cards {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.llm-card {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-control);
+  padding: 7px 10px;
+}
+
+.llm-card-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.llm-card-desc {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.llm-card-meta {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.llm-card-chip {
+  white-space: nowrap;
+  font-size: 10.5px;
+}
+
+.llm-strip-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}

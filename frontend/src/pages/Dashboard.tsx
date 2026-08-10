@@ -5,7 +5,7 @@ import BridgeChart from "../components/dashboard/BridgeChart";
 import CategoryBars from "../components/dashboard/CategoryBars";
 import EvolutionChart from "../components/dashboard/EvolutionChart";
 import KpiStrip from "../components/dashboard/KpiStrip";
-import LlmFeed from "../components/dashboard/LlmFeed";
+import LlmStrip from "../components/dashboard/LlmStrip";
 import MonthProgress from "../components/dashboard/MonthProgress";
 import MonthPicker from "../components/MonthPicker";
 import PageHeader from "../components/PageHeader";
@@ -26,7 +26,7 @@ export default function Dashboard() {
       {!s && !error && <p className="muted">Carregando…</p>}
       {s && <KpiStrip s={s} />}
 
-      <LlmFeed />
+      <LlmStrip />
       <div className="row" style={{ alignItems: "stretch" }}>
         <div className="card" style={{ flex: 2, minWidth: 340 }}>
           <CategoryBars month={month} />
