@@ -70,34 +70,6 @@ th.num {
   white-space: nowrap;
 }
 
-.trends-wrap {
-  overflow-x: auto;
-}
-
-.trends-wrap th,
-.trends-wrap td {
-  white-space: nowrap;
-}
-
-.trends-wrap th.sticky,
-.trends-wrap td.sticky {
-  position: sticky;
-  left: 0;
-  background: var(--surface);
-  z-index: 1;
-  text-align: left;
-}
-
-.trends-wrap th.cur,
-.trends-wrap td.cur {
-  background: var(--tint-accent);
-}
-
-.trends-wrap td.section {
-  padding-top: 14px;
-  font-weight: 700;
-}
-
 /* ---------- Dashboard ---------- */
 .month-progress {
   display: flex;

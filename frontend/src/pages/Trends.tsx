@@ -1,204 +1,68 @@
-import { useCategories, usePutBudget, useSummaries } from "../api/hooks";
-import type { CategoryKind, Summary } from "../api/types";
-import BudgetInput from "../components/BudgetInput";
-import { formatBRL } from "../lib/money";
-import { currentMonth, monthLabel } from "../lib/months";
-import {
-  buildTrends,
-  otimista,
-  trendsWindow,
-  type TrendsRow,
-  type TrendsTotals,
-} from "../lib/trends";
+import { useState } from "react";
 
-const KIND_LABELS: Record<CategoryKind, string> = {
-  entrada: "Entradas",
-  saida: "Saídas",
-  investimento: "Investimentos",
-};
+import { useCategories, usePutBudget, useSummaries } from "../api/hooks";
+import type { Summary } from "../api/types";
+import PageHeader from "../components/PageHeader";
+import Segmented from "../components/Segmented";
+import MatrixCard from "../components/trends/MatrixCard";
+import TrendsKpis from "../components/trends/TrendsKpis";
+import { currentMonth, monthLabel, monthName } from "../lib/months";
+import { buildTrends, trendsStrip, trendsWindow } from "../lib/trends";
+
+const SPANS = [
+  { value: "3" as const, label: "3 m" },
+  { value: "6" as const, label: "6 m" },
+];
 
 export default function Trends() {
-  const { pastMonths, planMonths } = trendsWindow(currentMonth());
+  const [span, setSpan] = useState<"3" | "6">("6");
+  const today = currentMonth();
+  const { pastMonths, planMonths } = trendsWindow(today, Number(span));
   const results = useSummaries([...pastMonths, ...planMonths]);
   const { data: categories } = useCategories();
   const putBudget = usePutBudget();
   const summaries = results.map((r) => r.data);
-  const nCols = pastMonths.length + planMonths.length + 2; // rótulo + média
-
   const error = results.find((r) => r.error)?.error;
+
+  const header = (
+    <PageHeader
+      eyebrow="Tendências"
+      title="Realizado e projeção"
+      subtitle={`Meses fechados mostram o realizado. De ${monthName(today)} em diante é o orçamento vigente, editável — o valor salvo vale a partir daquele mês.`}
+    >
+      <span className="trends-range">
+        {monthLabel(pastMonths[0])}–{monthLabel(pastMonths[pastMonths.length - 1])} realizado ·{" "}
+        {monthLabel(planMonths[0])}–{monthLabel(planMonths[planMonths.length - 1])} orçado
+      </span>
+      <Segmented value={span} options={SPANS} onChange={setSpan} ariaLabel="Janela de meses" />
+    </PageHeader>
+  );
+
   if (error)
     return (
       <>
-        <h2>Tendências e Projeção</h2>
+        {header}
         <p className="error">Erro ao carregar resumo: {(error as Error).message}</p>
       </>
     );
   if (!categories || summaries.some((s) => s === undefined))
     return (
       <>
-        <h2>Tendências e Projeção</h2>
+        {header}
         <p className="muted">Carregando…</p>
       </>
     );
 
   const m = buildTrends(pastMonths.length, summaries as Summary[], categories);
+  const strip = trendsStrip(m);
   const save = (categoryId: number, cents: number, month: string) =>
     putBudget.mutate({ category_id: categoryId, amount_cents: cents, valid_from: month });
 
   return (
     <>
-      <h2>Tendências e Projeção</h2>
-      <p className="muted">
-        Passado mostra o realizado; mês atual e seguintes mostram o orçamento vigente —
-        valores salvos valem a partir do mês da coluna até você mudar de novo.
-      </p>
-      <div className="card trends-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th className="sticky"></th>
-              {pastMonths.map((mo) => (
-                <th key={mo} className="num">
-                  {monthLabel(mo)}
-                </th>
-              ))}
-              <th className="num">média 6m</th>
-              {planMonths.map((mo, i) => (
-                <th key={mo} className={i === 0 ? "num cur" : "num"}>
-                  {monthLabel(mo)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {(["entrada", "saida", "investimento"] as const).map((kind) => (
-              <SectionRows
-                key={kind}
-                kind={kind}
-                rows={m.rows[kind]}
-                totals={m.totals[kind]}
-                planMonths={planMonths}
-                nCols={nCols}
-                onSave={save}
-              />
-            ))}
-            <tr>
-              <td className="sticky">
-                <b>Saldo do mês</b>
-              </td>
-              {m.saldoPast.map((v, i) => (
-                <Money key={i} v={v} tone />
-              ))}
-              <td className="num muted">
-                <b>{formatBRL(Math.round(m.saldoMedia))}</b>
-              </td>
-              {m.saldoPlan.map((v, i) => (
-                <Money key={i} v={v} tone cur={i === 0} />
-              ))}
-            </tr>
-            <tr>
-              <td className="sticky">
-                <b>Acumulado</b>
-              </td>
-              {pastMonths.map((mo) => (
-                <td key={mo} className="num muted">
-                  —
-                </td>
-              ))}
-              <td className="num muted">—</td>
-              {m.acumulado.map((v, i) => (
-                <Money key={i} v={v} tone cur={i === 0} />
-              ))}
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </>
-  );
-}
-
-function Money({ v, tone, cur }: { v: number; tone?: boolean; cur?: boolean }) {
-  const style = tone ? { color: v >= 0 ? "var(--good)" : "var(--critical)" } : undefined;
-  return (
-    <td className={cur ? "num cur" : "num"} style={style}>
-      {formatBRL(v)}
-    </td>
-  );
-}
-
-function SectionRows({
-  kind,
-  rows,
-  totals,
-  planMonths,
-  nCols,
-  onSave,
-}: {
-  kind: CategoryKind;
-  rows: TrendsRow[];
-  totals: TrendsTotals;
-  planMonths: string[];
-  nCols: number;
-  onSave: (categoryId: number, cents: number, month: string) => void;
-}) {
-  return (
-    <>
-      <tr>
-        <td className="sticky section">{KIND_LABELS[kind]}</td>
-        <td colSpan={nCols - 1}></td>
-      </tr>
-      {rows.map((row) => (
-        <tr key={row.id}>
-          <td className="sticky">{row.nome}</td>
-          {row.past.map((v, i) => (
-            <td key={i} className="num">
-              {v ? formatBRL(v) : "—"}
-            </td>
-          ))}
-          <td className="num muted">{formatBRL(Math.round(row.media))}</td>
-          {row.plan.map((v, i) => (
-            <td key={planMonths[i]} className={i === 0 ? "num cur" : "num"}>
-              <BudgetInput
-                cents={v}
-                width={90}
-                ariaLabel={`Orçamento de ${row.nome} em ${monthLabel(planMonths[i])}`}
-                onSave={(cents) => onSave(row.id, cents, planMonths[i])}
-              />
-            </td>
-          ))}
-        </tr>
-      ))}
-      <tr>
-        <td className="sticky">
-          <b>Total {KIND_LABELS[kind].toLowerCase()}</b>
-        </td>
-        {totals.past.map((v, i) => (
-          <td key={i} className="num">
-            <b>{formatBRL(v)}</b>
-          </td>
-        ))}
-        <td className="num muted">
-          <b>{formatBRL(Math.round(totals.media))}</b>
-        </td>
-        {totals.plan.map((v, i) => (
-          <td key={planMonths[i]} className={i === 0 ? "num cur" : "num"}>
-            <b>{formatBRL(v)}</b>
-            {otimista(kind, totals.media, v) && (
-              <span
-                className="badge"
-                style={{ color: "var(--critical)", marginLeft: 4 }}
-                title={
-                  kind === "saida"
-                    ? "orçado abaixo da média realizada"
-                    : "orçado acima da média realizada"
-                }
-              >
-                ⚠
-              </span>
-            )}
-          </td>
-        ))}
-      </tr>
+      {header}
+      <TrendsKpis strip={strip} span={pastMonths.length} month={today} />
+      <MatrixCard m={m} pastMonths={pastMonths} planMonths={planMonths} onSave={save} />
     </>
   );
 }

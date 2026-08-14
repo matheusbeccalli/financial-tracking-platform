@@ -188,10 +188,3 @@ export function trendsStrip(m: TrendsMatrix): TrendsStrip {
     semHistOrcado: semHistRows.reduce((sum, r) => sum + (r.plan[0] ?? 0), 0),
   };
 }
-
-// Usada só pela página antiga; sai na Task 4 junto com a reescrita de Trends.tsx.
-export function otimista(kind: CategoryKind, media6m: number, plano: number): boolean {
-  if (media6m <= 0) return false;
-  const ratio = plano / media6m;
-  return kind === "saida" ? ratio < 0.9 : ratio > 1.1;
-}
