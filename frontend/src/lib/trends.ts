@@ -20,6 +20,8 @@ export interface TrendsRow {
   plan: number[];
   /** Nenhum realizado na janela inteira: células viram n/d, fora da média e do chip. */
   semHist: boolean;
+  /** Desvio % do orçado do mês atual sobre a média; null sem média positiva. */
+  desvio: number | null;
   chip: TrendsChip | null;
 }
 
@@ -69,7 +71,8 @@ export function trendsWindow(
   };
 }
 
-const LIMIAR_DESVIO = 25;
+/** Limiar (em %) para chip de desvio e tons de alerta — o mesmo em toda a tela. */
+export const LIMIAR_DESVIO = 25;
 
 /**
  * Chip "vs. orçado". Suprimido em investimento — comparar meta de aporte com uma média
@@ -91,11 +94,15 @@ export function desvioChip(
 const porNome = (a: { nome: string }, b: { nome: string }) =>
   a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" });
 
-/** Saídas: o que mais desvia do histórico primeiro; sem histórico por último. */
-const desvioKey = (r: TrendsRow & { desvio: number | null }) => {
+/**
+ * Saídas: o que mais desvia do histórico primeiro; sem histórico por último.
+ * Derivado dos dados, não do texto do chip — mudar a copy não pode mudar a ordem.
+ */
+const desvioKey = (r: TrendsRow) => {
   if (r.semHist) return -2;
-  if (r.chip?.label === "sem orçado") return Number.MAX_SAFE_INTEGER;
-  return r.desvio === null ? -1 : Math.abs(r.desvio);
+  if (r.desvio === null) return -1;
+  if ((r.plan[0] ?? 0) === 0) return Number.MAX_SAFE_INTEGER; // com média, sem orçado
+  return Math.abs(r.desvio);
 };
 
 export function buildTrends(
@@ -133,7 +140,6 @@ export function buildTrends(
     linhas.sort(
       kind === "saida" ? (a, b) => desvioKey(b) - desvioKey(a) || porNome(a, b) : porNome
     );
-    // `desvio` é só chave de ordenação; o tipo exportado TrendsRow não o expõe.
     rows[kind] = linhas;
 
     const pastTotals = past.map((s) => s[BLOCK[kind]].real);
@@ -183,7 +189,14 @@ export function trendsStrip(m: TrendsMatrix): TrendsStrip {
       medianaSaidas > 0
         ? Math.round(pctRaw(orcadoAtual - medianaSaidas, medianaSaidas))
         : null,
-    foraDaMedia: m.rows.saida.filter((r) => r.chip !== null).length,
+    // Só desvio percentual de verdade: "sem orçado" não é desvio (a legenda do KPI
+    // promete "desvio acima de 25% entre orçado e média").
+    foraDaMedia: m.rows.saida.filter(
+      (r) =>
+        r.desvio !== null &&
+        (r.plan[0] ?? 0) > 0 &&
+        Math.abs(r.desvio) >= LIMIAR_DESVIO
+    ).length,
     semHist: semHistRows.length,
     semHistOrcado: semHistRows.reduce((sum, r) => sum + (r.plan[0] ?? 0), 0),
   };

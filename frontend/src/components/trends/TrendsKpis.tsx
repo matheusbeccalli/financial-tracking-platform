@@ -1,6 +1,6 @@
 import { formatBRL } from "../../lib/money";
 import { monthLabel } from "../../lib/months";
-import type { TrendsStrip } from "../../lib/trends";
+import { LIMIAR_DESVIO, type TrendsStrip } from "../../lib/trends";
 import Money from "../Money";
 
 export default function TrendsKpis({
@@ -13,7 +13,12 @@ export default function TrendsKpis({
   month: string;
 }) {
   const d = strip.deltaPct;
-  const deltaTone = d !== null && d > 20 ? "tone-warn" : d !== null && d < -20 ? "tone-accent" : undefined;
+  const deltaTone =
+    d !== null && d >= LIMIAR_DESVIO
+      ? "tone-warn"
+      : d !== null && d <= -LIMIAR_DESVIO
+        ? "tone-accent"
+        : undefined;
   const deltaLabel =
     d === null
       ? "sem base de comparação"
@@ -47,7 +52,9 @@ export default function TrendsKpis({
 
       <div className="kpi">
         <div className="label">Orçado sem histórico</div>
-        <div className="kpi-value mono">{strip.semHist} categorias</div>
+        <div className="kpi-value mono">
+          {strip.semHist} {strip.semHist === 1 ? "categoria" : "categorias"}
+        </div>
         <div className="kpi-note">
           {strip.semHist > 0 ? (
             <span className="tone-warn">{formatBRL(strip.semHistOrcado)} orçados sem base</span>

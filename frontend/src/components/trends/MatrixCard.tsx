@@ -144,13 +144,15 @@ function Section({
         {totals.past.map((v, i) => (
           <Cell key={i} v={v} />
         ))}
-        <div className="num trends-media">{formatUnitsSigned(totals.media)}</div>
+        <div className="num trends-media">
+          <Val v={totals.media} />
+        </div>
         <div className="trends-chip-cell">
           {totals.chip && <Pill tone={totals.chip.tone}>{totals.chip.label}</Pill>}
         </div>
         {totals.plan.map((v, i) => (
           <div key={planMonths[i]} className={planCls("num", i)}>
-            {formatUnitsSigned(v)}
+            <Val v={v} />
           </div>
         ))}
       </div>
@@ -188,7 +190,7 @@ function Row({
         <Cell key={i} v={v} nd={r.semHist} />
       ))}
       <div className="num trends-media">
-        {r.semHist ? <span className="nd">n/d</span> : formatUnitsSigned(r.media)}
+        {r.semHist ? <span className="nd">n/d</span> : <Val v={r.media} />}
       </div>
       <div className="trends-chip-cell">
         {r.chip && <Pill tone={r.chip.tone}>{r.chip.label}</Pill>}
@@ -208,6 +210,14 @@ function Row({
   );
 }
 
+/** O display arredonda para unidades: o que arredonda para zero vira o travessão. */
+const zeroish = (v: number) => Math.round(v / 100) === 0;
+
+function Val({ v }: { v: number }) {
+  if (zeroish(v)) return <span className="trends-zero">—</span>;
+  return <>{formatUnitsSigned(v)}</>;
+}
+
 function Cell({ v, nd = false }: { v: number; nd?: boolean }) {
   if (nd)
     return (
@@ -215,7 +225,7 @@ function Cell({ v, nd = false }: { v: number; nd?: boolean }) {
         <span className="nd">n/d</span>
       </div>
     );
-  if (v === 0)
+  if (zeroish(v))
     return (
       <div className="num">
         <span className="trends-zero">—</span>
@@ -232,6 +242,12 @@ function Cell({ v, nd = false }: { v: number; nd?: boolean }) {
 function ToneCell({ v, plan, media = false }: { v: number; plan?: number; media?: boolean }) {
   const base = media ? "num trends-media" : "num";
   const cls = plan === undefined ? base : planCls(base, plan);
+  if (zeroish(v))
+    return (
+      <div className={cls}>
+        <span className="trends-zero">—</span>
+      </div>
+    );
   return (
     <div className={cls}>
       <span className={v < 0 ? "tone-over" : "tone-accent"}>{formatUnitsSigned(v)}</span>

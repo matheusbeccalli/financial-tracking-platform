@@ -1379,9 +1379,13 @@ th.num {
   padding-right: 18px;
 }
 
+/* `.num` global só cobre td/th; aqui as células são divs de grid. */
 .trends-grid .num {
   font-size: 12px;
   color: var(--ink-2);
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .trends-grid .trends-media {

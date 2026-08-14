@@ -147,6 +147,7 @@ describe("buildTrends", () => {
     const p1 = mkSummary("2026-02", { categorias: [line(1, "saida", 0, 200000)] });
     const m = buildTrends(1, [s1, p1], CATS);
     expect(m.rows.saida[0].chip).toEqual({ label: "+100%", tone: "warn" });
+    expect(m.rows.saida[0].desvio).toBe(100);
   });
 
   it("saídas ordenam por desvio: sem orçado no topo, sem histórico no fim", () => {
@@ -239,5 +240,24 @@ describe("trendsStrip", () => {
     expect(s.foraDaMedia).toBe(1); // Mercado: orçado 4.000 vs média ~36.333 → −89%
     expect(s.semHist).toBe(1); // Viagem
     expect(s.semHistOrcado).toBe(200000);
+  });
+
+  it("chip 'sem orçado' não conta como fora da média (não há desvio sem orçado)", () => {
+    const cats = [cat(1, "Mercado", "saida"), cat(6, "Streaming", "saida")];
+    const s1 = mkSummary("2026-01", {
+      saidas: [100000, 0],
+      categorias: [line(1, "saida", 60000), line(6, "saida", 40000)],
+    });
+    const p1 = mkSummary("2026-02", {
+      saidas: [0, 60000],
+      categorias: [line(1, "saida", 0, 60000)],
+    });
+    const m = buildTrends(1, [s1, p1], cats);
+    // Streaming tem histórico e nenhum orçado: ganha o chip, mas não entra no KPI
+    expect(m.rows.saida.find((r) => r.nome === "Streaming")!.chip).toEqual({
+      label: "sem orçado",
+      tone: "over",
+    });
+    expect(trendsStrip(m).foraDaMedia).toBe(0); // Mercado desvia 0%
   });
 });
