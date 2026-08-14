@@ -1,5 +1,4 @@
 import type { ImportBatch } from "../api/types";
-import { dayMonth } from "./months";
 import { pctOf } from "./pct";
 
 /** "Bradesco_09082026.ofx" → "OFX". Sem extensão, "?" — o badge nunca fica vazio. */
@@ -16,9 +15,15 @@ export function formatKB(bytes: number): string {
   return `${Math.max(1, Math.round(bytes / 1024))} KB`;
 }
 
-/** "2026-08-07T15:27:33" → "07/08 15:27", para a coluna Quando do histórico. */
+/**
+ * "2026-08-07T15:27:33" → "07/08 12:27" (fuso local), para a coluna Quando.
+ * O backend grava `imported_at` naive em UTC (func.now() do SQLite) — fatiar a
+ * string, como a tela antiga fazia, mostrava a hora errada em UTC−3.
+ */
 export function whenLabel(iso: string): string {
-  return `${dayMonth(iso)} ${iso.slice(11, 16)}`;
+  const d = new Date(/Z|[+-]\d\d:?\d\d$/.test(iso) ? iso : `${iso}Z`);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${p(d.getDate())}/${p(d.getMonth() + 1)} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
 export function batchTotals(batches: ImportBatch[]): { novas: number; dup: number } {

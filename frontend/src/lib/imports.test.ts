@@ -36,8 +36,21 @@ describe("formatKB", () => {
 });
 
 describe("whenLabel", () => {
-  it("dd/mm hh:mm", () => {
-    expect(whenLabel("2026-08-07T15:27:33")).toBe("07/08 15:27");
+  it("trata o naive do backend como UTC e formata no fuso local", () => {
+    // constrói o esperado com o mesmo fuso do ambiente de teste
+    const d = new Date("2026-08-07T15:27:33Z");
+    const p = (n: number) => String(n).padStart(2, "0");
+    expect(whenLabel("2026-08-07T15:27:33")).toBe(
+      `${p(d.getDate())}/${p(d.getMonth() + 1)} ${p(d.getHours())}:${p(d.getMinutes())}`
+    );
+  });
+
+  it("respeita offset explícito quando houver", () => {
+    const d = new Date("2026-08-07T15:27:33-03:00");
+    const p = (n: number) => String(n).padStart(2, "0");
+    expect(whenLabel("2026-08-07T15:27:33-03:00")).toBe(
+      `${p(d.getDate())}/${p(d.getMonth() + 1)} ${p(d.getHours())}:${p(d.getMinutes())}`
+    );
   });
 });
 

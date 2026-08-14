@@ -1969,3 +1969,11 @@ th.num {
     grid-template-columns: 1fr;
   }
 }
+
+.imp-file-x:disabled,
+.imp-result-close:disabled,
+.imp-hist-undo button:disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}

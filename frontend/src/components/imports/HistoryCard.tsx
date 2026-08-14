@@ -55,6 +55,7 @@ export default function HistoryCard() {
                 <div className="imp-hist-undo">
                   <button
                     type="button"
+                    disabled={deleteImport.isPending}
                     onClick={() =>
                       window.confirm(
                         `Desfazer a importação de ${b.filename}? As ${b.new_count} transações dela serão removidas.`

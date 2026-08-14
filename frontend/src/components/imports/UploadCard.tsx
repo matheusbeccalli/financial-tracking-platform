@@ -20,7 +20,7 @@ export default function UploadCard({ accounts }: { accounts: Account[] }) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const addFiles = (list: FileList | null) => {
-    if (!list) return;
+    if (!list || busy) return;
     const ok = Array.from(list).filter((f) => EXT_OK.test(f.name));
     if (ok.length) setStaged((prev) => [...prev, ...ok]);
   };
@@ -30,12 +30,14 @@ export default function UploadCard({ accounts }: { accounts: Account[] }) {
     setBusy(true);
     setError(null);
     const done: ImportResult[] = [];
+    const enviados = new Set<File>();
     for (const file of staged) {
       const form = new FormData();
       form.append("account_id", String(accountId));
       form.append("file", file);
       try {
         done.push(await api<ImportResult>("/imports", { method: "POST", body: form }));
+        enviados.add(file);
       } catch (e) {
         setError(
           `${file.name}: ${(e as Error).message} — arquivos seguintes não foram enviados`
@@ -43,11 +45,13 @@ export default function UploadCard({ accounts }: { accounts: Account[] }) {
         break;
       }
     }
-    setResults(done);
-    // Quem entrou sai da fila; quem falhou (e os seguintes) fica para o retry.
-    setStaged((prev) => prev.slice(done.length));
+    // Cards anteriores continuam (podem estar classificando); os novos entram no fim.
+    setResults((prev) => [...prev, ...done]);
+    // Quem entrou sai da fila por identidade; quem falhou (e os seguintes) fica
+    // para o retry.
+    setStaged((prev) => prev.filter((f) => !enviados.has(f)));
     setBusy(false);
-    queryClient.invalidateQueries();
+    if (done.length) queryClient.invalidateQueries();
   }
 
   const conta = accounts.find((a) => a.id === accountId);
@@ -64,6 +68,9 @@ export default function UploadCard({ accounts }: { accounts: Account[] }) {
 
       <div className="label imp-step">1. Para qual conta</div>
       <div className="imp-chips">
+        {accounts.length === 0 && (
+          <p className="note">Crie uma conta em Configurações antes de importar.</p>
+        )}
         {accounts.map((a) => (
           <Chip key={a.id} active={a.id === accountId} onClick={() => setAccountId(a.id)}>
             {a.name}{" "}
@@ -76,8 +83,15 @@ export default function UploadCard({ accounts }: { accounts: Account[] }) {
       <div
         className={`imp-drop${drag ? " is-drag" : ""}${staged.length ? " has-files" : ""}`}
         role="button"
+        tabIndex={0}
         aria-label="Escolher arquivos de extrato"
         onClick={() => fileRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            fileRef.current?.click();
+          }
+        }}
         onDragOver={(e) => {
           e.preventDefault();
           setDrag(true);
@@ -118,6 +132,7 @@ export default function UploadCard({ accounts }: { accounts: Account[] }) {
                 type="button"
                 className="imp-file-x"
                 aria-label={`Remover ${f.name}`}
+                disabled={busy}
                 onClick={() => setStaged(staged.filter((_, j) => j !== i))}
               >
                 ×

@@ -35,7 +35,14 @@ export default function ResultCard({
     <div className="imp-result">
       <div className="imp-result-head">
         <span>Importado</span>
-        <button type="button" className="imp-result-close" onClick={onClose}>
+        {/* Fechar durante a classificação mataria o polling e a invalidação final. */}
+        <button
+          type="button"
+          className="imp-result-close"
+          disabled={status === "running"}
+          title={status === "running" ? "aguarde a classificação terminar" : undefined}
+          onClick={onClose}
+        >
           fechar
         </button>
       </div>
