@@ -1803,3 +1803,151 @@ th.num {
   padding-top: 11px;
   border-top: 1px solid var(--border);
 }
+
+.imp-classify-desc {
+  margin-top: 5px;
+}
+
+.imp-classify-btn {
+  width: 100%;
+  margin-top: 13px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 9px;
+  border-radius: var(--r-control);
+  cursor: pointer;
+  border: 1px solid var(--warn);
+  background: var(--tint-warn);
+  color: var(--warn);
+}
+
+.imp-classify-btn:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+.imp-classify-result {
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.imp-classify-result > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.imp-classify-result a {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.imp-classify-idle {
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.imp-hist-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.imp-hist-totals {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.imp-hist-row {
+  display: grid;
+  grid-template-columns: 1fr 116px 190px 96px;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.imp-hist-head-row {
+  padding: 12px 0 7px;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.imp-hist-file {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  font-size: 12.5px;
+}
+
+.imp-hist-when {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.imp-hist-counts {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.imp-hist-counts .tone-muted {
+  font-size: 11px;
+}
+
+.imp-hist-bar {
+  margin-top: 5px;
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: var(--track);
+  display: flex;
+  gap: 1px;
+  overflow: hidden;
+}
+
+.imp-hist-bar .is-new {
+  background: var(--accent);
+}
+
+.imp-hist-bar .is-dup {
+  background: var(--muted);
+  opacity: 0.55;
+}
+
+.imp-hist-undo {
+  text-align: right;
+}
+
+.imp-hist-undo button {
+  font: inherit;
+  font-size: 11.5px;
+  padding: 5px 11px;
+  border-radius: 7px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.imp-hist-undo button:hover {
+  color: var(--over);
+  border-color: var(--over);
+}
+
+.imp-hist-foot {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+}
