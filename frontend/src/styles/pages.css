@@ -1346,6 +1346,10 @@ th.num {
 
 .trends-card {
   padding: 6px 0 12px;
+}
+
+/* Só a grade rola; a legenda fica fora e nunca é clipada pelo scroll. */
+.trends-scroll {
   overflow-x: auto;
 }
 
@@ -1446,6 +1450,17 @@ th.num {
   background: color-mix(in srgb, var(--tint-accent) 55%, transparent);
 }
 
+/* Fonte e padding menores: "51712,38" precisa caber numa coluna de ~78px. */
+.trends-input input {
+  font-size: 11px;
+  padding: 4px;
+}
+
+.trends-input.trends-col-cur,
+.trends-input.trends-col-fut {
+  padding: 4px 6px;
+}
+
 /* Futuro fica apagado até receber foco — o mês corrente é o protagonista. */
 .trends-col-fut input {
   color: var(--muted);
@@ -1486,11 +1501,15 @@ th.num {
   opacity: 1;
 }
 
+/* Sticky + max-content: o título da seção não some no scroll horizontal. */
 .trends-section-head {
   display: flex;
   align-items: center;
   gap: 9px;
   padding: 15px 18px 6px;
+  position: sticky;
+  left: 0;
+  width: max-content;
 }
 
 .trends-dot {

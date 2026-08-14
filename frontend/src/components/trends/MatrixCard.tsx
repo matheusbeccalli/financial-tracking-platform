@@ -32,65 +32,67 @@ export default function MatrixCard({
 }) {
   return (
     <section className="card trends-card">
-      <div className={`trends-grid trends-grid--${pastMonths.length}`}>
-        <div className="trends-row trends-head">
-          <div className="trends-cell-cat">Categoria</div>
-          <div />
-          {pastMonths.map((mo) => (
-            <div key={mo} className="num">
-              {monthLabel(mo)}
-            </div>
-          ))}
-          <div className="num">média</div>
-          <div className="trends-chip-cell">vs. orçado</div>
-          {planMonths.map((mo, i) => (
-            <div key={mo} className={planCls("num", i)}>
-              {monthLabel(mo)}
-            </div>
-          ))}
-        </div>
+      <div className="trends-scroll">
+        <div className={`trends-grid trends-grid--${pastMonths.length}`}>
+          <div className="trends-row trends-head">
+            <div className="trends-cell-cat">Categoria</div>
+            <div />
+            {pastMonths.map((mo) => (
+              <div key={mo} className="num">
+                {monthLabel(mo)}
+              </div>
+            ))}
+            <div className="num">média</div>
+            <div className="trends-chip-cell">vs. orçado</div>
+            {planMonths.map((mo, i) => (
+              <div key={mo} className={planCls("num", i)}>
+                {monthLabel(mo)}
+              </div>
+            ))}
+          </div>
 
-        {SECTIONS.map(({ kind, label, nota }) => (
-          <Section
-            key={kind}
-            kind={kind}
-            label={label}
-            nota={nota}
-            rows={m.rows[kind]}
-            totals={m.totals[kind]}
-            planMonths={planMonths}
-            onSave={onSave}
-          />
-        ))}
-
-        <div className="trends-row trends-total">
-          <div className="trends-cell-cat">Saldo do mês</div>
-          <div />
-          {m.saldoPast.map((v, i) => (
-            <ToneCell key={i} v={v} />
+          {SECTIONS.map(({ kind, label, nota }) => (
+            <Section
+              key={kind}
+              kind={kind}
+              label={label}
+              nota={nota}
+              rows={m.rows[kind]}
+              totals={m.totals[kind]}
+              planMonths={planMonths}
+              onSave={onSave}
+            />
           ))}
-          <ToneCell v={m.saldoMedia} media />
-          <div />
-          {m.saldoPlan.map((v, i) => (
-            <ToneCell key={i} v={v} plan={i} />
-          ))}
-        </div>
 
-        <div className="trends-row trends-total">
-          <div className="trends-cell-cat">Acumulado</div>
-          <div />
-          {pastMonths.map((mo) => (
-            <div key={mo} className="num">
+          <div className="trends-row trends-total">
+            <div className="trends-cell-cat">Saldo do mês</div>
+            <div />
+            {m.saldoPast.map((v, i) => (
+              <ToneCell key={i} v={v} />
+            ))}
+            <ToneCell v={m.saldoMedia} media />
+            <div />
+            {m.saldoPlan.map((v, i) => (
+              <ToneCell key={i} v={v} plan={i} />
+            ))}
+          </div>
+
+          <div className="trends-row trends-total">
+            <div className="trends-cell-cat">Acumulado</div>
+            <div />
+            {pastMonths.map((mo) => (
+              <div key={mo} className="num">
+                <span className="trends-zero">—</span>
+              </div>
+            ))}
+            <div className="num">
               <span className="trends-zero">—</span>
             </div>
-          ))}
-          <div className="num">
-            <span className="trends-zero">—</span>
+            <div />
+            {m.acumulado.map((v, i) => (
+              <ToneCell key={i} v={v} plan={i} />
+            ))}
           </div>
-          <div />
-          {m.acumulado.map((v, i) => (
-            <ToneCell key={i} v={v} plan={i} />
-          ))}
         </div>
       </div>
 
