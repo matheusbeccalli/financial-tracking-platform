@@ -1354,3 +1354,20 @@ th.num {
     position: static;
   }
 }
+
+/* ---------- Tendências ---------- */
+.trends-range {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.trends-kpis {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.trends-kpis .kpi-value .money,
+.trends-kpis .kpi-value.mono {
+  font-size: 21px;
+}

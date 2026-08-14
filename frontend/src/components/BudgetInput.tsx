@@ -11,7 +11,7 @@ export default function BudgetInput({
 }: {
   cents: number;
   onSave: (c: number) => void;
-  width?: number;
+  width?: number | string;
   ariaLabel?: string;
   className?: string;
 }) {
