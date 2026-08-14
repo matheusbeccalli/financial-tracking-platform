@@ -1,8 +1,16 @@
 import type { Category, CategoryKind, Summary } from "../api/types";
 import { addMonths, lastNMonths } from "./months";
+import { pctRaw } from "./pct";
 
-// Matriz da página Tendências e Projeção: passado = realizado, plano = orçado vigente.
+// Matriz da página Tendências: passado = realizado, plano = orçado vigente.
 // Valores de investimento são o líquido com sinal (positivo = aportou mais que resgatou).
+
+/** Desvio do orçado do mês atual contra a média realizada, quando passa de ±25%. */
+export interface TrendsChip {
+  label: string;
+  tone: "warn" | "accent" | "over";
+}
+
 export interface TrendsRow {
   id: number;
   nome: string;
@@ -10,12 +18,16 @@ export interface TrendsRow {
   past: number[];
   media: number;
   plan: number[];
+  /** Nenhum realizado na janela inteira: células viram n/d, fora da média e do chip. */
+  semHist: boolean;
+  chip: TrendsChip | null;
 }
 
 export interface TrendsTotals {
   past: number[];
   media: number;
   plan: number[];
+  chip: TrendsChip | null;
 }
 
 export interface TrendsMatrix {
@@ -34,14 +46,57 @@ const BLOCK: Record<CategoryKind, "entradas" | "saidas" | "investimentos"> = {
   investimento: "investimentos",
 };
 
+// Mês zerado conta como zero: com importação contínua, zero é zero de verdade.
+// O caso "dado não existe" é o semHist (janela inteira zerada), que vira n/d.
 const media = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
 
-export function trendsWindow(today: string): { pastMonths: string[]; planMonths: string[] } {
+/** Mediana simples — a base do strip de KPIs, robusta a meses atípicos. */
+export function mediana(xs: number[]): number {
+  if (!xs.length) return 0;
+  const s = [...xs].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+/** Janela da matriz: `span` meses fechados + mês atual + `span` futuros. */
+export function trendsWindow(
+  today: string,
+  span = 6
+): { pastMonths: string[]; planMonths: string[] } {
   return {
-    pastMonths: lastNMonths(addMonths(today, -1), 6),
-    planMonths: Array.from({ length: 7 }, (_, i) => addMonths(today, i)),
+    pastMonths: lastNMonths(addMonths(today, -1), span),
+    planMonths: Array.from({ length: span + 1 }, (_, i) => addMonths(today, i)),
   };
 }
+
+const LIMIAR_DESVIO = 25;
+
+/**
+ * Chip "vs. orçado". Suprimido em investimento — comparar meta de aporte com uma média
+ * que mistura aportes e resgates não significa nada. "sem orçado" avisa que a categoria
+ * tem histórico mas nenhum orçamento no mês atual.
+ */
+export function desvioChip(
+  kind: CategoryKind,
+  media6m: number,
+  orcadoAtual: number
+): TrendsChip | null {
+  if (kind === "investimento" || media6m <= 0) return null;
+  if (orcadoAtual === 0) return { label: "sem orçado", tone: "over" };
+  const d = Math.round(pctRaw(orcadoAtual - media6m, media6m));
+  if (Math.abs(d) < LIMIAR_DESVIO) return null;
+  return d > 0 ? { label: `+${d}%`, tone: "warn" } : { label: `−${-d}%`, tone: "accent" };
+}
+
+const porNome = (a: { nome: string }, b: { nome: string }) =>
+  a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" });
+
+/** Saídas: o que mais desvia do histórico primeiro; sem histórico por último. */
+const desvioKey = (r: TrendsRow & { desvio: number | null }) => {
+  if (r.semHist) return -2;
+  if (r.chip?.label === "sem orçado") return Number.MAX_SAFE_INTEGER;
+  return r.desvio === null ? -1 : Math.abs(r.desvio);
+};
 
 export function buildTrends(
   nPast: number,
@@ -55,41 +110,86 @@ export function buildTrends(
   const rows = {} as Record<CategoryKind, TrendsRow[]>;
   const totals = {} as Record<CategoryKind, TrendsTotals>;
   for (const kind of KINDS) {
-    rows[kind] = categories
+    const linhas = categories
       .filter((c) => !c.archived && c.kind === kind)
       .map((c) => {
         const pastVals = past.map((s) => line(s, c.id)?.real ?? 0);
+        const planVals = plan.map((s) => line(s, c.id)?.orcado ?? 0);
+        const semHist = pastVals.every((v) => v === 0);
+        const m = semHist ? 0 : media(pastVals);
+        const desvio = m > 0 ? Math.round(pctRaw((planVals[0] ?? 0) - m, m)) : null;
         return {
           id: c.id,
           nome: c.name,
           kind,
           past: pastVals,
-          media: media(pastVals),
-          plan: plan.map((s) => line(s, c.id)?.orcado ?? 0),
+          media: m,
+          plan: planVals,
+          semHist,
+          chip: semHist ? null : desvioChip(kind, m, planVals[0] ?? 0),
+          desvio,
         };
       });
+    linhas.sort(
+      kind === "saida" ? (a, b) => desvioKey(b) - desvioKey(a) || porNome(a, b) : porNome
+    );
+    // `desvio` é só chave de ordenação; o tipo exportado TrendsRow não o expõe.
+    rows[kind] = linhas;
+
     const pastTotals = past.map((s) => s[BLOCK[kind]].real);
+    const planTotals = plan.map((s) => s[BLOCK[kind]].orcado);
+    const mediaTotal = media(pastTotals);
     totals[kind] = {
       past: pastTotals,
-      media: media(pastTotals),
-      plan: plan.map((s) => s[BLOCK[kind]].orcado),
+      media: mediaTotal,
+      plan: planTotals,
+      chip: desvioChip(kind, mediaTotal, planTotals[0] ?? 0),
     };
   }
 
   const saldoPast = past.map((s) => s.saldo.real);
   const saldoPlan = plan.map((s) => s.saldo.orcado);
   const acumulado: number[] = [];
-  saldoPlan.reduce((acc, v) => {
-    acumulado.push(acc + v);
-    return acc + v;
-  }, 0);
+  let acc = 0;
+  for (const v of saldoPlan) {
+    acc += v;
+    acumulado.push(acc);
+  }
 
   return { rows, totals, saldoPast, saldoMedia: media(saldoPast), saldoPlan, acumulado };
 }
 
-// Orçamento "otimista" vs. a média realizada: planejar gastar bem menos (saída) ou
-// receber/aportar bem mais (entrada/investimento) do que vem acontecendo. Tolerância
-// de 10% para não marcar ruído.
+export interface TrendsStrip {
+  medianaSaidas: number;
+  orcadoAtual: number;
+  /** Desvio % do orçado atual sobre a mediana; null sem base. */
+  deltaPct: number | null;
+  foraDaMedia: number;
+  semHist: number;
+  semHistOrcado: number;
+}
+
+/** KPIs do topo. A mediana ignora meses atípicos — a compra do carro não vira "base". */
+export function trendsStrip(m: TrendsMatrix): TrendsStrip {
+  const medianaSaidas = mediana(m.totals.saida.past);
+  const orcadoAtual = m.totals.saida.plan[0] ?? 0;
+  const semHistRows = KINDS.flatMap((k) => m.rows[k]).filter(
+    (r) => r.semHist && (r.plan[0] ?? 0) > 0
+  );
+  return {
+    medianaSaidas,
+    orcadoAtual,
+    deltaPct:
+      medianaSaidas > 0
+        ? Math.round(pctRaw(orcadoAtual - medianaSaidas, medianaSaidas))
+        : null,
+    foraDaMedia: m.rows.saida.filter((r) => r.chip !== null).length,
+    semHist: semHistRows.length,
+    semHistOrcado: semHistRows.reduce((sum, r) => sum + (r.plan[0] ?? 0), 0),
+  };
+}
+
+// Usada só pela página antiga; sai na Task 4 junto com a reescrita de Trends.tsx.
 export function otimista(kind: CategoryKind, media6m: number, plano: number): boolean {
   if (media6m <= 0) return false;
   const ratio = plano / media6m;

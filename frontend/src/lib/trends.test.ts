@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Category, CategoryKind, Summary } from "../api/types";
-import { buildTrends, otimista, trendsWindow } from "./trends";
+import { buildTrends, desvioChip, mediana, trendsStrip, trendsWindow } from "./trends";
 
 const cat = (id: number, name: string, kind: CategoryKind): Category => ({
   id,
@@ -42,17 +42,65 @@ function mkSummary(
   };
 }
 
-const CATS = [cat(2, "Salário", "entrada"), cat(1, "Mercado", "saida"), cat(3, "Investimentos", "investimento")];
+const CATS = [
+  cat(2, "Salário", "entrada"),
+  cat(1, "Mercado", "saida"),
+  cat(3, "Investimentos", "investimento"),
+];
 
 describe("trendsWindow", () => {
-  it("monta 6 passados e atual+6 futuros, atravessando a virada de ano", () => {
-    const w = trendsWindow("2026-01");
+  it("janela 6: 6 passados e atual+6, atravessando a virada de ano", () => {
+    const w = trendsWindow("2026-01", 6);
     expect(w.pastMonths).toEqual([
       "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12",
     ]);
     expect(w.planMonths).toEqual([
       "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07",
     ]);
+  });
+
+  it("janela 3: 3 passados e atual+3", () => {
+    const w = trendsWindow("2026-08", 3);
+    expect(w.pastMonths).toEqual(["2026-05", "2026-06", "2026-07"]);
+    expect(w.planMonths).toEqual(["2026-08", "2026-09", "2026-10", "2026-11"]);
+  });
+});
+
+describe("mediana", () => {
+  it("ímpar pega o valor central; o outlier não puxa", () => {
+    expect(mediana([500000, 400000, 10000000])).toBe(500000);
+  });
+
+  it("par tira a média dos dois centrais", () => {
+    expect(mediana([100, 200, 300, 10000])).toBe(250);
+  });
+
+  it("vazia é zero", () => {
+    expect(mediana([])).toBe(0);
+  });
+});
+
+describe("desvioChip", () => {
+  it("orçado bem acima da média: chip +% em warn", () => {
+    expect(desvioChip("saida", 100000, 132000)).toEqual({ label: "+32%", tone: "warn" });
+  });
+
+  it("orçado bem abaixo: chip −% em accent", () => {
+    expect(desvioChip("saida", 100000, 60000)).toEqual({ label: "−40%", tone: "accent" });
+  });
+
+  it("desvio menor que 25% não gera chip", () => {
+    expect(desvioChip("saida", 100000, 120000)).toBeNull();
+    expect(desvioChip("entrada", 100000, 80000)).toBeNull();
+  });
+
+  it("média positiva sem orçado vira o chip 'sem orçado'", () => {
+    expect(desvioChip("saida", 100000, 0)).toEqual({ label: "sem orçado", tone: "over" });
+  });
+
+  it("sem média positiva, ou em investimento, não há chip", () => {
+    expect(desvioChip("saida", 0, 50000)).toBeNull();
+    expect(desvioChip("investimento", 100000, 500000)).toBeNull();
   });
 });
 
@@ -64,6 +112,7 @@ describe("buildTrends", () => {
     const m = buildTrends(2, [s1, s2, p1], CATS);
     expect(m.rows.saida[0].past).toEqual([100000, 0]);
     expect(m.rows.saida[0].media).toBe(50000);
+    expect(m.rows.saida[0].semHist).toBe(false);
   });
 
   it("plan usa o orçado vigente de cada mês", () => {
@@ -83,6 +132,48 @@ describe("buildTrends", () => {
     expect(m.rows.investimento[0].media).toBe(50000);
   });
 
+  it("categoria zerada na janela inteira vira semHist, sem média nem chip", () => {
+    const s1 = mkSummary("2026-01");
+    const s2 = mkSummary("2026-02");
+    const p1 = mkSummary("2026-03", { categorias: [line(1, "saida", 0, 500000)] });
+    const m = buildTrends(2, [s1, s2, p1], CATS);
+    expect(m.rows.saida[0].semHist).toBe(true);
+    expect(m.rows.saida[0].media).toBe(0);
+    expect(m.rows.saida[0].chip).toBeNull();
+  });
+
+  it("linha com histórico ganha chip contra o orçado do mês atual", () => {
+    const s1 = mkSummary("2026-01", { categorias: [line(1, "saida", 100000)] });
+    const p1 = mkSummary("2026-02", { categorias: [line(1, "saida", 0, 200000)] });
+    const m = buildTrends(1, [s1, p1], CATS);
+    expect(m.rows.saida[0].chip).toEqual({ label: "+100%", tone: "warn" });
+  });
+
+  it("saídas ordenam por desvio: sem orçado no topo, sem histórico no fim", () => {
+    const cats = [
+      cat(1, "Grande desvio", "saida"),
+      cat(2, "Sem orçado", "saida"),
+      cat(3, "Na média", "saida"),
+      cat(4, "Sem histórico", "saida"),
+    ];
+    const s1 = mkSummary("2026-01", {
+      categorias: [line(1, "saida", 100000), line(2, "saida", 50000), line(3, "saida", 80000)],
+    });
+    const p1 = mkSummary("2026-02", {
+      categorias: [line(1, "saida", 0, 200000), line(3, "saida", 0, 80000), line(4, "saida", 0, 10000)],
+    });
+    const m = buildTrends(1, [s1, p1], cats);
+    expect(m.rows.saida.map((r) => r.nome)).toEqual([
+      "Sem orçado", "Grande desvio", "Na média", "Sem histórico",
+    ]);
+  });
+
+  it("entradas ficam em ordem alfabética", () => {
+    const cats = [cat(2, "Salário", "entrada"), cat(5, "Outras", "entrada")];
+    const m = buildTrends(1, [mkSummary("2026-01"), mkSummary("2026-02")], cats);
+    expect(m.rows.entrada.map((r) => r.nome)).toEqual(["Outras", "Salário"]);
+  });
+
   it("totais vêm dos blocos do summary (incluem não categorizadas)", () => {
     const s1 = mkSummary("2026-01", { entradas: [850000, 0] }); // sem linha por categoria
     const p1 = mkSummary("2026-02", { entradas: [0, 900000] });
@@ -90,6 +181,14 @@ describe("buildTrends", () => {
     expect(m.totals.entrada.past).toEqual([850000]);
     expect(m.totals.entrada.media).toBe(850000);
     expect(m.totals.entrada.plan).toEqual([900000]);
+  });
+
+  it("total ganha chip do desvio, menos em investimento", () => {
+    const s1 = mkSummary("2026-01", { saidas: [100000, 0], investimentos: [100000, 0] });
+    const p1 = mkSummary("2026-02", { saidas: [0, 150000], investimentos: [0, 500000] });
+    const m = buildTrends(1, [s1, p1], CATS);
+    expect(m.totals.saida.chip).toEqual({ label: "+50%", tone: "warn" });
+    expect(m.totals.investimento.chip).toBeNull();
   });
 
   it("saldo usa real no passado e orçado no plano; acumulado soma o plano", () => {
@@ -111,19 +210,34 @@ describe("buildTrends", () => {
   });
 });
 
-describe("otimista", () => {
-  it("saída orçada bem abaixo da média é otimista", () => {
-    expect(otimista("saida", 100000, 80000)).toBe(true);
-    expect(otimista("saida", 100000, 95000)).toBe(false);
+describe("trendsStrip", () => {
+  // 3 meses de saídas: 4.000, 5.000 e um atípico de 100.000; orçado atual 6.000.
+  // "Viagem" nunca teve lançamento mas está orçada — é o caso "sem histórico".
+  const mk = () => {
+    const cats = [cat(1, "Mercado", "saida"), cat(4, "Viagem", "saida")];
+    const s1 = mkSummary("2026-01", { saidas: [400000, 0], categorias: [line(1, "saida", 400000)] });
+    const s2 = mkSummary("2026-02", { saidas: [500000, 0], categorias: [line(1, "saida", 500000)] });
+    const s3 = mkSummary("2026-03", { saidas: [10000000, 0], categorias: [line(1, "saida", 10000000)] });
+    const p1 = mkSummary("2026-04", {
+      saidas: [0, 600000],
+      categorias: [line(1, "saida", 0, 400000), line(4, "saida", 0, 200000)],
+    });
+    return trendsStrip(buildTrends(3, [s1, s2, s3, p1], cats));
+  };
+
+  it("a mediana dos totais mensais resiste ao mês atípico", () => {
+    expect(mk().medianaSaidas).toBe(500000);
   });
 
-  it("entrada/investimento orçados bem acima da média são otimistas", () => {
-    expect(otimista("entrada", 100000, 120000)).toBe(true);
-    expect(otimista("investimento", 100000, 105000)).toBe(false);
+  it("delta do orçado atual contra a mediana", () => {
+    expect(mk().orcadoAtual).toBe(600000);
+    expect(mk().deltaPct).toBe(20);
   });
 
-  it("sem média positiva não marca", () => {
-    expect(otimista("saida", 0, 50000)).toBe(false);
-    expect(otimista("investimento", -20000, 50000)).toBe(false);
+  it("conta categorias fora da média e o orçado sem histórico", () => {
+    const s = mk();
+    expect(s.foraDaMedia).toBe(1); // Mercado: orçado 4.000 vs média ~36.333 → −89%
+    expect(s.semHist).toBe(1); // Viagem
+    expect(s.semHistOrcado).toBe(200000);
   });
 });

@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { formatBRL, formatK, formatSigned, formatUnits, parseBRL } from "./money";
+import {
+  formatBRL,
+  formatK,
+  formatSigned,
+  formatUnits,
+  formatUnitsSigned,
+  parseBRL,
+} from "./money";
 
 // toLocaleString pt-BR usa espaco nao-quebravel (U+00A0) entre R$ e o numero
 const clean = (s: string) => s.replace(/\u00a0/g, " ");
@@ -62,5 +69,13 @@ describe("formatUnits", () => {
   it("arredonda em vez de virar 0,0k como o formatK", () => {
     expect(formatUnits(1)).toBe("0");
     expect(formatUnits(-5048)).toBe("-50");
+  });
+});
+
+describe("formatUnitsSigned", () => {
+  it("usa o traço de menos do design, sem R$ nem centavos", () => {
+    expect(formatUnitsSigned(-2568675)).toBe("−25.687");
+    expect(formatUnitsSigned(510000)).toBe("5.100");
+    expect(formatUnitsSigned(0)).toBe("0");
   });
 });

@@ -41,3 +41,9 @@ export function formatK(cents: number): string {
 export function formatUnits(cents: number): string {
   return (cents / 100).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
 }
+
+/** `formatUnits` com o traço de menos do design (U+2212). Para a matriz de Tendências. */
+export function formatUnitsSigned(cents: number): string {
+  const abs = formatUnits(Math.abs(cents));
+  return cents < 0 ? MINUS + abs : abs;
+}
