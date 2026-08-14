@@ -1951,3 +1951,21 @@ th.num {
   border-top: 1px solid var(--border);
   font-size: 11px;
 }
+
+.imp-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: var(--gap-section);
+  align-items: start;
+  margin-bottom: var(--gap-section);
+}
+
+.imp-grid .card {
+  margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .imp-grid {
+    grid-template-columns: 1fr;
+  }
+}
