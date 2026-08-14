@@ -1587,3 +1587,219 @@ th.num {
   background: var(--accent);
   opacity: 0.3;
 }
+
+/* ---------- Importar ---------- */
+.imports-page {
+  max-width: 1180px;
+}
+
+.imp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.imp-exts {
+  display: flex;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.imp-exts span {
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border-strong);
+}
+
+.imp-step {
+  margin-top: 13px;
+  margin-bottom: 8px;
+}
+
+.imp-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.imp-chip-kind {
+  opacity: 0.65;
+  font-size: 10.5px;
+}
+
+.imp-drop {
+  border: 1.5px dashed var(--border-strong);
+  border-radius: 11px;
+  padding: 26px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+}
+
+.imp-drop:hover,
+.imp-drop.is-drag {
+  border-color: var(--focus);
+  background: var(--tint-accent);
+}
+
+.imp-drop.has-files {
+  border-color: var(--focus);
+}
+
+.imp-drop-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 1px solid var(--border-strong);
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.imp-drop-title {
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-top: 11px;
+}
+
+.imp-drop-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.imp-staged {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.imp-file {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-control);
+  padding: 8px 11px;
+}
+
+.imp-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--track);
+  color: var(--ink-2);
+  flex: none;
+}
+
+.imp-file-name {
+  flex: 1;
+  font-size: 12.5px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imp-file-size {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.imp-file-x {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.imp-file-x:hover {
+  color: var(--over);
+}
+
+.imp-run {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 5px;
+}
+
+.imp-result {
+  margin-top: 12px;
+  border: 1px solid var(--focus);
+  background: var(--tint-accent);
+  border-radius: 10px;
+  padding: 13px 14px;
+}
+
+.imp-result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.imp-result-close {
+  border: 0;
+  background: none;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+}
+
+.imp-result-close:hover {
+  color: var(--ink);
+}
+
+.imp-result-file {
+  font-size: 12px;
+  color: var(--ink-2);
+  margin-top: 7px;
+}
+
+.imp-result-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.imp-metric--divider {
+  border-left: 1px solid var(--border-strong);
+  padding-left: 12px;
+}
+
+.imp-metric-v {
+  font-size: 16px;
+  margin-top: 3px;
+}
+
+.imp-result-progress {
+  grid-column: span 3;
+  align-self: end;
+}
+
+.imp-result-link {
+  display: inline-block;
+  font-size: 12px;
+  margin-top: 11px;
+}
+
+.imp-foot {
+  margin-top: 13px;
+  padding-top: 11px;
+  border-top: 1px solid var(--border);
+}

@@ -1,6 +1,3 @@
-import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-
 import { useClassification } from "../api/hooks";
 import type { ClassificationProgress } from "../api/types";
 
@@ -13,6 +10,7 @@ export function describeProgress(p: ClassificationProgress): string {
   return `classificadas: ${p.counts.regra} por regra, ${p.counts.llm} pelo LLM, ${p.counts.pendente} pendentes`;
 }
 
+// Compat: a página antiga ainda renderiza este componente; sai na Task 4.
 export default function ClassificationStatus({
   batchId,
   initial,
@@ -21,15 +19,5 @@ export default function ClassificationStatus({
   initial: ClassificationProgress;
 }) {
   const { data } = useClassification(batchId, initial);
-  const queryClient = useQueryClient();
-  const status = data.status;
-  useEffect(() => {
-    // terminou (ou falhou): dashboard/transações precisam refletir as categorias
-    if (status !== "running") {
-      queryClient.invalidateQueries({
-        predicate: (q) => q.queryKey[0] !== "classification",
-      });
-    }
-  }, [status, queryClient]);
   return <span>{describeProgress(data)}</span>;
 }
