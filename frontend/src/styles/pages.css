@@ -1371,3 +1371,224 @@ th.num {
 .trends-kpis .kpi-value.mono {
   font-size: 21px;
 }
+
+.trends-card {
+  padding: 6px 0 12px;
+  overflow-x: auto;
+}
+
+/* Cada linha é um grid; o template é compartilhado por janela via custom property. */
+.trends-grid--3 {
+  --trend-cols: minmax(150px, 1.4fr) 40px repeat(3, minmax(76px, 0.95fr))
+    minmax(74px, 0.9fr) 88px repeat(4, minmax(84px, 1fr));
+  min-width: 960px;
+}
+
+.trends-grid--6 {
+  --trend-cols: minmax(150px, 1.4fr) 52px repeat(6, minmax(70px, 0.9fr))
+    minmax(74px, 0.9fr) 88px repeat(7, minmax(78px, 0.95fr));
+  min-width: 1420px;
+}
+
+.trends-row {
+  display: grid;
+  grid-template-columns: var(--trend-cols);
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.trends-row > :last-child {
+  padding-right: 18px;
+}
+
+.trends-grid .num {
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+.trends-grid .trends-media {
+  color: var(--ink);
+}
+
+.trends-card .nd {
+  font-style: italic;
+  color: var(--muted-2);
+}
+
+.trends-zero {
+  color: var(--muted);
+}
+
+/* Primeira coluna gruda no scroll horizontal; o box-shadow cobre o gap do grid. */
+.trends-cell-cat {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+  box-shadow: 8px 0 var(--surface);
+  padding-left: 18px;
+  font-size: 12.5px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trends-head {
+  padding: 10px 0 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.trends-head > div {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.trends-head .trends-col-cur {
+  color: var(--ink);
+}
+
+.trends-chip-cell {
+  text-align: center;
+}
+
+.trends-chip-cell .pill {
+  font-size: 10px;
+}
+
+.trends-col-cur,
+.trends-col-fut {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 4px 8px;
+  background: var(--tint-accent);
+}
+
+.trends-col-fut {
+  background: color-mix(in srgb, var(--tint-accent) 55%, transparent);
+}
+
+/* Futuro fica apagado até receber foco — o mês corrente é o protagonista. */
+.trends-col-fut input {
+  color: var(--muted);
+  border-color: var(--border);
+}
+
+.trends-col-fut input:focus {
+  color: var(--ink);
+}
+
+.trends-spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 16px;
+}
+
+.trends-spark i {
+  width: 5px;
+  border-radius: 1px;
+}
+
+.trends-spark--entrada i {
+  background: var(--accent);
+}
+
+.trends-spark--investimento i {
+  background: var(--invest);
+}
+
+.trends-spark--saida i {
+  background: var(--ink-2);
+  opacity: 0.55;
+}
+
+.trends-spark i.is-zero {
+  background: var(--track);
+  opacity: 1;
+}
+
+.trends-section-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 15px 18px 6px;
+}
+
+.trends-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+}
+
+.trends-dot--entrada {
+  background: var(--accent);
+}
+
+.trends-dot--investimento {
+  background: var(--invest);
+}
+
+.trends-dot--saida {
+  background: var(--muted);
+}
+
+.trends-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.trends-section-nota {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.trends-total {
+  padding: 8px 0;
+  border-top: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border);
+}
+
+.trends-total .trends-cell-cat {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.trends-total .num {
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.trends-total .trends-media {
+  font-weight: 600;
+}
+
+.trends-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  padding: 14px 18px 2px;
+  margin-top: 6px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.trends-legend-swatch {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  margin-right: 6px;
+  background: var(--accent);
+  opacity: 0.3;
+}
