@@ -1,31 +1,11 @@
-/* Estilos de tela. Enquanto os planos 01–06 não rodam, este arquivo é quase todo
-   a seção "legado" abaixo: as classes e tokens da versão anterior, remapeados para
-   os tokens novos, para que as telas não migradas continuem utilizáveis.
-   Cada plano de tela remove o pedaço legado que deixou de ser usado. */
+/* Estilos de tela, uma seção por página do redesign (planos 01–06). O legado da
+   versão anterior foi removido ao fim do plano 06; sobraram apenas a margem de
+   h2/h3 (os cards novos usam h2/h3 soltos seguidos de .sub e dependem dela) e os
+   estilos de table (Transações e o histórico do Orçamento ainda usam tabela). */
 
-/* ---------- LEGADO: aliases de tokens ---------- */
-/* Telas ainda não migradas usam estes nomes em `style={{}}` inline. Somem conforme
-   os planos 02–06 rodarem. */
-:root {
-  --good: var(--accent);
-  --critical: var(--over);
-  --baseline: var(--muted);
-}
-
-/* ---------- LEGADO: classes das telas ainda não migradas ---------- */
-/* As telas antigas usam h2/h3 como título de bloco e contavam com a margem
-   inferior que o CSS anterior dava. No redesign os títulos ficam em .card-head,
-   sem margem — até lá, a margem volta aqui. */
 h2,
 h3 {
   margin-bottom: 10px;
-}
-
-.row {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
 }
 
 table {
@@ -55,19 +35,6 @@ th.num {
   text-align: right;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-}
-
-.pos {
-  color: var(--accent);
-}
-
-.badge {
-  font-size: 10px;
-  padding: 1px 7px;
-  border-radius: var(--r-pill);
-  border: 1px solid var(--border);
-  color: var(--ink-2);
-  white-space: nowrap;
 }
 
 /* ---------- Dashboard ---------- */
@@ -2397,4 +2364,30 @@ th.num {
   padding-top: 11px;
   border-top: 1px solid var(--border);
   font-size: 11px;
+}
+
+.settings-page {
+  max-width: 1240px;
+}
+
+.set-grid {
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) minmax(240px, 300px);
+  gap: var(--gap-section);
+  align-items: start;
+  margin-bottom: var(--gap-section);
+}
+
+.set-grid .card {
+  margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .set-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .set-accounts {
+    position: static;
+  }
 }
