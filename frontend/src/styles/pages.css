@@ -2408,4 +2408,8 @@ th.num {
   .set-accounts {
     position: static;
   }
+
+  .set-models {
+    grid-template-columns: 1fr;
+  }
 }

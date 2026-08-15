@@ -3,6 +3,13 @@ import type { Account, Category, CategoryKind, Rule } from "../api/types";
 const porNome = (a: { name: string }, b: { name: string }) =>
   a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" });
 
+/** Rótulos dos kinds — única fonte para pills, options e segmented desta tela. */
+export const KIND_LABELS: Record<CategoryKind, string> = {
+  saida: "saída",
+  entrada: "entrada",
+  investimento: "investimento",
+};
+
 /** Categorias agrupadas por kind, alfabéticas. Arquivadas só entram com a flag. */
 export function groupByKind(
   categories: Category[],
@@ -26,22 +33,25 @@ export interface AccountGroup {
   accounts: Account[];
 }
 
+// Agrupamento e contagem por instituição são case-insensitive: o formulário grava em
+// minúsculas, mas nada garante isso para contas criadas por fora (API, seed).
 export function groupAccounts(accounts: Account[]): AccountGroup[] {
   const map = new Map<string, Account[]>();
   for (const a of accounts) {
-    const list = map.get(a.institution) ?? [];
+    const key = a.institution.toLowerCase();
+    const list = map.get(key) ?? [];
     list.push(a);
-    map.set(a.institution, list);
+    map.set(key, list);
   }
   return [...map.entries()]
-    .sort(([a], [b]) => a.localeCompare(b, "pt-BR"))
+    .sort(([a], [b]) => a.localeCompare(b, "pt-BR", { sensitivity: "base" }))
     .map(([institution, list]) => ({ institution, accounts: [...list].sort(porNome) }));
 }
 
 /** "4 contas em 2 instituições", com singular quando for o caso. */
 export function accountsSummary(accounts: Account[]): string {
   const n = accounts.length;
-  const i = new Set(accounts.map((a) => a.institution)).size;
+  const i = new Set(accounts.map((a) => a.institution.toLowerCase())).size;
   return `${n} ${n === 1 ? "conta" : "contas"} em ${i} ${i === 1 ? "instituição" : "instituições"}`;
 }
 

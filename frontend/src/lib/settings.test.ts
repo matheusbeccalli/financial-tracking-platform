@@ -65,6 +65,12 @@ describe("groupAccounts", () => {
   it("lista vazia devolve vazio", () => {
     expect(groupAccounts([])).toEqual([]);
   });
+
+  it("agrupa instituições sem sensibilidade a caixa", () => {
+    const g = groupAccounts([acc(1, "A", "Inter"), acc(2, "B", "inter")]);
+    expect(g).toHaveLength(1);
+    expect(g[0].accounts).toHaveLength(2);
+  });
 });
 
 describe("accountsSummary", () => {
@@ -81,6 +87,12 @@ describe("accountsSummary", () => {
 
   it("singular quando é uma só", () => {
     expect(accountsSummary([acc(1, "A", "bradesco")])).toBe("1 conta em 1 instituição");
+  });
+
+  it("não conta a mesma instituição duas vezes por diferença de caixa", () => {
+    expect(accountsSummary([acc(1, "A", "Inter"), acc(2, "B", "inter")])).toBe(
+      "2 contas em 1 instituição"
+    );
   });
 });
 

@@ -1,16 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useCategories, useCreateCategory, usePatchCategory } from "../../api/hooks";
 import type { Category, CategoryKind } from "../../api/types";
-import { groupByKind } from "../../lib/settings";
+import { groupByKind, KIND_LABELS } from "../../lib/settings";
 import InlineText from "../InlineText";
 import Segmented from "../Segmented";
 
-const KIND_OPTIONS = [
-  { value: "saida" as const, label: "saída" },
-  { value: "entrada" as const, label: "entrada" },
-  { value: "investimento" as const, label: "investimento" },
-];
+const KIND_OPTIONS = (Object.keys(KIND_LABELS) as CategoryKind[]).map((value) => ({
+  value,
+  label: KIND_LABELS[value],
+}));
 
 const SECTIONS: { kind: CategoryKind; label: string; nota?: string }[] = [
   { kind: "entrada", label: "Entradas" },
@@ -112,15 +111,7 @@ function CategoryRow({
 }) {
   return (
     <div className={c.archived ? "set-cat-row is-archived" : "set-cat-row"}>
-      {/* O quadrado é um label sobre um input[type=color] escondido: clique abre o picker. */}
-      <label className="set-swatch" style={{ background: c.color }}>
-        <input
-          type="color"
-          value={c.color}
-          aria-label={`Cor da categoria ${c.name}`}
-          onChange={(e) => onPatch(c.id, { color: e.target.value })}
-        />
-      </label>
+      <ColorSwatch c={c} onPatch={onPatch} />
       <InlineText
         value={c.name}
         ariaLabel={`Nome da categoria ${c.name}`}
@@ -138,6 +129,33 @@ function CategoryRow({
   );
 }
 
+/**
+ * O quadrado é um label sobre um input[type=color] escondido: clique abre o picker.
+ * A cor fica num buffer local — arrastar no picker dispara dezenas de `change`, e
+ * cada PATCH invalida todas as queries; o servidor só vê a cor final, no blur.
+ */
+function ColorSwatch({
+  c,
+  onPatch,
+}: {
+  c: Category;
+  onPatch: (id: number, p: CatPatch) => void;
+}) {
+  const [cor, setCor] = useState(c.color);
+  useEffect(() => setCor(c.color), [c.color]);
+  return (
+    <label className="set-swatch" style={{ background: cor }}>
+      <input
+        type="color"
+        value={cor}
+        aria-label={`Cor da categoria ${c.name}`}
+        onChange={(e) => setCor(e.target.value)}
+        onBlur={() => cor !== c.color && onPatch(c.id, { color: cor })}
+      />
+    </label>
+  );
+}
+
 function KindPill({
   c,
   onPatch,
@@ -147,7 +165,7 @@ function KindPill({
 }) {
   return (
     <span className={c.kind === "investimento" ? "set-kind-pill tone-invest" : "set-kind-pill"}>
-      <span>{c.kind === "saida" ? "saída" : c.kind} ⌄</span>
+      <span>{KIND_LABELS[c.kind]} ⌄</span>
       <select
         className="set-kind-select"
         aria-label={`Tipo da categoria ${c.name}`}
@@ -163,9 +181,11 @@ function KindPill({
             onPatch(c.id, { kind });
         }}
       >
-        <option value="saida">saída</option>
-        <option value="entrada">entrada</option>
-        <option value="investimento">investimento</option>
+        {KIND_OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
       </select>
     </span>
   );

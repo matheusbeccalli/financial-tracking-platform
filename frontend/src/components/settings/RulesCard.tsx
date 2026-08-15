@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   useCategories,
@@ -23,12 +23,18 @@ export default function RulesCard() {
   const [q, setQ] = useState("");
   const [todas, setTodas] = useState(false);
 
+  const carregando = rules === undefined;
   const total = (rules ?? []).length;
-  const list = filterRules(rules ?? [], categories ?? [], q);
+  const buscando = q.trim() !== "";
+  const list = useMemo(
+    () => filterRules(rules ?? [], categories ?? [], q),
+    [rules, categories, q]
+  );
   const ignoradas = ignoreRules ?? [];
-  // O protótipo assumia ~12 regras; o banco real tem centenas. Sem busca ativa,
-  // a lista é limitada — a busca sempre varre todas.
-  const visiveis = todas || q.trim() ? list : list.slice(0, LIMITE_REGRAS);
+  // O protótipo assumia ~12 regras; o banco real tem centenas. A lista é sempre
+  // limitada (cada linha monta um CategoryChip com todas as categorias); a busca
+  // varre todas, e "mostrar todas" abre o resto.
+  const visiveis = todas ? list : list.slice(0, LIMITE_REGRAS);
 
   return (
     <section className="card">
@@ -36,8 +42,9 @@ export default function RulesCard() {
         <div>
           <h2>Regras de classificação</h2>
           <div className="sub">
-            {total} {total === 1 ? "regra" : "regras"} · cada correção de categoria em
-            Transações cria uma nova
+            {carregando
+              ? "carregando…"
+              : `${total} ${total === 1 ? "regra" : "regras"} · cada correção de categoria em Transações cria uma nova`}
           </div>
         </div>
         <input
@@ -49,9 +56,11 @@ export default function RulesCard() {
         />
       </div>
 
-      {list.length === 0 ? (
+      {carregando ? (
+        <p className="muted set-rules-empty">Carregando…</p>
+      ) : list.length === 0 ? (
         <p className="muted set-rules-empty">
-          {q
+          {buscando
             ? "Nenhuma regra encontrada."
             : "Nenhuma regra ainda — corrigir uma categoria em Transações cria a primeira."}
         </p>
@@ -82,7 +91,7 @@ export default function RulesCard() {
         </div>
       )}
 
-      {!q.trim() && list.length > LIMITE_REGRAS && (
+      {list.length > LIMITE_REGRAS && (
         <button
           type="button"
           className="set-rules-more"
@@ -90,7 +99,7 @@ export default function RulesCard() {
         >
           {todas
             ? "mostrar menos"
-            : `mostrar todas as ${list.length} regras`}
+            : `mostrar todas as ${list.length} ${buscando ? "encontradas" : "regras"}`}
         </button>
       )}
 

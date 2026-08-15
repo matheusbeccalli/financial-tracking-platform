@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Texto editável inline: parece texto parado, mas é um input — hover revela,
@@ -14,9 +14,14 @@ export default function InlineText({
   ariaLabel: string;
 }) {
   const [text, setText] = useState(value);
-  useEffect(() => setText(value), [value]);
+  const ref = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    // Refetch no meio da edição não pode apagar o que está sendo digitado.
+    if (document.activeElement !== ref.current) setText(value);
+  }, [value]);
   return (
     <input
+      ref={ref}
       className="inline-text"
       value={text}
       aria-label={ariaLabel}

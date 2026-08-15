@@ -17,6 +17,8 @@ export default function LlmCard() {
   const value = model ?? settings.llm_model;
   const dirty = value !== settings.llm_model;
   const isKnown = KNOWN_MODELS.some((m) => m.id === value);
+  // Texto digitado sem Enter não pode ser descartado em silêncio pelo Salvar.
+  const pendente = custom.trim() !== "";
 
   return (
     <section className="card">
@@ -69,15 +71,17 @@ export default function LlmCard() {
         <button
           type="button"
           className="primary"
-          disabled={!dirty || putSettings.isPending}
+          disabled={!dirty || pendente || putSettings.isPending}
           onClick={() => putSettings.mutate({ llm_model: value })}
         >
           Salvar modelo
         </button>
         <span className="note">
-          {dirty
-            ? "modelo alterado — salve para valer nas próximas classificações"
-            : "nenhuma mudança para salvar"}
+          {pendente
+            ? "pressione Enter no id digitado para usá-lo"
+            : dirty
+              ? "modelo alterado — salve para valer nas próximas classificações"
+              : "nenhuma mudança para salvar"}
         </span>
       </div>
     </section>
