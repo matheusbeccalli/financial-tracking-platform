@@ -2273,3 +2273,128 @@ th.num {
 .set-archive:hover {
   color: var(--over);
 }
+
+/* Rail gruda como o do Orçamento; some o sticky em janela estreita via media query
+   do grid (Step 4.3). */
+.set-accounts {
+  position: sticky;
+  top: 20px;
+}
+
+.set-inst-list {
+  margin-top: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.set-inst-label {
+  margin-bottom: 2px;
+}
+
+.set-account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.set-kind-tag {
+  font-size: 10.5px;
+  color: var(--ink-2);
+  padding: 1.5px 8px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border-strong);
+  white-space: nowrap;
+}
+
+.set-new-account {
+  margin-top: 14px;
+  padding-top: 13px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.set-new-account input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.set-new-account-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.set-rule-search {
+  min-width: 230px;
+}
+
+.set-rules-empty {
+  margin-top: 12px;
+}
+
+.set-rules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 0 26px;
+  margin-top: 8px;
+}
+
+.set-rule-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) auto 22px;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.set-rule-matcher {
+  font-size: 11.5px;
+  color: var(--ink-2);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.set-rule-x {
+  font: inherit;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.set-rule-x:hover {
+  color: var(--over);
+}
+
+.set-ignore {
+  margin-top: 16px;
+  padding-top: 13px;
+  border-top: 1px solid var(--border);
+}
+
+.set-ignore-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.set-rules-foot {
+  margin-top: 14px;
+  padding-top: 11px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+}
