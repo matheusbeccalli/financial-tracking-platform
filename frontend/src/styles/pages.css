@@ -1977,3 +1977,27 @@ th.num {
   cursor: default;
   pointer-events: none;
 }
+
+/* ---------- Configurações ---------- */
+.inline-text {
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin-left: -4px;
+  min-width: 0;
+  width: 100%;
+}
+
+.inline-text:hover {
+  background: var(--hover-ghost);
+}
+
+.inline-text:focus {
+  outline: none;
+  border-color: var(--focus);
+  background: var(--surface-2);
+}
