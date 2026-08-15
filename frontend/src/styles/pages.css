@@ -2346,6 +2346,24 @@ th.num {
   color: var(--over);
 }
 
+.set-rules-more {
+  width: 100%;
+  margin-top: 12px;
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-control);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 12px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.set-rules-more:hover {
+  color: var(--ink);
+  background: var(--hover-ghost);
+}
+
 .set-ignore {
   margin-top: 16px;
   padding-top: 13px;

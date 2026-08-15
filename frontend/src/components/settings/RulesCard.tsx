@@ -11,6 +11,8 @@ import {
 import { filterRules } from "../../lib/settings";
 import CategoryChip from "../CategoryChip";
 
+const LIMITE_REGRAS = 60;
+
 export default function RulesCard() {
   const { data: rules } = useRules();
   const { data: ignoreRules } = useIgnoreRules();
@@ -19,10 +21,14 @@ export default function RulesCard() {
   const deleteRule = useDeleteRule();
   const deleteIgnoreRule = useDeleteIgnoreRule();
   const [q, setQ] = useState("");
+  const [todas, setTodas] = useState(false);
 
   const total = (rules ?? []).length;
   const list = filterRules(rules ?? [], categories ?? [], q);
   const ignoradas = ignoreRules ?? [];
+  // O protótipo assumia ~12 regras; o banco real tem centenas. Sem busca ativa,
+  // a lista é limitada — a busca sempre varre todas.
+  const visiveis = todas || q.trim() ? list : list.slice(0, LIMITE_REGRAS);
 
   return (
     <section className="card">
@@ -51,7 +57,7 @@ export default function RulesCard() {
         </p>
       ) : (
         <div className="set-rules-grid">
-          {list.map((r) => (
+          {visiveis.map((r) => (
             <div key={r.id} className="set-rule-row">
               <span className="mono set-rule-matcher" title={r.matcher}>
                 {r.matcher}
@@ -74,6 +80,18 @@ export default function RulesCard() {
             </div>
           ))}
         </div>
+      )}
+
+      {!q.trim() && list.length > LIMITE_REGRAS && (
+        <button
+          type="button"
+          className="set-rules-more"
+          onClick={() => setTodas((t) => !t)}
+        >
+          {todas
+            ? "mostrar menos"
+            : `mostrar todas as ${list.length} regras`}
+        </button>
       )}
 
       <div className="set-ignore">
