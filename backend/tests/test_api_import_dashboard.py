@@ -47,6 +47,18 @@ def test_import_list_and_undo(client, session):
     assert session.scalar(select(func.count()).select_from(Transaction)) == 0
 
 
+def test_list_imports_emits_utc_offset(client):
+    csv = "Data;Histórico;Valor\n01/07/2026;LOJA A;-10,00\n".encode()
+    r = client.post(
+        "/api/imports",
+        data={"account_id": "1"},
+        files={"file": ("t.csv", csv, "text/csv")},
+    )
+    assert r.status_code == 200
+    batches = client.get("/api/imports").json()
+    assert batches[0]["imported_at"].endswith("+00:00")
+
+
 def test_dashboard_summary_and_feed(client, session):
     upload(client)
     tx = session.scalar(select(Transaction).where(Transaction.amount_cents == -18740))

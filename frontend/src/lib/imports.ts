@@ -17,9 +17,9 @@ export function formatKB(bytes: number): string {
 }
 
 /**
- * "2026-08-07T15:27:33" → "07/08 12:27" (fuso local), para a coluna Quando.
- * O backend grava `imported_at` naive em UTC (func.now() do SQLite) — fatiar a
- * string, como a tela antiga fazia, mostrava a hora errada em UTC−3.
+ * "2026-08-07T15:27:33+00:00" → "07/08 12:27" (fuso local), para a coluna Quando.
+ * O backend emite `imported_at` com offset UTC explícito; o fallback de colar um
+ * "Z" cobre strings naive de versões antigas da API.
  */
 export function whenLabel(iso: string): string {
   const d = new Date(/Z|[+-]\d\d:?\d\d$/.test(iso) ? iso : `${iso}Z`);

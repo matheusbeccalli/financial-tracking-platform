@@ -1,3 +1,5 @@
+from datetime import timezone
+
 from fastapi import (
     APIRouter,
     BackgroundTasks,
@@ -65,7 +67,7 @@ def list_imports(session=Depends(get_session)):
     return [
         {
             "id": b.id, "filename": b.filename, "source": b.source,
-            "imported_at": b.imported_at.isoformat(),
+            "imported_at": b.imported_at.replace(tzinfo=timezone.utc).isoformat(),
             "new_count": b.new_count, "dup_count": b.dup_count,
         }
         for b in batches
