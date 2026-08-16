@@ -48,3 +48,11 @@ class AccountPatch(BaseModel):
 
 class RulePatch(BaseModel):
     category_id: int
+
+
+class PluggyLinkIn(BaseModel):
+    item_id: str
+    pluggy_account_id: str
+    pluggy_type: str  # "BANK" | "CREDIT"
+    account_id: int
+    sync_from: str  # "YYYY-MM-DD"

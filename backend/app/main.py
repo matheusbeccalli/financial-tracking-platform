@@ -4,7 +4,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.routers import budgets, dashboard, imports, meta, transactions
+from app.routers import budgets, dashboard, imports, meta, pluggy, transactions
 
 FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 
@@ -29,6 +29,7 @@ def create_app(init: bool = False) -> FastAPI:
     app.include_router(budgets.router)
     app.include_router(imports.router)
     app.include_router(dashboard.router)
+    app.include_router(pluggy.router)
 
     @app.get("/api/health")
     def health():
