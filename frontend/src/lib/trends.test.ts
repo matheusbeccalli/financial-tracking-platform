@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import type { Category, CategoryKind, Summary } from "../api/types";
-import { buildTrends, desvioChip, mediana, trendsStrip, trendsWindow } from "./trends";
+import {
+  applyOrder,
+  buildTrends,
+  desvioChip,
+  mediana,
+  trendsStrip,
+  trendsWindow,
+  type TrendsRow,
+} from "./trends";
 
 const cat = (id: number, name: string, kind: CategoryKind): Category => ({
   id,
@@ -259,5 +267,25 @@ describe("trendsStrip", () => {
       tone: "over",
     });
     expect(trendsStrip(m).foraDaMedia).toBe(0); // Mercado desvia 0%
+  });
+});
+
+const row = (id: number) => ({ id }) as TrendsRow;
+
+describe("applyOrder", () => {
+  it("reordena pela lista de ids congelada", () => {
+    expect(applyOrder([row(3), row(1), row(2)], [1, 2, 3]).map((r) => r.id)).toEqual([
+      1, 2, 3,
+    ]);
+  });
+
+  it("ids fora da lista (categoria nova) vão para o fim, na ordem em que vieram", () => {
+    expect(applyOrder([row(9), row(1), row(8)], [1]).map((r) => r.id)).toEqual([1, 9, 8]);
+  });
+
+  it("não muta o array original", () => {
+    const rows = [row(2), row(1)];
+    applyOrder(rows, [1, 2]);
+    expect(rows.map((r) => r.id)).toEqual([2, 1]);
   });
 });

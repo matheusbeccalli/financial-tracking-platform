@@ -201,3 +201,17 @@ export function trendsStrip(m: TrendsMatrix): TrendsStrip {
     semHistOrcado: semHistRows.reduce((sum, r) => sum + (r.plan[0] ?? 0), 0),
   };
 }
+
+/**
+ * Congela a ordem das linhas enquanto o usuário edita: reordena `rows` pela
+ * lista de ids capturada no primeiro render. Sem isso, salvar o orçamento do
+ * mês atual re-ordena as saídas por desvio e a linha pula sob o cursor. Ids
+ * fora da lista (categoria recém-criada) vão para o fim, na ordem natural
+ * (sort estável).
+ */
+export function applyOrder(rows: TrendsRow[], order: number[]): TrendsRow[] {
+  const pos = new Map(order.map((id, i) => [id, i]));
+  return [...rows].sort(
+    (a, b) => (pos.get(a.id) ?? order.length) - (pos.get(b.id) ?? order.length)
+  );
+}

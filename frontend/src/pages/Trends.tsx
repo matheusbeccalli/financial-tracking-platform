@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { useCategories, usePutBudget, useSummaries } from "../api/hooks";
 import type { Summary } from "../api/types";
@@ -7,7 +7,7 @@ import Segmented from "../components/Segmented";
 import MatrixCard from "../components/trends/MatrixCard";
 import TrendsKpis from "../components/trends/TrendsKpis";
 import { currentMonth, monthLabel, monthName } from "../lib/months";
-import { buildTrends, trendsStrip, trendsWindow } from "../lib/trends";
+import { applyOrder, buildTrends, trendsStrip, trendsWindow } from "../lib/trends";
 
 const SPANS = [
   { value: "3" as const, label: "3 m" },
@@ -16,6 +16,7 @@ const SPANS = [
 
 export default function Trends() {
   const [span, setSpan] = useState<"3" | "6">("6");
+  const saidaOrder = useRef<number[] | null>(null);
   const today = currentMonth();
   const { pastMonths, planMonths } = trendsWindow(today, Number(span));
   const results = useSummaries([...pastMonths, ...planMonths]);
@@ -34,7 +35,15 @@ export default function Trends() {
         {monthLabel(pastMonths[0])}–{monthLabel(pastMonths[pastMonths.length - 1])} realizado ·{" "}
         {monthLabel(planMonths[0])}–{monthLabel(planMonths[planMonths.length - 1])} orçado
       </span>
-      <Segmented value={span} options={SPANS} onChange={setSpan} ariaLabel="Janela de meses" />
+      <Segmented
+        value={span}
+        options={SPANS}
+        onChange={(v) => {
+          saidaOrder.current = null; // trocar a janela é momento deliberado de re-rankear
+          setSpan(v);
+        }}
+        ariaLabel="Janela de meses"
+      />
     </PageHeader>
   );
 
@@ -54,6 +63,8 @@ export default function Trends() {
     );
 
   const m = buildTrends(pastMonths.length, summaries as Summary[], categories);
+  if (saidaOrder.current === null) saidaOrder.current = m.rows.saida.map((r) => r.id);
+  m.rows.saida = applyOrder(m.rows.saida, saidaOrder.current);
   const strip = trendsStrip(m);
   const save = (categoryId: number, cents: number, month: string) =>
     putBudget.mutate({ category_id: categoryId, amount_cents: cents, valid_from: month });
