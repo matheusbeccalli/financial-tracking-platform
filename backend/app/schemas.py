@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class CategoryIn(BaseModel):
@@ -27,7 +27,7 @@ class TxPatch(BaseModel):
 
 class BudgetPut(BaseModel):
     category_id: int
-    amount_cents: int = Field(ge=0)
+    amount_cents: int  # negativo = resgate planejado (kind investimento)
     valid_from: str  # "YYYY-MM"
 
 

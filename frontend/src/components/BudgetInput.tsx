@@ -20,7 +20,7 @@ export default function BudgetInput({
   useEffect(() => setText(toText(cents)), [cents]);
   const commit = () => {
     const parsed = text.trim() === "" ? 0 : parseBRL(text);
-    if (parsed !== null && parsed >= 0 && parsed !== cents) onSave(parsed);
+    if (parsed !== null && parsed !== cents) onSave(parsed);
   };
   return (
     <input

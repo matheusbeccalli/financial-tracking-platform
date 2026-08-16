@@ -72,7 +72,7 @@ class Budget(Base):
     __table_args__ = (UniqueConstraint("category_id", "valid_from"),)
     id: Mapped[int] = mapped_column(primary_key=True)
     category_id: Mapped[int] = mapped_column(ForeignKey("category.id"))
-    amount_cents: Mapped[int]  # sempre positivo; sinal vem do kind da categoria
+    amount_cents: Mapped[int]  # negativo = resgate planejado; sinal por kind da categoria
     valid_from: Mapped[str]  # "YYYY-MM"
 
 

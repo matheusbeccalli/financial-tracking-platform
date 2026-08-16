@@ -68,6 +68,16 @@ def test_copy_validates_months(client):
     )
 
 
+def test_put_budget_accepts_negative_planned_resgate(client, session):
+    """Negativo em categoria de investimento = resgate planejado."""
+    from app.models import Category
+    from sqlalchemy import select
+
+    invest = session.scalar(select(Category).where(Category.name == "Investimentos"))
+    put(client, invest.id, -50000, "2026-09")
+    assert get_map(client, "2026-09")[invest.id] == -50000
+
+
 def test_copy_from_future_month_into_past(client):
     """Copiar de mês futuro é intencional (ex.: ajustes feitos em julho
     replicados para junho). O mês futuro mantém suas próprias linhas."""
