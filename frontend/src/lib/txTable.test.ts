@@ -134,6 +134,32 @@ describe("sortTxs", () => {
     expect(sortTxs(txs, "category", "asc", LOOKUPS).map((t) => t.id)).toEqual([2, 1, 3]);
     expect(sortTxs(txs, "category", "desc", LOOKUPS).map((t) => t.id)).toEqual([1, 2, 3]);
   });
+
+  it("ordena por descrição", () => {
+    const rows = [
+      tx({ id: 1, description: "Zoo" }),
+      tx({ id: 2, description: "água" }),
+      tx({ id: 3, description: "Mercado" }),
+    ];
+    expect(sortTxs(rows, "description", "asc", LOOKUPS).map((t) => t.id)).toEqual([
+      2, 3, 1,
+    ]);
+  });
+
+  it("ordena por origem; origem nula vai para o fim nos dois sentidos", () => {
+    const rows = [
+      tx({ id: 1, source: null }),
+      tx({ id: 2, source: "regra" }),
+      tx({ id: 3, source: "llm" }),
+    ];
+    expect(sortTxs(rows, "source", "asc", LOOKUPS).map((t) => t.id)).toEqual([3, 2, 1]);
+    expect(sortTxs(rows, "source", "desc", LOOKUPS).map((t) => t.id)).toEqual([2, 3, 1]);
+  });
+
+  it("categoria com id fora do lookup ordena como vazio: primeiro no asc, não no fim", () => {
+    const rows = [tx({ id: 1, category_id: 999 }), tx({ id: 2, category_id: 10 })];
+    expect(sortTxs(rows, "category", "asc", LOOKUPS).map((t) => t.id)).toEqual([1, 2]);
+  });
 });
 
 describe("filterTxs", () => {
