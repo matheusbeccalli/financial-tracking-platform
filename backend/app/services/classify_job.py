@@ -11,6 +11,15 @@ from app.services.llm import get_llm
 # single-user local; contagens vêm sempre do banco (job_status).
 JOBS: dict[int, str] = {}
 
+MAX_JOBS = 20
+
+
+def prune_jobs() -> None:
+    """Poda os jobs terminados mais antigos; o dict viveria para sempre sem isso."""
+    finished = [k for k, v in JOBS.items() if v != "running"]
+    for k in finished[: max(0, len(JOBS) - MAX_JOBS)]:
+        del JOBS[k]
+
 
 def run_classification(batch_id: int) -> None:
     session = SessionLocal()
@@ -39,6 +48,7 @@ def run_classification(batch_id: int) -> None:
         session.rollback()
         JOBS[batch_id] = "error"
     finally:
+        prune_jobs()
         session.close()
 
 

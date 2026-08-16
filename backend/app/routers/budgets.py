@@ -56,15 +56,16 @@ def copy_budget(payload: BudgetCopy, session=Depends(get_session)):
     if payload.from_month == payload.to_month:
         raise HTTPException(400, "Meses de origem e destino são iguais")
     bmap = budget_map(session, payload.from_month)
+    existentes = {
+        b.category_id: b
+        for b in session.scalars(
+            select(Budget).where(Budget.valid_from == payload.to_month)
+        )
+    }
     copied = 0
     for cat in session.scalars(select(Category).where(~Category.archived)):
         cents = bmap.get(cat.id, 0)
-        existing = session.scalar(
-            select(Budget).where(
-                Budget.category_id == cat.id,
-                Budget.valid_from == payload.to_month,
-            )
-        )
+        existing = existentes.get(cat.id)
         if existing:
             existing.amount_cents = cents
         else:

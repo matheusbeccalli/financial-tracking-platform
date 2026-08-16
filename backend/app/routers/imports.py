@@ -14,7 +14,7 @@ from sqlalchemy import select
 from app.db import get_session
 from app.models import Account, ImportBatch, Transaction
 from app.services.classifier import apply_rules, classify_new
-from app.services.classify_job import JOBS, job_status, run_classification
+from app.services.classify_job import JOBS, job_status, prune_jobs, run_classification
 from app.services.importer import import_file, undo_batch
 from app.services.llm import get_llm
 
@@ -45,6 +45,7 @@ def create_import(
         background_tasks.add_task(run_classification, batch.id)
     else:
         JOBS[batch.id] = "done"
+    prune_jobs()
     return {
         "batch_id": batch.id,
         "filename": batch.filename,

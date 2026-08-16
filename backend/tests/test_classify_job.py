@@ -87,3 +87,16 @@ def test_llm_client_has_timeout_and_limited_retries():
     llm = AnthropicLLM("sk-test", "claude-haiku-4-5")
     assert llm.client.timeout == 120.0
     assert llm.client.max_retries == 1
+
+
+def test_prune_jobs_keeps_recent_and_running():
+    from app.services.classify_job import MAX_JOBS, prune_jobs
+
+    JOBS.clear()
+    for i in range(30):
+        JOBS[i] = "done"
+    JOBS[99] = "running"
+    prune_jobs()
+    assert len(JOBS) == MAX_JOBS
+    assert 99 in JOBS  # nunca poda job em execução
+    assert 0 not in JOBS and 29 in JOBS  # caem os mais antigos
