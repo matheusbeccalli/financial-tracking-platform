@@ -2,6 +2,11 @@ import { ApiError } from "../api/client";
 import type { ImportBatch } from "../api/types";
 import { pctOf } from "./pct";
 
+/** Única fonte das extensões aceitas — filtro de arquivos, accept do input e badges. */
+export const IMPORT_EXTS = ["ofx", "csv"] as const;
+export const IMPORT_EXT_RE = new RegExp(`\\.(${IMPORT_EXTS.join("|")})$`, "i");
+export const IMPORT_ACCEPT = IMPORT_EXTS.map((e) => `.${e}`).join(",");
+
 /** "Bradesco_09082026.ofx" → "OFX". Sem extensão, "?" — o badge nunca fica vazio. */
 export function fileBadge(filename: string): string {
   const dot = filename.lastIndexOf(".");

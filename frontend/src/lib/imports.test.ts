@@ -2,7 +2,17 @@ import { describe, expect, it } from "vitest";
 
 import { ApiError } from "../api/client";
 import type { ImportBatch } from "../api/types";
-import { batchTotals, dupSplit, fileBadge, formatKB, pollInterval, whenLabel } from "./imports";
+import {
+  batchTotals,
+  dupSplit,
+  fileBadge,
+  formatKB,
+  IMPORT_ACCEPT,
+  IMPORT_EXT_RE,
+  IMPORT_EXTS,
+  pollInterval,
+  whenLabel,
+} from "./imports";
 
 const batch = (id: number, new_count: number, dup_count: number): ImportBatch => ({
   id,
@@ -102,5 +112,18 @@ describe("pollInterval", () => {
     expect(pollInterval("done", null)).toBe(false);
     expect(pollInterval("error", null)).toBe(false);
     expect(pollInterval(undefined, null)).toBe(false);
+  });
+});
+
+describe("extensões de importação", () => {
+  it("regex aceita as extensões sem case, rejeita o resto", () => {
+    expect(IMPORT_EXT_RE.test("extrato.OFX")).toBe(true);
+    expect(IMPORT_EXT_RE.test("fatura.csv")).toBe(true);
+    expect(IMPORT_EXT_RE.test("nota.txt")).toBe(false);
+    expect(IMPORT_EXT_RE.test("ofx")).toBe(false); // precisa do ponto
+  });
+
+  it("accept do input deriva da mesma lista", () => {
+    expect(IMPORT_ACCEPT).toBe(IMPORT_EXTS.map((e) => `.${e}`).join(","));
   });
 });

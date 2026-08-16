@@ -3,11 +3,9 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { api } from "../../api/client";
 import type { Account, ImportResult } from "../../api/types";
-import { fileBadge, formatKB } from "../../lib/imports";
+import { fileBadge, formatKB, IMPORT_ACCEPT, IMPORT_EXT_RE, IMPORT_EXTS } from "../../lib/imports";
 import Chip from "../Chip";
 import ResultCard from "./ResultCard";
-
-const EXT_OK = /\.(ofx|csv)$/i;
 
 export default function UploadCard({ accounts }: { accounts: Account[] }) {
   const queryClient = useQueryClient();
@@ -21,7 +19,7 @@ export default function UploadCard({ accounts }: { accounts: Account[] }) {
 
   const addFiles = (list: FileList | null) => {
     if (!list || busy) return;
-    const ok = Array.from(list).filter((f) => EXT_OK.test(f.name));
+    const ok = Array.from(list).filter((f) => IMPORT_EXT_RE.test(f.name));
     if (ok.length) setStaged((prev) => [...prev, ...ok]);
   };
 
@@ -61,8 +59,9 @@ export default function UploadCard({ accounts }: { accounts: Account[] }) {
       <div className="imp-head">
         <h2>Novo upload</h2>
         <div className="imp-exts mono">
-          <span>.OFX</span>
-          <span>.CSV</span>
+          {IMPORT_EXTS.map((e) => (
+            <span key={e}>.{e.toUpperCase()}</span>
+          ))}
         </div>
       </div>
 
@@ -111,7 +110,7 @@ export default function UploadCard({ accounts }: { accounts: Account[] }) {
         <input
           ref={fileRef}
           type="file"
-          accept=".ofx,.csv"
+          accept={IMPORT_ACCEPT}
           multiple
           hidden
           onChange={(e) => {
