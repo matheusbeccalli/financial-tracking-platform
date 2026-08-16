@@ -706,10 +706,6 @@ th.num {
   }
 }
 
-.dash-col > .card:last-child {
-  margin-bottom: 0;
-}
-
 .bridge-zero {
   position: absolute;
   left: 0;
@@ -1145,10 +1141,6 @@ th.num {
   gap: var(--gap-section);
   position: sticky;
   top: 20px;
-}
-
-.budget-rail .card {
-  margin-bottom: 0;
 }
 
 .budget-rail-rows {
@@ -1927,10 +1919,6 @@ th.num {
   margin-bottom: var(--gap-section);
 }
 
-.imp-grid .card {
-  margin-bottom: 0;
-}
-
 @media (max-width: 900px) {
   .imp-grid {
     grid-template-columns: 1fr;
@@ -2394,10 +2382,6 @@ th.num {
   gap: var(--gap-section);
   align-items: start;
   margin-bottom: var(--gap-section);
-}
-
-.set-grid .card {
-  margin-bottom: 0;
 }
 
 @media (max-width: 900px) {

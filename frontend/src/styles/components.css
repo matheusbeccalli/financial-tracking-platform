@@ -8,6 +8,14 @@
   margin-bottom: var(--gap-section);
 }
 
+/* Grids e rails espaçam com o gap do container — o margin-bottom do .card duplicaria. */
+.dash-col > .card:last-child,
+.budget-rail .card,
+.imp-grid .card,
+.set-grid .card {
+  margin-bottom: 0;
+}
+
 .card-head {
   display: flex;
   align-items: flex-start;
