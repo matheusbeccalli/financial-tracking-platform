@@ -11,6 +11,12 @@ from app.seed import DEFAULT_LLM_MODEL
 
 router = APIRouter(prefix="/api")
 
+_KINDS_MSG = (
+    "kind deve ser "
+    + ", ".join(f"'{k}'" for k in CATEGORY_KINDS[:-1])
+    + f" ou '{CATEGORY_KINDS[-1]}'"
+)
+
 
 def _acc_out(a: Account) -> dict:
     return {"id": a.id, "name": a.name, "institution": a.institution, "kind": a.kind}
@@ -58,7 +64,7 @@ def list_categories(session=Depends(get_session)):
 @router.post("/categories", status_code=201)
 def create_category(payload: CategoryIn, session=Depends(get_session)):
     if payload.kind not in CATEGORY_KINDS:
-        raise HTTPException(400, "kind deve ser 'entrada', 'saida' ou 'investimento'")
+        raise HTTPException(400, _KINDS_MSG)
     if session.scalar(select(Category).where(Category.name == payload.name)):
         raise HTTPException(400, f"Categoria '{payload.name}' já existe")
     cat = Category(name=payload.name, kind=payload.kind, color=payload.color)
@@ -73,7 +79,7 @@ def patch_category(cat_id: int, payload: CategoryPatch, session=Depends(get_sess
     if not cat:
         raise HTTPException(404, "Categoria não encontrada")
     if payload.kind is not None and payload.kind not in CATEGORY_KINDS:
-        raise HTTPException(400, "kind deve ser 'entrada', 'saida' ou 'investimento'")
+        raise HTTPException(400, _KINDS_MSG)
     for field in ("name", "color", "archived", "kind"):
         value = getattr(payload, field)
         if value is not None:
