@@ -53,7 +53,7 @@ Tabela nova `pluggy_link`:
 
 Para cada `pluggy_link`:
 
-1. `from = max(sync_from, date(last_synced_at) − 3 dias)`, `to = hoje`. A sobreposição de 3 dias pega lançamentos que o banco publica com atraso; o dedupe v2 segura os repetidos porque a descrição da Pluggy é consistente com ela mesma (o risco cross-source arquivo×Pluggy é justamente o que o `sync_from` elimina).
+1. `from = max(sync_from, date(last_synced_at) − 3 dias)`, `to = hoje`. A sobreposição de 3 dias pega lançamentos que o banco publica com atraso; o dedupe v2 segura os repetidos porque a descrição da Pluggy é consistente com ela mesma (o risco cross-source arquivo×Pluggy é justamente o que o `sync_from` elimina). Transações PENDING são puladas e a mais antiga fica registrada em `pending_since`: a janela seguinte não passa dela, para a pendente não se perder ao postar com a data original.
 2. Busca as transações paginadas, converte para `ParsedTransaction(date, description, amount_cents)`.
 3. Chama `import_parsed(session, link.account_id, filename_sintético, "pluggy", parsed)`.
 4. Sucesso → atualiza `last_synced_at`. Falha em um vínculo **não aborta os outros**; o resultado reporta por conta.

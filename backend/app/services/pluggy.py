@@ -30,7 +30,12 @@ class PluggyClient:
         self._api_key: str | None = None
 
     def _authenticate(self) -> str:
-        r = self._http.post("/auth", json=self._auth)
+        try:
+            r = self._http.post("/auth", json=self._auth)
+        except httpx.HTTPError as e:
+            raise PluggyError(
+                f"Pluggy inacessível ({e.__class__.__name__}) — verifique a conexão"
+            )
         if r.status_code in (401, 403):
             raise PluggyError(
                 "Credencial Pluggy inválida — confira PLUGGY_CLIENT_ID e "
@@ -44,10 +49,15 @@ class PluggyClient:
 
     def _get(self, path: str, params: dict | None = None) -> dict:
         key = self._api_key or self._authenticate()
-        r = self._http.get(path, params=params, headers={"X-API-KEY": key})
-        if r.status_code in (401, 403):  # apiKey expira em ~2h — renova uma vez
-            key = self._authenticate()
+        try:
             r = self._http.get(path, params=params, headers={"X-API-KEY": key})
+            if r.status_code in (401, 403):  # apiKey expira em ~2h — renova uma vez
+                key = self._authenticate()
+                r = self._http.get(path, params=params, headers={"X-API-KEY": key})
+        except httpx.HTTPError as e:
+            raise PluggyError(
+                f"Pluggy inacessível ({e.__class__.__name__}) — verifique a conexão"
+            )
         if r.status_code == 404:
             raise PluggyError(
                 "Item não encontrado na Pluggy — confira o Item ID no dashboard", 404

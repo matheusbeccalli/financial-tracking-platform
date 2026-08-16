@@ -95,3 +95,13 @@ def test_get_accounts_devolve_results():
 
     c = make_client(handler)
     assert c.get_accounts("item-1") == [{"id": "acc-1", "type": "BANK"}]
+
+
+def test_erro_de_rede_vira_pluggy_error():
+    def handler(request):
+        raise httpx.ConnectError("boom")
+
+    c = make_client(handler)
+    with pytest.raises(PluggyError) as e:
+        c.get_item("x")
+    assert "inacess" in str(e.value).lower()

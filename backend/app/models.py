@@ -87,6 +87,9 @@ class PluggyLink(Base):
     account_id: Mapped[int] = mapped_column(ForeignKey("account.id"))
     sync_from: Mapped[date] = mapped_column(Date)  # nunca gravar nada antes disto
     last_synced_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    # Data da transação PENDING mais antiga vista no último sync: a janela da
+    # próxima busca não passa dela, senão ela se perde ao postar com a data original.
+    pending_since: Mapped[Optional[date]] = mapped_column(Date)
 
 
 class Setting(Base):

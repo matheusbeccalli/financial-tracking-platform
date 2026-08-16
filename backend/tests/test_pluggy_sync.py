@@ -187,3 +187,38 @@ def test_resync_dentro_do_overlap_deduplica(session):
     assert r1[0]["batch"].new_count == 1
     assert r2[0]["batch"].new_count == 0
     assert r2[0]["batch"].dup_count == 1
+
+
+def test_resposta_malformada_nao_aborta_os_outros(session):
+    _link(session, pluggy_id="acc-1", account_id=1)
+    _link(session, pluggy_id="acc-2", account_id=2)
+    malformada = {"id": "x", "status": "POSTED", "currencyCode": "BRL",
+                  "date": "2026-08-10T03:00:00.000Z"}  # sem amount/description
+    fake = FakePluggy({"acc-1": [malformada], "acc-2": [_raw()]})
+    results = sync_all(session, fake, today=date(2026, 8, 16))
+    assert "error" in results[0]
+    assert results[1]["batch"].new_count == 1
+
+
+def test_pending_segura_a_janela(session):
+    link = _link(session, sync_from=date(2026, 8, 1))
+    fake = FakePluggy({"acc-1": [_raw(status="PENDING", date="2026-08-02T03:00:00.000Z")]})
+    sync_all(session, fake, today=date(2026, 8, 16))
+    session.commit()
+    assert link.pending_since == date(2026, 8, 2)
+    # segunda sync: mesmo com last_synced_at de agora (overlap seria hoje-3),
+    # a janela volta até a pendente que ainda não postou
+    sync_all(session, fake, today=date(2026, 8, 16))
+    assert fake.windows["acc-1"][0] == date(2026, 8, 2)
+
+
+def test_pending_postada_libera_a_janela_e_importa(session):
+    link = _link(session, sync_from=date(2026, 8, 1))
+    fake = FakePluggy({"acc-1": [_raw(status="PENDING", date="2026-08-02T03:00:00.000Z")]})
+    sync_all(session, fake, today=date(2026, 8, 16))
+    session.commit()
+    fake.by_account["acc-1"] = [_raw(date="2026-08-02T03:00:00.000Z")]  # postou
+    results = sync_all(session, fake, today=date(2026, 8, 16))
+    session.commit()
+    assert results[0]["batch"].new_count == 1
+    assert link.pending_since is None
