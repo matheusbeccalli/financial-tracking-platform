@@ -123,3 +123,47 @@ export interface AppSettings {
   llm_model: string;
   api_key_set: boolean;
 }
+
+export interface PluggyAccount {
+  id: string;
+  type: "BANK" | "CREDIT";
+  subtype: string | null;
+  name: string | null;
+  number: string | null;
+}
+
+export interface PluggyItemAccounts {
+  item_status: string | null;
+  connector: string | null;
+  accounts: PluggyAccount[];
+}
+
+export interface PluggyLink {
+  id: number;
+  item_id: string;
+  pluggy_account_id: string;
+  pluggy_type: "BANK" | "CREDIT";
+  account_id: number;
+  sync_from: string;
+  last_synced_at: string | null;
+}
+
+export interface PluggyStatus {
+  credential_set: boolean;
+  links: PluggyLink[];
+  /** account_id local (como string) → data ISO da última transação da conta */
+  last_tx_dates: Record<string, string>;
+}
+
+/** Elemento da resposta de POST /pluggy/sync: sucesso tem cara de ImportResult. */
+export interface SyncResult {
+  link_id: number;
+  account: string;
+  batch_id?: number;
+  filename?: string;
+  new_count?: number;
+  dup_count?: number;
+  skipped_currency?: number;
+  classification?: ClassificationProgress;
+  error?: string;
+}

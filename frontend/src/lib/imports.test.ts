@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ApiError } from "../api/client";
 import type { ImportBatch } from "../api/types";
 import {
+  batchBadge,
   batchTotals,
   dupSplit,
   fileBadge,
@@ -125,5 +126,14 @@ describe("extensões de importação", () => {
 
   it("accept do input deriva da mesma lista", () => {
     expect(IMPORT_ACCEPT).toBe(IMPORT_EXTS.map((e) => `.${e}`).join(","));
+  });
+});
+
+describe("batchBadge", () => {
+  it("lote pluggy ganha badge OF (filename sintético não tem extensão)", () => {
+    expect(batchBadge({ source: "pluggy", filename: "Pluggy · Bradesco Conta · 2026-08-16" })).toBe("OF");
+  });
+  it("lote de arquivo continua usando a extensão", () => {
+    expect(batchBadge({ source: "ofx", filename: "extrato.ofx" })).toBe("OFX");
   });
 });

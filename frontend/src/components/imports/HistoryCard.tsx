@@ -1,5 +1,5 @@
 import { useDeleteImport, useImports } from "../../api/hooks";
-import { batchTotals, dupSplit, fileBadge, whenLabel } from "../../lib/imports";
+import { batchBadge, batchTotals, dupSplit, whenLabel } from "../../lib/imports";
 
 export default function HistoryCard() {
   const { data: batches } = useImports();
@@ -33,7 +33,7 @@ export default function HistoryCard() {
             return (
               <div key={b.id} className="imp-hist-row">
                 <div className="imp-hist-file">
-                  <span className="imp-badge mono">{fileBadge(b.filename)}</span>
+                  <span className="imp-badge mono">{batchBadge(b)}</span>
                   <span className="imp-file-name">{b.filename}</span>
                 </div>
                 <div className="mono imp-hist-when">{whenLabel(b.imported_at)}</div>

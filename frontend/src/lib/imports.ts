@@ -14,6 +14,11 @@ export function fileBadge(filename: string): string {
   return filename.slice(dot + 1).toUpperCase();
 }
 
+/** Badge do histórico: lote Pluggy não tem extensão de arquivo — a origem manda. */
+export function batchBadge(b: Pick<ImportBatch, "source" | "filename">): string {
+  return b.source === "pluggy" ? "OF" : fileBadge(b.filename);
+}
+
 /** Tamanho de arquivo como o design mostra: "142 KB", "1,5 MB". Nunca "0 KB". */
 export function formatKB(bytes: number): string {
   if (bytes >= 1024 * 1024)

@@ -18,6 +18,7 @@ import type {
   Category,
   IgnoreRule,
   ImportBatch,
+  PluggyStatus,
   Rule,
   Summary,
   Tx,
@@ -213,4 +214,26 @@ export const useDeleteRule = () =>
 export const useDeleteIgnoreRule = () =>
   useInvalidatingMutation((id: number) =>
     api(`/ignore-rules/${id}`, { method: "DELETE" })
+  );
+
+export const usePluggyStatus = () =>
+  useQuery({
+    queryKey: ["pluggy-status"],
+    queryFn: () => api<PluggyStatus>("/pluggy/links"),
+  });
+
+export const useCreatePluggyLink = () =>
+  useInvalidatingMutation(
+    (payload: {
+      item_id: string;
+      pluggy_account_id: string;
+      pluggy_type: string;
+      account_id: number;
+      sync_from: string;
+    }) => api("/pluggy/links", jsonBody("POST", payload))
+  );
+
+export const useDeletePluggyLink = () =>
+  useInvalidatingMutation((id: number) =>
+    api(`/pluggy/links/${id}`, { method: "DELETE" })
   );
