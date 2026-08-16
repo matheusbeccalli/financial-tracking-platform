@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -22,9 +22,12 @@ export default function ResultCard({
   const { data: p } = useClassification(r.batch_id, r.classification);
   const queryClient = useQueryClient();
   const status = p.status;
+  // Invalida UMA vez, na transição rodando→terminou. Montar um card cuja
+  // classificação já acabou não pode disparar refetch de tudo de novo.
+  const estavaRodando = useRef(status === "running");
   useEffect(() => {
-    // terminou (ou falhou): dashboard/transações precisam refletir as categorias
-    if (status !== "running") {
+    if (estavaRodando.current && status !== "running") {
+      estavaRodando.current = false;
       queryClient.invalidateQueries({
         predicate: (q) => q.queryKey[0] !== "classification",
       });

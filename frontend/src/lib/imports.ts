@@ -1,3 +1,4 @@
+import { ApiError } from "../api/client";
 import type { ImportBatch } from "../api/types";
 import { pctOf } from "./pct";
 
@@ -24,6 +25,16 @@ export function whenLabel(iso: string): string {
   const d = new Date(/Z|[+-]\d\d:?\d\d$/.test(iso) ? iso : `${iso}Z`);
   const p = (n: number) => String(n).padStart(2, "0");
   return `${p(d.getDate())}/${p(d.getMonth() + 1)} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/**
+ * Cadência do polling de classificação. Erro transiente (rede, 5xx) NÃO para —
+ * parar congelaria o card em "classificando…" e perderia a invalidação final.
+ * 404 para de vez: o lote foi desfeito e não volta.
+ */
+export function pollInterval(status: string | undefined, error: unknown): number | false {
+  if (error instanceof ApiError && error.status === 404) return false;
+  return status === "running" ? 1500 : false;
 }
 
 export function batchTotals(batches: ImportBatch[]): { novas: number; dup: number } {

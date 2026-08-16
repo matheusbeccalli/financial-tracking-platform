@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 
 import { api, jsonBody } from "./client";
+import { pollInterval } from "../lib/imports";
 import type {
   Account,
   AppSettings,
@@ -89,8 +90,7 @@ export const useClassification = (
     queryFn: () =>
       api<ClassificationProgress>(`/imports/${batchId}/classification`),
     initialData: initial,
-    refetchInterval: (query) =>
-      !query.state.error && query.state.data?.status === "running" ? 1500 : false,
+    refetchInterval: (query) => pollInterval(query.state.data?.status, query.state.error),
   });
 
 export const useSettings = () =>

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { ApiError } from "../api/client";
 import type { ImportBatch } from "../api/types";
-import { batchTotals, dupSplit, fileBadge, formatKB, whenLabel } from "./imports";
+import { batchTotals, dupSplit, fileBadge, formatKB, pollInterval, whenLabel } from "./imports";
 
 const batch = (id: number, new_count: number, dup_count: number): ImportBatch => ({
   id,
@@ -80,5 +81,26 @@ describe("dupSplit", () => {
 
   it("lote vazio cai no cinza, sem NaN", () => {
     expect(dupSplit(0, 0)).toEqual({ novasPct: 0, dupPct: 100 });
+  });
+});
+
+describe("pollInterval", () => {
+  it("continua a 1500ms enquanto roda, sem erro", () => {
+    expect(pollInterval("running", null)).toBe(1500);
+  });
+
+  it("erro transiente (rede, 5xx) NÃO para o polling", () => {
+    expect(pollInterval("running", new TypeError("failed to fetch"))).toBe(1500);
+    expect(pollInterval("running", new ApiError("boom", 500))).toBe(1500);
+  });
+
+  it("404 para: o lote foi desfeito e não volta", () => {
+    expect(pollInterval("running", new ApiError("Lote não encontrado", 404))).toBe(false);
+  });
+
+  it("terminou (done/error/interrupted) para", () => {
+    expect(pollInterval("done", null)).toBe(false);
+    expect(pollInterval("error", null)).toBe(false);
+    expect(pollInterval(undefined, null)).toBe(false);
   });
 });
