@@ -89,6 +89,33 @@ def test_llm_client_has_timeout_and_limited_retries():
     assert llm.client.max_retries == 1
 
 
+def test_crash_mid_run_preserves_committed_chunks(session, monkeypatch):
+    batch = _import_batch(session)
+
+    class FlakyLLM:
+        def __init__(self):
+            self.calls = 0
+
+        def classify(self, items, categories, examples=None):
+            self.calls += 1
+            if self.calls == 2:
+                raise RuntimeError("caiu no 2º lote")
+            return {item["id"]: categories[0] for item in items}
+
+    monkeypatch.setattr(
+        classify_job, "SessionLocal", sessionmaker(bind=session.get_bind())
+    )
+    monkeypatch.setattr(classify_job, "get_llm", lambda s: FlakyLLM())
+    monkeypatch.setattr(classify_job, "LLM_BATCH_SIZE", 2)
+
+    run_classification(batch.id)
+
+    assert JOBS[batch.id] == "error"
+    st = job_status(session, batch.id)
+    assert st["counts"]["llm"] == 2  # 1º lote commitado antes da queda
+    assert st["counts"]["pendente"] == 1
+
+
 def test_prune_jobs_keeps_recent_and_running():
     from app.services.classify_job import MAX_JOBS, prune_jobs
 

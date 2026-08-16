@@ -78,6 +78,28 @@ def test_put_budget_accepts_negative_planned_resgate(client, session):
     assert get_map(client, "2026-09")[invest.id] == -50000
 
 
+def test_copy_ignores_archived_categories(client, session):
+    from sqlalchemy import select
+
+    from app.models import Category
+
+    viagem = session.scalar(select(Category).where(Category.name == "Viagem"))
+    viagem.archived = True
+    session.flush()
+    put(client, viagem.id, 100000, "2026-06")
+
+    r = client.post(
+        "/api/budgets/copy", json={"from_month": "2026-06", "to_month": "2026-08"}
+    )
+    assert r.status_code == 200
+    rows = session.scalars(
+        select(Budget).where(
+            Budget.valid_from == "2026-08", Budget.category_id == viagem.id
+        )
+    ).all()
+    assert rows == []
+
+
 def test_copy_from_future_month_into_past(client):
     """Copiar de mês futuro é intencional (ex.: ajustes feitos em julho
     replicados para junho). O mês futuro mantém suas próprias linhas."""

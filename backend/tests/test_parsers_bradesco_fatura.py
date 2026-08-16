@@ -132,3 +132,30 @@ def test_amount_comes_from_last_nonempty_column():
     txs = parse_bradesco_fatura(fatura)
     by_desc = {t.description.strip(): t.amount_cents for t in txs}
     assert by_desc == {"TRAILING": -1000, "EXTRA COL": -2000}
+
+
+def _mini_fatura(*rows: str) -> bytes:
+    return (
+        "Data: 07/08/2026\r"
+        "Situação da Fatura: PAGO\r"
+        "Data;Histórico;Valor(US$);Valor(R$);\r" + "\r".join(rows) + "\r"
+    ).encode("latin-1")
+
+
+def test_skips_row_with_too_few_columns():
+    txs = parse_bradesco_fatura(_mini_fatura("04/08;OK ;0,00;10,00", "04/08;CURTA;10,00"))
+    assert [t.description.strip() for t in txs] == ["OK"]
+
+
+def test_skips_row_with_impossible_date():
+    txs = parse_bradesco_fatura(
+        _mini_fatura("04/08;OK ;0,00;10,00", "30/02;IMPOSSIVEL ;0,00;10,00")
+    )
+    assert [t.description.strip() for t in txs] == ["OK"]
+
+
+def test_skips_row_with_unparseable_amount():
+    txs = parse_bradesco_fatura(
+        _mini_fatura("04/08;OK ;0,00;10,00", "04/08;VALOR RUIM ;0,00;abc")
+    )
+    assert [t.description.strip() for t in txs] == ["OK"]

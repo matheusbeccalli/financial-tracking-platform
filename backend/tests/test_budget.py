@@ -121,6 +121,29 @@ def test_ritmo_negativo_significa_folga(session):
     assert abs(s["ritmo"] - (10.0 - (16 / 31) * 100)) < 0.001
 
 
+def test_investimentos_soma_multiplas_categorias(session):
+    invest = cat(session, "Investimentos")
+    cripto = Category(name="Cripto", kind="investimento")
+    session.add(cripto)
+    session.flush()
+    add_tx(session, invest.id, -100000)
+    add_tx(session, cripto.id, -50000)
+    s = month_summary(session, "2026-08", today=date(2026, 8, 15))
+    assert s["investimentos"]["real"] == 150000
+    nomes = {c["nome"] for c in s["categorias"] if c["kind"] == "investimento"}
+    assert {"Investimentos", "Cripto"} <= nomes
+
+
+def test_investimentos_arquivada_conta_no_liquido(session):
+    invest = cat(session, "Investimentos")
+    invest.archived = True
+    session.flush()
+    add_tx(session, invest.id, -100000)
+    s = month_summary(session, "2026-08", today=date(2026, 8, 15))
+    assert s["investimentos"]["real"] == 100000
+    assert s["saldo"]["real"] == -100000  # o aporte da arquivada não some do caixa
+
+
 def test_dias_em_mes_passado_e_futuro(session):
     passado = month_summary(session, "2026-07", today=date(2026, 8, 15))
     assert passado["dias"] == {"decorridos": 31, "no_mes": 31}
