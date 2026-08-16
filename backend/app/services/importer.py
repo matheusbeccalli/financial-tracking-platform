@@ -29,6 +29,13 @@ def import_file(
 ) -> tuple[ImportBatch, list[Transaction]]:
     parsed = parse_file(filename, content)  # ValueError => nada foi escrito
     source = "csv" if filename.lower().endswith(".csv") else "ofx"
+    return import_parsed(session, account_id, filename, source, parsed)
+
+
+def import_parsed(
+    session, account_id: int, filename: str, source: str, parsed
+) -> tuple[ImportBatch, list[Transaction]]:
+    """Grava transações já parseadas — ponto de entrada de conectores (Pluggy)."""
     batch = ImportBatch(source=source, filename=filename)
     session.add(batch)
     session.flush()

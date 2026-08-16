@@ -165,3 +165,20 @@ def test_ignore_rule_applies_on_import(session):
     session.commit()
     tx = session.scalar(select(Transaction).where(Transaction.amount_cents == -18740))
     assert tx.ignored is True
+
+
+def test_import_parsed_accepts_prebuilt_transactions(session):
+    """Ponto de entrada do futuro conector Pluggy: transações já parseadas."""
+    from datetime import date
+
+    from app.parsers import ParsedTransaction
+    from app.services.importer import import_parsed
+
+    parsed = [
+        ParsedTransaction(date=date(2026, 7, 1), description="LOJA A", amount_cents=-1000),
+        ParsedTransaction(date=date(2026, 7, 2), description="LOJA B", amount_cents=-2000),
+    ]
+    batch, new = import_parsed(session, 1, "pluggy", "pluggy", parsed)
+    session.commit()
+    assert batch.new_count == 2 and batch.dup_count == 0
+    assert len(new) == 2 and batch.source == "pluggy"
