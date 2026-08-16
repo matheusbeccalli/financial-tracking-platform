@@ -1987,6 +1987,27 @@ th.num {
   background: var(--over);
 }
 
+/* ---- Configurações · Open Finance (Pluggy) ---- */
+.plg-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.plg-form input {
+  flex: 1;
+}
+.plg-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid var(--divider);
+}
+.plg-links-label {
+  margin-top: 16px;
+}
+
 .set-models {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

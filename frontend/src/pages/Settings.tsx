@@ -2,6 +2,7 @@ import PageHeader from "../components/PageHeader";
 import AccountsRail from "../components/settings/AccountsRail";
 import CategoriesCard from "../components/settings/CategoriesCard";
 import LlmCard from "../components/settings/LlmCard";
+import PluggyCard from "../components/settings/PluggyCard";
 import RulesCard from "../components/settings/RulesCard";
 
 export default function Settings() {
@@ -13,6 +14,7 @@ export default function Settings() {
         <CategoriesCard />
         <AccountsRail />
       </section>
+      <PluggyCard />
       <RulesCard />
     </div>
   );
