@@ -3,17 +3,10 @@ from datetime import date, datetime
 
 from app.normalize import extract_installment
 from app.parsers import ParsedTransaction
-from app.parsers.csv_generic import _fold, _to_cents
+from app.parsers.csv_generic import _decode, _fold, _to_cents
 
 _ROW_RE = re.compile(r"^(\d{2})/(\d{2});")
 _REF_RE = re.compile(r"^data:\s*(\d{2}/\d{2}/\d{4})")
-
-
-def _decode(content: bytes) -> str:
-    try:
-        return content.decode("utf-8-sig")
-    except UnicodeDecodeError:
-        return content.decode("latin-1")
 
 
 def sniff(content: bytes) -> bool:
@@ -60,8 +53,9 @@ def parse_bradesco_fatura(content: bytes) -> list[ParsedTransaction]:
         d = _infer_date(int(m.group(1)), int(m.group(2)), ref)
         if d is None:
             continue
+        raw_valor = next((p for p in reversed(parts) if p.strip()), "")
         try:
-            cents = -_to_cents(parts[3])
+            cents = -_to_cents(raw_valor)
         except ValueError:
             continue
         rows.append((d, desc, cents))

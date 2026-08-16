@@ -19,11 +19,15 @@ def _to_cents(raw: str) -> int:
     return int(round(float(s) * 100))
 
 
-def parse_csv(content: bytes) -> list[ParsedTransaction]:
+def _decode(content: bytes) -> str:
     try:
-        text = content.decode("utf-8-sig")
+        return content.decode("utf-8-sig")
     except UnicodeDecodeError:
-        text = content.decode("latin-1")
+        return content.decode("latin-1")
+
+
+def parse_csv(content: bytes) -> list[ParsedTransaction]:
+    text = _decode(content)
     lines = [l for l in text.splitlines() if l.strip()]
 
     header_idx = None

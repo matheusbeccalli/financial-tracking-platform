@@ -119,3 +119,16 @@ def test_parse_file_routes_generic_csv_to_generic_parser():
     txs = parse_file("extrato.csv", GENERIC_CSV)
     assert len(txs) == 1
     assert txs[0].description == "SUPERMERCADO PAO DE ACUCAR"
+
+
+def test_amount_comes_from_last_nonempty_column():
+    fatura = (
+        "Data: 07/08/2026\r"
+        "Situação da Fatura: PAGO\r"
+        "Data;Histórico;Valor(US$);Valor(R$);\r"
+        "04/08;TRAILING ;0,00;10,00;\r"
+        "05/08;EXTRA COL ;0,00;x;20,00\r"
+    ).encode("latin-1")
+    txs = parse_bradesco_fatura(fatura)
+    by_desc = {t.description.strip(): t.amount_cents for t in txs}
+    assert by_desc == {"TRAILING": -1000, "EXTRA COL": -2000}
