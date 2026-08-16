@@ -1,4 +1,5 @@
 import type { CategoryKind, Tx } from "../api/types";
+import { collatePt } from "./collate";
 
 export interface TxSummary {
   count: number;
@@ -59,9 +60,6 @@ export interface SortLookups {
   categoryName: Map<number, string>;
 }
 
-const collate = (a: string, b: string) =>
-  a.localeCompare(b, "pt-BR", { sensitivity: "base" });
-
 export function sortTxs(
   txs: Tx[],
   key: SortKey,
@@ -73,15 +71,15 @@ export function sortTxs(
   const cmp = (a: Tx, b: Tx): number => {
     switch (key) {
       case "date":
-        return sign * collate(a.date, b.date);
+        return sign * collatePt(a.date, b.date);
       case "description":
-        return sign * collate(a.description, b.description);
+        return sign * collatePt(a.description, b.description);
       case "amount_cents":
         return sign * (a.amount_cents - b.amount_cents);
       case "account":
         return (
           sign *
-          collate(
+          collatePt(
             lookups.accountName.get(a.account_id) ?? String(a.account_id),
             lookups.accountName.get(b.account_id) ?? String(b.account_id)
           )
@@ -90,12 +88,12 @@ export function sortTxs(
         const an = a.category_id === null ? null : lookups.categoryName.get(a.category_id) ?? "";
         const bn = b.category_id === null ? null : lookups.categoryName.get(b.category_id) ?? "";
         if (an === null || bn === null) return an === bn ? 0 : an === null ? 1 : -1;
-        return sign * collate(an, bn);
+        return sign * collatePt(an, bn);
       }
       case "source": {
         if (a.source === null || b.source === null)
           return a.source === b.source ? 0 : a.source === null ? 1 : -1;
-        return sign * collate(a.source, b.source);
+        return sign * collatePt(a.source, b.source);
       }
     }
   };

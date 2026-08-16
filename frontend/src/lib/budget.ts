@@ -1,4 +1,5 @@
 import type { Category } from "../api/types";
+import { porNome } from "./collate";
 import { pctRaw } from "./pct";
 
 /**
@@ -26,9 +27,6 @@ export interface BudgetView {
   semOrcamento: BudgetLineRow[];
   total: number;
 }
-
-const porNome = (a: { nome: string }, b: { nome: string }) =>
-  a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" });
 
 /**
  * Divide as saídas entre as que têm orçamento e as que não têm. O bloco "sem

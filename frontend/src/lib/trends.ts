@@ -1,4 +1,5 @@
 import type { Category, CategoryKind, Summary } from "../api/types";
+import { porNome } from "./collate";
 import { addMonths, lastNMonths } from "./months";
 import { pctRaw } from "./pct";
 
@@ -90,9 +91,6 @@ export function desvioChip(
   if (Math.abs(d) < LIMIAR_DESVIO) return null;
   return d > 0 ? { label: `+${d}%`, tone: "warn" } : { label: `−${-d}%`, tone: "accent" };
 }
-
-const porNome = (a: { nome: string }, b: { nome: string }) =>
-  a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" });
 
 /**
  * Saídas: o que mais desvia do histórico primeiro; sem histórico por último.

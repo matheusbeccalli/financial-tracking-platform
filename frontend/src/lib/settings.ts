@@ -1,7 +1,7 @@
 import type { Account, Category, CategoryKind, Rule } from "../api/types";
+import { collatePt } from "./collate";
 
-const porNome = (a: { name: string }, b: { name: string }) =>
-  a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" });
+const porName = (a: { name: string }, b: { name: string }) => collatePt(a.name, b.name);
 
 /** Rótulos dos kinds — única fonte para pills, options e segmented desta tela. */
 export const KIND_LABELS: Record<CategoryKind, string> = {
@@ -24,7 +24,7 @@ export function groupByKind(
     if (!showArchived && c.archived) continue;
     groups[c.kind].push(c);
   }
-  for (const kind of Object.keys(groups) as CategoryKind[]) groups[kind].sort(porNome);
+  for (const kind of Object.keys(groups) as CategoryKind[]) groups[kind].sort(porName);
   return groups;
 }
 
@@ -44,8 +44,8 @@ export function groupAccounts(accounts: Account[]): AccountGroup[] {
     map.set(key, list);
   }
   return [...map.entries()]
-    .sort(([a], [b]) => a.localeCompare(b, "pt-BR", { sensitivity: "base" }))
-    .map(([institution, list]) => ({ institution, accounts: [...list].sort(porNome) }));
+    .sort(([a], [b]) => collatePt(a, b))
+    .map(([institution, list]) => ({ institution, accounts: [...list].sort(porName) }));
 }
 
 /** "4 contas em 2 instituições", com singular quando for o caso. */
