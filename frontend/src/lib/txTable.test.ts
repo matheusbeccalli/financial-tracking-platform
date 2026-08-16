@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { Tx } from "../api/types";
+import type { CategoryKind, Tx } from "../api/types";
 import { accountCounts, filterTxs, sortTxs, statusCounts, summarize } from "./txTable";
 
 function tx(partial: Partial<Tx> & { id: number }): Tx {
@@ -29,30 +29,83 @@ const LOOKUPS = {
 };
 
 describe("summarize", () => {
+  const KINDS = new Map<number, CategoryKind>([
+    [10, "saida"],
+    [20, "saida"],
+    [30, "investimento"],
+    [40, "entrada"],
+  ]);
+
   it("soma entradas, saídas e saldo, ignoradas fora", () => {
-    const s = summarize([
-      tx({ id: 1, amount_cents: 850000 }),
-      tx({ id: 2, amount_cents: -30000 }),
-      tx({ id: 3, amount_cents: -20000 }),
-      tx({ id: 4, amount_cents: -99900, ignored: true }),
-    ]);
+    const s = summarize(
+      [
+        tx({ id: 1, amount_cents: 850000, category_id: 40 }),
+        tx({ id: 2, amount_cents: -30000, category_id: 10 }),
+        tx({ id: 3, amount_cents: -20000, category_id: 20 }),
+        tx({ id: 4, amount_cents: -99900, ignored: true }),
+      ],
+      KINDS
+    );
     expect(s).toEqual({
       count: 3,
       entradas: 850000,
       saidas: 50000,
+      investido: 0,
       saldo: 800000,
       temIgnoradas: true,
     });
   });
 
   it("lista vazia zera tudo", () => {
-    expect(summarize([])).toEqual({
+    expect(summarize([], KINDS)).toEqual({
       count: 0,
       entradas: 0,
       saidas: 0,
+      investido: 0,
       saldo: 0,
       temIgnoradas: false,
     });
+  });
+
+  it("resgate de investimento não vira entrada (caso registrado)", () => {
+    const s = summarize([tx({ id: 1, amount_cents: 5048, category_id: 30 })], KINDS);
+    expect(s.entradas).toBe(0);
+    expect(s.investido).toBe(-5048); // resgate líquido
+    expect(s.saldo).toBe(5048); // variação de caixa preservada
+  });
+
+  it("aporte é investido positivo e sai do saldo", () => {
+    const s = summarize(
+      [
+        tx({ id: 1, amount_cents: 850000, category_id: 40 }),
+        tx({ id: 2, amount_cents: -200000, category_id: 30 }),
+      ],
+      KINDS
+    );
+    expect(s).toMatchObject({ entradas: 850000, investido: 200000, saldo: 650000 });
+  });
+
+  it("estorno em categoria de entrada reduz entradas, como no backend", () => {
+    const s = summarize(
+      [
+        tx({ id: 1, amount_cents: 850000, category_id: 40 }),
+        tx({ id: 2, amount_cents: -10000, category_id: 40 }),
+      ],
+      KINDS
+    );
+    expect(s.entradas).toBe(840000);
+    expect(s.saidas).toBe(0);
+  });
+
+  it("sem categoria e id desconhecido caem por sinal (uncat_in/uncat_out)", () => {
+    const s = summarize(
+      [
+        tx({ id: 1, amount_cents: 5000, category_id: null }),
+        tx({ id: 2, amount_cents: -3000, category_id: 999 }),
+      ],
+      KINDS
+    );
+    expect(s).toMatchObject({ entradas: 5000, saidas: 3000, investido: 0 });
   });
 });
 

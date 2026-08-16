@@ -1,16 +1,24 @@
-import type { Tx } from "../api/types";
+import type { CategoryKind, Tx } from "../api/types";
 
 export interface TxSummary {
   count: number;
   entradas: number;
   saidas: number;
+  investido: number;
   saldo: number;
   temIgnoradas: boolean;
 }
 
-export function summarize(txs: Tx[]): TxSummary {
+/**
+ * Espelha a semântica do backend (`month_summary`): entradas/saídas somam pelo
+ * kind da categoria; investimento é o líquido com sinal (positivo = aportou);
+ * sem categoria (ou id fora do mapa, ex.: categorias ainda carregando) cai por
+ * sinal, como uncat_in/uncat_out. Saldo segue sendo a variação real de caixa.
+ */
+export function summarize(txs: Tx[], kindById: Map<number, CategoryKind>): TxSummary {
   let entradas = 0;
   let saidas = 0;
+  let investido = 0;
   let count = 0;
   let temIgnoradas = false;
   for (const t of txs) {
@@ -19,10 +27,21 @@ export function summarize(txs: Tx[]): TxSummary {
       continue;
     }
     count += 1;
-    if (t.amount_cents > 0) entradas += t.amount_cents;
+    const kind = t.category_id === null ? undefined : kindById.get(t.category_id);
+    if (kind === "entrada") entradas += t.amount_cents;
+    else if (kind === "investimento") investido += -t.amount_cents;
+    else if (kind === "saida") saidas += -t.amount_cents;
+    else if (t.amount_cents > 0) entradas += t.amount_cents;
     else saidas += -t.amount_cents;
   }
-  return { count, entradas, saidas, saldo: entradas - saidas, temIgnoradas };
+  return {
+    count,
+    entradas,
+    saidas,
+    investido,
+    saldo: entradas - saidas - investido,
+    temIgnoradas,
+  };
 }
 
 export type SortKey =

@@ -13,6 +13,10 @@ export default function TotalsStrip({ s }: { s: TxSummary }) {
         <Money cents={-s.saidas} />
       </div>
       <div>
+        <span className="label">Investido</span>
+        <Money cents={s.investido} tone={s.investido < 0 ? "over" : undefined} zeroDash />
+      </div>
+      <div>
         <span className="label">Saldo</span>
         <Money cents={s.saldo} tone={s.saldo < 0 ? "over" : "accent"} />
       </div>

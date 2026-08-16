@@ -54,6 +54,11 @@ export default function Transactions() {
     [accounts, categories]
   );
 
+  const kindById = useMemo(
+    () => new Map((categories ?? []).map((c) => [c.id, c.kind])),
+    [categories]
+  );
+
   const visiveis = useMemo(
     () => filterTxs(txs ?? [], { accountId, categoryId, status }),
     [txs, accountId, categoryId, status]
@@ -62,7 +67,7 @@ export default function Transactions() {
     () => (sort ? sortTxs(visiveis, sort.key, sort.dir, lookups) : visiveis),
     [visiveis, sort, lookups]
   );
-  const totais = useMemo(() => summarize(visiveis), [visiveis]);
+  const totais = useMemo(() => summarize(visiveis, kindById), [visiveis, kindById]);
   // A seleção guarda ids, e as linhas visíveis mudam com mês, busca e filtros. Agir
   // sobre `selected` cru aplicaria a ação em lançamentos de outro mês, invisíveis na
   // tela. A seleção efetiva é sempre a interseção com o que está à vista.
