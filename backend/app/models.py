@@ -76,6 +76,19 @@ class Budget(Base):
     valid_from: Mapped[str]  # "YYYY-MM"
 
 
+class PluggyLink(Base):
+    """Conta da Pluggy vinculada a uma Account local (spec 2026-08-16)."""
+
+    __tablename__ = "pluggy_link"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    item_id: Mapped[str]  # conexão bancária na Pluggy (um item = N contas)
+    pluggy_account_id: Mapped[str] = mapped_column(unique=True)
+    pluggy_type: Mapped[str]  # "BANK" | "CREDIT" — decide o sinal do amount
+    account_id: Mapped[int] = mapped_column(ForeignKey("account.id"))
+    sync_from: Mapped[date] = mapped_column(Date)  # nunca gravar nada antes disto
+    last_synced_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
+
+
 class Setting(Base):
     __tablename__ = "setting"
     key: Mapped[str] = mapped_column(primary_key=True)
