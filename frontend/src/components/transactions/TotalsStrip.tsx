@@ -6,7 +6,7 @@ export default function TotalsStrip({ s }: { s: TxSummary }) {
     <section className="tx-totals">
       <div>
         <span className="label">Entradas</span>
-        <Money cents={s.entradas} tone="accent" />
+        <Money cents={s.entradas} tone={s.entradas < 0 ? "over" : "accent"} />
       </div>
       <div>
         <span className="label">Saídas</span>

@@ -16,9 +16,11 @@ MAX_JOBS = 20
 
 def prune_jobs() -> None:
     """Poda os jobs terminados mais antigos; o dict viveria para sempre sem isso."""
-    finished = [k for k, v in JOBS.items() if v != "running"]
-    for k in finished[: max(0, len(JOBS) - MAX_JOBS)]:
-        del JOBS[k]
+    # Snapshot + pop: request e background task chamam isto de threads diferentes.
+    snapshot = list(JOBS.items())
+    finished = [k for k, v in snapshot if v != "running"]
+    for k in finished[: max(0, len(snapshot) - MAX_JOBS)]:
+        JOBS.pop(k, None)
 
 
 def run_classification(batch_id: int) -> None:
@@ -48,8 +50,8 @@ def run_classification(batch_id: int) -> None:
         session.rollback()
         JOBS[batch_id] = "error"
     finally:
-        prune_jobs()
         session.close()
+        prune_jobs()
 
 
 def job_status(session, batch_id: int) -> dict:
