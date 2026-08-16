@@ -51,3 +51,14 @@ def clean_jobs():
     JOBS.clear()
     yield
     JOBS.clear()
+
+
+@pytest.fixture(autouse=True)
+def no_real_pluggy(monkeypatch):
+    """Testes nunca chamam a API real da Pluggy, mesmo com credencial no .env."""
+    from app.config import settings as app_settings
+    from app.services import pluggy
+
+    monkeypatch.setattr(app_settings, "pluggy_client_id", "")
+    monkeypatch.setattr(app_settings, "pluggy_client_secret", "")
+    monkeypatch.setattr(pluggy, "_client", None)
