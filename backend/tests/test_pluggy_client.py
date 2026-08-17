@@ -68,22 +68,32 @@ def test_item_404_vira_pluggy_error_com_status():
     assert e.value.status == 404
 
 
-def test_transactions_pagina_ate_o_fim():
+def test_transactions_v2_pagina_pelo_cursor_next():
+    # O GET /transactions paginado foi removido (410 ENDPOINT_DEPRECATED em
+    # 2026-09): o v2 filtra por dateFrom/dateTo e devolve em `next` a query
+    # string pronta da próxima página (parâmetro real: `after`).
+    calls = []
+
     def handler(request):
         if request.url.path == "/auth":
             return httpx.Response(200, json={"apiKey": "k"})
-        page = int(request.url.params["page"])
-        assert request.url.params["accountId"] == "acc-1"
-        assert request.url.params["from"] == "2026-08-01"
-        return httpx.Response(200, json={
-            "results": [{"id": f"t{page}"}],
-            "page": page,
-            "totalPages": 3,
-        })
+        assert request.url.path == "/v2/transactions"
+        calls.append(dict(request.url.params))
+        if "after" not in request.url.params:
+            assert request.url.params["accountId"] == "acc-1"
+            assert request.url.params["dateFrom"] == "2026-08-01"
+            assert request.url.params["dateTo"] == "2026-08-16"
+            return httpx.Response(200, json={
+                "results": [{"id": "t1"}],
+                "next": "?accountId=acc-1&dateFrom=2026-08-01&after=cur2",
+            })
+        assert request.url.params["after"] == "cur2"
+        return httpx.Response(200, json={"results": [{"id": "t2"}], "next": None})
 
     c = make_client(handler)
     txs = c.get_transactions("acc-1", date(2026, 8, 1), date(2026, 8, 16))
-    assert [t["id"] for t in txs] == ["t1", "t2", "t3"]
+    assert [t["id"] for t in txs] == ["t1", "t2"]
+    assert len(calls) == 2
 
 
 def test_get_accounts_devolve_results():

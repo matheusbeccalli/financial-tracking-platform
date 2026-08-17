@@ -46,7 +46,7 @@ Tabela nova `pluggy_link`:
 ### `services/pluggy.py` — cliente da API
 
 - Autentica com `POST /auth` (clientId/clientSecret → apiKey, validade ~2h; cachear e renovar em 401).
-- `GET /items/{id}` (status do item/consentimento), `GET /accounts?itemId=`, `GET /transactions?accountId=&from=&to=` com paginação.
+- `GET /items/{id}` (status do item/consentimento), `GET /accounts?itemId=`, `GET /v2/transactions?accountId=&dateFrom=&dateTo=` com paginação por cursor (`next` devolve a query string da próxima página; o `GET /transactions` paginado foi removido pela Pluggy — 410 ENDPOINT_DEPRECATED, constatado no 1º sync real em 2026-08-17).
 - **Atrás de interface** (mesmo padrão do LLM em `services/llm.py`): testes usam respostas gravadas; nenhum teste bate na API real.
 
 ### `services/sync.py` — orquestração

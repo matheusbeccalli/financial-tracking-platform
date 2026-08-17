@@ -7,7 +7,6 @@ import httpx
 from app.config import settings
 
 BASE_URL = "https://api.pluggy.ai"
-PAGE_SIZE = 500
 
 
 class PluggyError(Exception):
@@ -73,23 +72,24 @@ class PluggyClient:
         return self._get("/accounts", {"itemId": item_id})["results"]
 
     def get_transactions(self, account_id: str, date_from: date, date_to: date) -> list[dict]:
+        # v2 com cursor: o GET /transactions paginado foi removido (410
+        # ENDPOINT_DEPRECATED). `next` já vem como a query string completa da
+        # próxima página (inclui o `after`), então basta segui-la.
         out: list[dict] = []
-        page = 1
+        path = "/v2/transactions"
+        params: dict | None = {
+            "accountId": account_id,
+            "dateFrom": date_from.isoformat(),
+            "dateTo": date_to.isoformat(),
+        }
         while True:
-            data = self._get(
-                "/transactions",
-                {
-                    "accountId": account_id,
-                    "from": date_from.isoformat(),
-                    "to": date_to.isoformat(),
-                    "pageSize": PAGE_SIZE,
-                    "page": page,
-                },
-            )
+            data = self._get(path, params)
             out.extend(data["results"])
-            if page >= data.get("totalPages", 1):
+            nxt = data.get("next")
+            if not nxt:
                 return out
-            page += 1
+            path = f"/v2/transactions{nxt}"
+            params = None
 
 
 # Singleton: preserva o cache da apiKey entre requests do FastAPI.
