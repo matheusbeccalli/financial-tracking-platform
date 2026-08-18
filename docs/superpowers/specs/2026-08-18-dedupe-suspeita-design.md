@@ -109,10 +109,13 @@ Backend:
 - `not-duplicate` zera a marca sem apagar
 - `import_parsed` devolve `suspect_count` correto pelos dois caminhos
 
-Frontend:
+Frontend — o projeto roda vitest em `environment: "node"`, sem jsdom nem
+testing-library, e todo teste hoje é de função pura. Mantendo esse padrão, a
+lógica testável fica em `lib/txTable.ts` e os componentes só a consomem:
 - `statusCounts` e `filterTxs` com o estado `duplicadas`
-- render do badge com o texto da gêmea e do botão apagar
-- `confirm()` negado não chama a API
+- `describeTwin`, que monta o texto do badge (data, origem, descrição da gêmea)
+- badge, botão apagar e `confirm()` ficam sem teste automatizado, verificados
+  na conferência final rodando o app
 
 ## Fora de escopo
 

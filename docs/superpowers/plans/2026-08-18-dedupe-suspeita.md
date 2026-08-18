@@ -836,7 +836,7 @@ Em `backend/app/routers/pluggy.py`, no `out.append({...})` do `sync`, depois de
 - [ ] **Step 4: Rodar a suíte inteira**
 
 Run: `cd backend && ../backend/.venv/bin/python -m pytest -q`
-Expected: PASS — 172 passed
+Expected: PASS — 182 passed
 
 - [ ] **Step 5: Commit**
 
@@ -956,11 +956,22 @@ function tx(partial: Partial<Tx> & { id: number }): Tx {
 }
 ```
 
+Trocar a linha de import existente (`src/lib/txTable.test.ts:4`) por:
+
+```typescript
+import {
+  accountCounts,
+  describeTwin,
+  filterTxs,
+  sortTxs,
+  statusCounts,
+  summarize,
+} from "./txTable";
+```
+
 E acrescentar ao final do arquivo:
 
 ```typescript
-import { describeTwin } from "./txTable";
-
 const gemea = {
   id: 7,
   date: "2026-08-13",
@@ -1234,9 +1245,8 @@ No fim de `frontend/src/styles/components.css`:
 }
 ```
 
-Se `--warn` não existir em `frontend/src/theme`, usar a variável de aviso que a
-FilterBar já usa no `Chip tone="warn"` — conferir com
-`grep -rn "warn" frontend/src/theme frontend/src/styles | head`.
+`--warn` e `--tint-warn` já existem em `frontend/src/styles/tokens.css:29,35`
+(claro) e `:82,88` (escuro), nos dois temas.
 
 - [ ] **Step 4: Verificar**
 
@@ -1281,25 +1291,19 @@ Em `frontend/src/components/transactions/FilterBar.tsx`, dentro da
 Em `frontend/src/components/imports/ResultCard.tsx`, depois da métrica
 "Duplicadas":
 
+`Tone` já aceita `"warn"` (`frontend/src/lib/tone.ts:2`). O `?? 0` é necessário
+porque o SyncCard renderiza o mesmo `ResultCard` com o resultado do sync, e
+`SyncResult.suspect_count` é opcional:
+
 ```tsx
         <Metric label="Duplicadas" v={r.dup_count} tone="muted" />
-        {r.suspect_count > 0 && (
-          <Metric label="Possíveis duplicatas" v={r.suspect_count} tone="warn" />
-        )}
-```
-
-Conferir os valores aceitos por `tone` em `frontend/src/lib/tone.ts`; se não
-houver `"warn"`, usar `"accent"`.
-
-O SyncCard já renderiza `ResultCard` com o resultado do sync (`r as ImportResult`),
-então a métrica aparece nos dois caminhos sem mudança extra — mas `SyncResult`
-tem `suspect_count?: number`, então garantir o default no ResultCard:
-
-```tsx
         {(r.suspect_count ?? 0) > 0 && (
           <Metric label="Possíveis duplicatas" v={r.suspect_count ?? 0} tone="warn" />
         )}
 ```
+
+Assim a métrica aparece nos dois caminhos (arquivo e sync) sem mudança extra no
+SyncCard.
 
 - [ ] **Step 3: Verificar**
 
@@ -1322,7 +1326,7 @@ git commit -m "feat(dedupe): chip Duplicadas e metrica no card de import"
 - [ ] **Step 1: Rodar as duas suítes**
 
 Run: `cd backend && ../backend/.venv/bin/python -m pytest -q && cd ../frontend && npm test -- --run`
-Expected: backend 172 passed, frontend 173 passed
+Expected: backend 182 passed, frontend 173 passed
 
 - [ ] **Step 2: Migrar uma cópia do banco real**
 
