@@ -24,3 +24,5 @@ design_handoff_frontend_redesign/
 
 # VS Code
 .vscode/
+# Worktrees
+.worktrees/
