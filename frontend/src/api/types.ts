@@ -15,6 +15,14 @@ export interface Category {
   archived: boolean;
 }
 
+/** Resumo da transação que uma outra parece duplicar. */
+export interface TwinTx {
+  id: number;
+  date: string;
+  description: string;
+  origin: "ofx" | "csv" | "pluggy" | null;
+}
+
 export interface Tx {
   id: number;
   account_id: number;
@@ -25,6 +33,8 @@ export interface Tx {
   source: "regra" | "llm" | "manual" | null;
   installment: string | null;
   ignored: boolean;
+  duplicate_of_id: number | null;
+  duplicate_of: TwinTx | null;
 }
 
 export interface RealOrc {
@@ -105,6 +115,7 @@ export interface ImportResult {
   filename: string;
   new_count: number;
   dup_count: number;
+  suspect_count: number;
   classification: ClassificationProgress;
 }
 
@@ -163,6 +174,7 @@ export interface SyncResult {
   filename?: string;
   new_count?: number;
   dup_count?: number;
+  suspect_count?: number;
   skipped_currency?: number;
   classification?: ClassificationProgress;
   error?: string;

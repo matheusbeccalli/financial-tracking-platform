@@ -121,6 +121,16 @@ export const usePatchTx = () =>
       api(`/transactions/${id}`, jsonBody("PATCH", patch))
   );
 
+export const useDeleteTx = () =>
+  useInvalidatingMutation((id: number) =>
+    api(`/transactions/${id}`, { method: "DELETE" })
+  );
+
+export const useNotDuplicate = () =>
+  useInvalidatingMutation((id: number) =>
+    api(`/transactions/${id}/not-duplicate`, { method: "POST" })
+  );
+
 export interface TxPatch {
   category_id?: number;
   ignored?: boolean;
