@@ -8,6 +8,7 @@ const LINKS = [
   ["/", "Dashboard"],
   ["/transacoes", "Transações"],
   ["/orcamento", "Orçamento"],
+  ["/parcelamentos", "Parcelamentos"],
   ["/tendencias", "Tendências"],
   ["/importar", "Importar"],
   ["/config", "Configurações"],
@@ -24,7 +25,8 @@ const THEME_OPTIONS: readonly { value: ThemeMode; label: string }[] = [
 export default function Layout() {
   const { mode, setMode } = useTheme();
   const { pathname } = useLocation();
-  const wide = pathname === "/tendencias"; // matriz de meses precisa da tela toda
+  // matriz de meses precisa da tela toda
+  const wide = pathname === "/tendencias" || pathname === "/parcelamentos";
   return (
     <div className="app">
       <aside className="sidebar">

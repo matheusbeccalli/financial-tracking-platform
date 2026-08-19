@@ -2418,3 +2418,84 @@ th.num {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- Parcelamentos ---------- */
+
+.inst-scroll {
+  overflow-x: auto;
+}
+
+.inst-grid {
+  display: grid;
+  column-gap: 12px;
+  row-gap: 6px;
+  align-items: baseline;
+  min-width: max-content;
+}
+
+.inst-head {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.inst-cell-cat {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inst-grid .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.inst-zero {
+  color: var(--muted);
+}
+
+.inst-orc {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.inst-total {
+  font-weight: 600;
+  border-top: 1px solid var(--border);
+  padding-top: 6px;
+}
+
+.inst-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.inst-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.inst-table th {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  padding: 6px 12px 6px 0;
+}
+
+.inst-table td {
+  padding: 6px 12px 6px 0;
+  border-top: 1px solid var(--border);
+}
+
+.inst-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

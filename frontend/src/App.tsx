@@ -7,6 +7,7 @@ import { showToast } from "./lib/toast";
 import Budget from "./pages/Budget";
 import Dashboard from "./pages/Dashboard";
 import Imports from "./pages/Imports";
+import Installments from "./pages/Installments";
 import Settings from "./pages/Settings";
 import Transactions from "./pages/Transactions";
 import Trends from "./pages/Trends";
@@ -27,6 +28,7 @@ export default function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/transacoes" element={<Transactions />} />
             <Route path="/orcamento" element={<Budget />} />
+            <Route path="/parcelamentos" element={<Installments />} />
             <Route path="/tendencias" element={<Trends />} />
             <Route path="/importar" element={<Imports />} />
             <Route path="/config" element={<Settings />} />
