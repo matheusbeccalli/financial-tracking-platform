@@ -7,6 +7,10 @@ class ParsedTransaction:
     date: date
     description: str
     amount_cents: int
+    # Preenchidos por conectores que trazem parcela estruturada (Pluggy);
+    # parsers de arquivo deixam None e o importer cai na regex da descrição.
+    installment_number: int | None = None
+    installment_total: int | None = None
 
 
 def parse_file(filename: str, content: bytes) -> list["ParsedTransaction"]:

@@ -1,10 +1,12 @@
+from datetime import date
 from pathlib import Path
 
 import pytest
 from sqlalchemy import func, select
 
 from app.models import ImportBatch, Transaction
-from app.services.importer import import_file, undo_batch
+from app.parsers import ParsedTransaction
+from app.services.importer import import_file, import_parsed, undo_batch
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -182,3 +184,41 @@ def test_import_parsed_accepts_prebuilt_transactions(session):
     session.commit()
     assert batch.new_count == 2 and batch.dup_count == 0
     assert len(new) == 2 and batch.source == "pluggy"
+
+
+def test_import_preenche_parcela_via_regex(session):
+    parsed = [
+        ParsedTransaction(date=date(2026, 7, 5), description="LOJA X PARC 02/10", amount_cents=-4500)
+    ]
+    _, new = import_parsed(session, 2, "f.csv", "csv", parsed)
+    assert new[0].installment == "02/10"
+    assert (new[0].installment_number, new[0].installment_total) == (2, 10)
+
+
+def test_import_usa_campos_estruturados_do_parsed():
+    """Campos vindos do conector (Pluggy) ganham da regex e derivam a string NN/TT."""
+    p = ParsedTransaction(
+        date=date(2026, 7, 5), description="LOJA Y", amount_cents=-4500,
+        installment_number=3, installment_total=6,
+    )
+    assert (p.installment_number, p.installment_total) == (3, 6)
+
+
+def test_import_grava_campos_estruturados(session):
+    parsed = [
+        ParsedTransaction(
+            date=date(2026, 7, 6), description="LOJA Y", amount_cents=-4500,
+            installment_number=3, installment_total=6,
+        )
+    ]
+    _, new = import_parsed(session, 2, "pluggy", "pluggy", parsed)
+    assert new[0].installment == "03/06"
+    assert (new[0].installment_number, new[0].installment_total) == (3, 6)
+
+
+def test_import_sem_parcela_fica_none(session):
+    parsed = [ParsedTransaction(date=date(2026, 7, 7), description="PADARIA", amount_cents=-1000)]
+    _, new = import_parsed(session, 2, "f.csv", "csv", parsed)
+    assert new[0].installment is None
+    assert new[0].installment_number is None
+    assert new[0].installment_total is None

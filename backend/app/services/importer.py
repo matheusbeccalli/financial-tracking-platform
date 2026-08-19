@@ -2,7 +2,7 @@ from sqlalchemy import delete, select
 
 from app.dedupe import make_hash
 from app.models import IgnoreRule, ImportBatch, Transaction
-from app.normalize import extract_installment, normalize_description
+from app.normalize import extract_installment, normalize_description, parse_installment
 from app.parsers import parse_file
 
 # Conservador de propósito: só o que é certamente dupla contagem.
@@ -52,6 +52,12 @@ def import_parsed(
             batch.dup_count += 1
             continue
         norm = normalize_description(p.description)
+        num, tot = p.installment_number, p.installment_total
+        if num is not None and tot is not None:
+            inst = f"{num:02d}/{tot:02d}"  # badge da UI usa a string
+        else:
+            inst = extract_installment(p.description)
+            num, tot = parse_installment(inst) or (None, None)
         tx = Transaction(
             account_id=account_id,
             date=p.date,
@@ -60,7 +66,9 @@ def import_parsed(
             amount_cents=p.amount_cents,
             dedupe_hash=h,
             batch_id=batch.id,
-            installment=extract_installment(p.description),
+            installment=inst,
+            installment_number=num,
+            installment_total=tot,
             ignored=any(pat in norm for pat in IGNORE_PATTERNS)
             or norm in ignore_matchers,
         )

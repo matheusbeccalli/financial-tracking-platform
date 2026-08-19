@@ -51,6 +51,8 @@ class Transaction(Base):
     dedupe_hash: Mapped[str] = mapped_column(unique=True)
     batch_id: Mapped[Optional[int]] = mapped_column(ForeignKey("import_batch.id"))
     installment: Mapped[Optional[str]]  # ex.: "02/10"
+    installment_number: Mapped[Optional[int]]  # nº da parcela (1-based)
+    installment_total: Mapped[Optional[int]]  # total de parcelas
     ignored: Mapped[bool] = mapped_column(default=False)
 
 
