@@ -6,7 +6,7 @@ from app.services.suspect import find_twin, mark_suspects
 
 
 def add(session, *, batch_id, dia, cents=-150000, desc="X", installment=None,
-        duplicate_of_id=None):
+        installment_number=None, installment_total=None, duplicate_of_id=None):
     tx = Transaction(
         account_id=1,
         date=date(2026, 8, dia),
@@ -16,6 +16,8 @@ def add(session, *, batch_id, dia, cents=-150000, desc="X", installment=None,
         dedupe_hash=f"h-{batch_id}-{dia}-{cents}-{desc}",
         batch_id=batch_id,
         installment=installment,
+        installment_number=installment_number,
+        installment_total=installment_total,
         duplicate_of_id=duplicate_of_id,
     )
     session.add(tx)
@@ -104,3 +106,20 @@ def test_mark_suspects_nao_usa_a_mesma_gemea_duas_vezes(session):
     assert mark_suspects(session, [nova1, nova2]) == 1
     assert nova1.duplicate_of_id == velha.id
     assert nova2.duplicate_of_id is None
+
+
+def test_parcela_compara_numeros_e_nao_o_texto(session):
+    """O import passou a gravar `01/10`, e as linhas antigas têm `1/10`. É a
+    mesma parcela, então a suspeita continua valendo."""
+    velha = add(session, batch_id=1, dia=10, desc="HUGO BOSS", installment="1/10")
+    nova = add(session, batch_id=2, dia=10, desc="HUGO BOSS DO BRA",
+               installment="01/10", installment_number=1, installment_total=10)
+    assert find_twin(session, nova, set()) is velha
+
+
+def test_nao_marca_parcelas_diferentes_pelos_numeros(session):
+    add(session, batch_id=1, dia=10, desc="HUGO BOSS", installment="02/10",
+        installment_number=2, installment_total=10)
+    nova = add(session, batch_id=2, dia=10, desc="HUGO BOSS DO BRA",
+               installment="01/10", installment_number=1, installment_total=10)
+    assert find_twin(session, nova, set()) is None

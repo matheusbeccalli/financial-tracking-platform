@@ -12,14 +12,25 @@ from datetime import timedelta
 from sqlalchemy import select
 
 from app.models import Transaction
+from app.normalize import parse_installment
 
 WINDOW_DAYS = 3  # a Pluggy chega a datar o mesmo lançamento 1 dia depois do OFX
 
 
+def _parcela(t: Transaction) -> tuple[int, int] | None:
+    """(nº, total) da parcela. Cai na string para linhas gravadas antes das
+    colunas numéricas existirem — lá o formato era `1/10`, hoje é `01/10`."""
+    if t.installment_number is not None and t.installment_total is not None:
+        return (t.installment_number, t.installment_total)
+    return parse_installment(t.installment)
+
+
 def _parcelas_diferentes(a: Transaction, b: Transaction) -> bool:
     """Parcelas distintas da mesma compra dividem data e valor, e não são
-    duplicata: `HUGO BOSS 1/10` na fatura de um mês e `2/10` na do mês seguinte."""
-    return bool(a.installment and b.installment and a.installment != b.installment)
+    duplicata: `HUGO BOSS 1/10` na fatura de um mês e `2/10` na do mês seguinte.
+    Compara os números, nunca o texto: os dois formatos convivem no banco."""
+    pa, pb = _parcela(a), _parcela(b)
+    return bool(pa and pb and pa != pb)
 
 
 def find_twin(session, tx: Transaction, taken: set[int]) -> Transaction | None:
