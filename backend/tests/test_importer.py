@@ -195,13 +195,17 @@ def test_import_preenche_parcela_via_regex(session):
     assert (new[0].installment_number, new[0].installment_total) == (2, 10)
 
 
-def test_import_usa_campos_estruturados_do_parsed():
-    """Campos vindos do conector (Pluggy) ganham da regex e derivam a string NN/TT."""
-    p = ParsedTransaction(
-        date=date(2026, 7, 5), description="LOJA Y", amount_cents=-4500,
-        installment_number=3, installment_total=6,
-    )
-    assert (p.installment_number, p.installment_total) == (3, 6)
+def test_import_campos_estruturados_ganham_da_regex(session):
+    """Parcela do conector (Pluggy) tem precedência sobre o N/T da descrição."""
+    parsed = [
+        ParsedTransaction(
+            date=date(2026, 7, 5), description="LOJA Y 05/08", amount_cents=-4500,
+            installment_number=3, installment_total=6,
+        )
+    ]
+    _, new = import_parsed(session, 2, "pluggy", "pluggy", parsed)
+    assert new[0].installment == "03/06"
+    assert (new[0].installment_number, new[0].installment_total) == (3, 6)
 
 
 def test_import_grava_campos_estruturados(session):
