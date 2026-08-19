@@ -104,3 +104,14 @@ def delete_transaction(tx_id: int, session=Depends(get_session)):
     )
     session.delete(tx)
     session.commit()
+
+
+@router.post("/{tx_id}/not-duplicate")
+def not_duplicate(tx_id: int, session=Depends(get_session)):
+    """Dispensa a suspeita: a linha continua, só perde a marca."""
+    tx = session.get(Transaction, tx_id)
+    if not tx:
+        raise HTTPException(404, "Transação não encontrada")
+    tx.duplicate_of_id = None
+    session.commit()
+    return tx_out(tx, {})

@@ -71,3 +71,16 @@ def test_delete_da_gemea_limpa_a_marca_da_outra(client, session):
 
 def test_delete_inexistente_404(client):
     assert client.delete("/api/transactions/9999").status_code == 404
+
+
+def test_not_duplicate_tira_a_marca_sem_apagar(client, session):
+    _, nova = seed_par(session)
+    r = client.post(f"/api/transactions/{nova.id}/not-duplicate")
+    assert r.status_code == 200
+    assert r.json()["duplicate_of_id"] is None
+    t = linha(client, nova.id)
+    assert t["duplicate_of_id"] is None
+
+
+def test_not_duplicate_inexistente_404(client):
+    assert client.post("/api/transactions/9999/not-duplicate").status_code == 404
