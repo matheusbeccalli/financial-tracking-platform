@@ -16,6 +16,12 @@
 
 Baseline antes de começar: backend 157 passed, frontend 169 passed.
 
+**Atualização 2026-08-18:** a branch foi rebaseada sobre a frente de
+parcelamentos (colunas `installment_number`/`installment_total`), então as
+contagens absolutas de testes citadas nas tarefas estão defasadas — vale a
+regra "tudo verde e os testes novos existem", não o número exato. Depois do
+rebase e das Tasks 1-3: backend 186 passed.
+
 ---
 
 ### Task 1: Coluna `duplicate_of_id` e migração one-off
@@ -87,7 +93,7 @@ def test_rodar_de_novo_nao_faz_nada(tmp_path):
 
 - [ ] **Step 2: Rodar e ver falhar**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest tests/test_migrate_add_duplicate_of.py -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest tests/test_migrate_add_duplicate_of.py -q`
 Expected: FAIL — `FileNotFoundError` / `spec_from_file_location` retorna None, porque o script ainda não existe.
 
 - [ ] **Step 3: Criar o script**
@@ -149,7 +155,7 @@ if __name__ == "__main__":
 
 - [ ] **Step 4: Rodar e ver passar**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest tests/test_migrate_add_duplicate_of.py -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest tests/test_migrate_add_duplicate_of.py -q`
 Expected: PASS (2 passed)
 
 - [ ] **Step 5: Adicionar a coluna ao modelo**
@@ -168,7 +174,7 @@ Em `backend/app/models.py`, dentro de `class Transaction`, logo depois de
 
 - [ ] **Step 6: Rodar a suíte inteira**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest -q`
 Expected: PASS — 159 passed (157 do baseline + 2 novos)
 
 - [ ] **Step 7: Commit**
@@ -301,7 +307,7 @@ def test_mark_suspects_nao_usa_a_mesma_gemea_duas_vezes(session):
 
 - [ ] **Step 2: Rodar e ver falhar**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest tests/test_suspect.py -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest tests/test_suspect.py -q`
 Expected: FAIL — `ModuleNotFoundError: No module named 'app.services.suspect'`
 
 - [ ] **Step 3: Escrever o módulo**
@@ -379,7 +385,7 @@ def mark_suspects(session, new: list[Transaction]) -> int:
 
 - [ ] **Step 4: Rodar e ver passar**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest tests/test_suspect.py -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest tests/test_suspect.py -q`
 Expected: PASS (12 passed)
 
 - [ ] **Step 5: Commit**
@@ -438,7 +444,7 @@ def test_reimport_identico_nao_marca_suspeita(session):
 
 - [ ] **Step 2: Rodar e ver falhar**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest tests/test_importer.py -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest tests/test_importer.py -q`
 Expected: FAIL em `test_import_de_outra_origem_marca_suspeita` — `assert None == 1` (nada marca ainda)
 
 - [ ] **Step 3: Chamar `mark_suspects` no importer**
@@ -466,7 +472,7 @@ por
 
 - [ ] **Step 4: Rodar e ver passar**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest tests/test_importer.py tests/test_pluggy_sync.py -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest tests/test_importer.py tests/test_pluggy_sync.py -q`
 Expected: PASS (todos)
 
 - [ ] **Step 5: Commit**
@@ -547,7 +553,7 @@ def test_linha_sem_suspeita_vem_com_campos_nulos(client, session):
 
 - [ ] **Step 2: Rodar e ver falhar**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest tests/test_api_tx_duplicates.py -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest tests/test_api_tx_duplicates.py -q`
 Expected: FAIL — `KeyError: 'duplicate_of_id'`
 
 - [ ] **Step 3: Resolver as gêmeas em `tx_out`**
@@ -613,7 +619,7 @@ E no fim de `patch_transaction`:
 
 - [ ] **Step 4: Rodar e ver passar**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest tests/test_api_tx_duplicates.py tests/test_api_tx_budget.py -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest tests/test_api_tx_duplicates.py tests/test_api_tx_budget.py -q`
 Expected: PASS (todos)
 
 - [ ] **Step 5: Commit**
@@ -660,7 +666,7 @@ def test_delete_inexistente_404(client):
 
 - [ ] **Step 2: Rodar e ver falhar**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest tests/test_api_tx_duplicates.py -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest tests/test_api_tx_duplicates.py -q`
 Expected: FAIL — 405 Method Not Allowed em vez de 204
 
 - [ ] **Step 3: Escrever a rota**
@@ -691,7 +697,7 @@ def delete_transaction(tx_id: int, session=Depends(get_session)):
 
 - [ ] **Step 4: Rodar e ver passar**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest tests/test_api_tx_duplicates.py -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest tests/test_api_tx_duplicates.py -q`
 Expected: PASS (5 passed)
 
 - [ ] **Step 5: Commit**
@@ -732,7 +738,7 @@ def test_not_duplicate_inexistente_404(client):
 
 - [ ] **Step 2: Rodar e ver falhar**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest tests/test_api_tx_duplicates.py -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest tests/test_api_tx_duplicates.py -q`
 Expected: FAIL — 404 na rota que existe (nenhuma rota casa `/not-duplicate`)
 
 - [ ] **Step 3: Escrever a rota**
@@ -753,7 +759,7 @@ def not_duplicate(tx_id: int, session=Depends(get_session)):
 
 - [ ] **Step 4: Rodar e ver passar**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest tests/test_api_tx_duplicates.py -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest tests/test_api_tx_duplicates.py -q`
 Expected: PASS (7 passed)
 
 - [ ] **Step 5: Commit**
@@ -812,7 +818,7 @@ def test_sync_responde_quantas_suspeitas(client, session):
 
 - [ ] **Step 2: Rodar e ver falhar**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest tests/test_api_import_dashboard.py tests/test_api_pluggy.py -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest tests/test_api_import_dashboard.py tests/test_api_pluggy.py -q`
 Expected: FAIL — `KeyError: 'suspect_count'` nos dois
 
 - [ ] **Step 3: Contar nas duas rotas**
@@ -835,7 +841,7 @@ Em `backend/app/routers/pluggy.py`, no `out.append({...})` do `sync`, depois de
 
 - [ ] **Step 4: Rodar a suíte inteira**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest -q`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest -q`
 Expected: PASS — 182 passed
 
 - [ ] **Step 5: Commit**
@@ -1325,7 +1331,7 @@ git commit -m "feat(dedupe): chip Duplicadas e metrica no card de import"
 
 - [ ] **Step 1: Rodar as duas suítes**
 
-Run: `cd backend && ../backend/.venv/bin/python -m pytest -q && cd ../frontend && npm test -- --run`
+Run: `cd backend && /home/mathe/programming/financial-tracking-platform/backend/.venv/bin/python -m pytest -q && cd ../frontend && npm test -- --run`
 Expected: backend 182 passed, frontend 173 passed
 
 - [ ] **Step 2: Migrar uma cópia do banco real**
