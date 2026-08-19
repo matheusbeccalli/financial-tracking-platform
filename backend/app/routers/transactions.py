@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from app.db import get_session
 from app.models import ImportBatch, Transaction
@@ -88,3 +88,19 @@ def patch_transaction(tx_id: int, payload: TxPatch, session=Depends(get_session)
         apply_ignore(session, tx, payload.ignored)
     session.commit()
     return tx_out(tx, resolve_twins(session, [tx]))
+
+
+@router.delete("/{tx_id}", status_code=204)
+def delete_transaction(tx_id: int, session=Depends(get_session)):
+    """Apaga de vez — usado para resolver duplicata. Ignorar é outra coisa:
+    cria regra por descrição e mantém a linha."""
+    tx = session.get(Transaction, tx_id)
+    if not tx:
+        raise HTTPException(404, "Transação não encontrada")
+    session.execute(
+        update(Transaction)
+        .where(Transaction.duplicate_of_id == tx_id)
+        .values(duplicate_of_id=None)
+    )
+    session.delete(tx)
+    session.commit()

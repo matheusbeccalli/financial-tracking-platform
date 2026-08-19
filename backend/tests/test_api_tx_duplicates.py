@@ -52,3 +52,22 @@ def test_linha_sem_suspeita_vem_com_campos_nulos(client, session):
     t = linha(client, velha.id)
     assert t["duplicate_of_id"] is None
     assert t["duplicate_of"] is None
+
+
+def test_delete_apaga_a_transacao(client, session):
+    _, nova = seed_par(session)
+    assert client.delete(f"/api/transactions/{nova.id}").status_code == 204
+    ids = [t["id"] for t in client.get("/api/transactions?month=2026-08").json()]
+    assert nova.id not in ids
+
+
+def test_delete_da_gemea_limpa_a_marca_da_outra(client, session):
+    velha, nova = seed_par(session)
+    assert client.delete(f"/api/transactions/{velha.id}").status_code == 204
+    t = linha(client, nova.id)
+    assert t["duplicate_of_id"] is None
+    assert t["duplicate_of"] is None
+
+
+def test_delete_inexistente_404(client):
+    assert client.delete("/api/transactions/9999").status_code == 404
