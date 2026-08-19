@@ -226,3 +226,33 @@ def test_import_sem_parcela_fica_none(session):
     assert new[0].installment is None
     assert new[0].installment_number is None
     assert new[0].installment_total is None
+
+def test_import_de_outra_origem_marca_suspeita(session):
+    """Mesmo lançamento com a descrição que a outra origem usa: o hash não
+    pega, mas a suspeita sim."""
+    import_file(session, 1, "a.ofx", load("bradesco_conta.ofx"))
+    session.commit()
+    outra_origem = load("bradesco_conta.ofx").replace(
+        b"SUPERMERCADO PAO DE ACUCAR 123456",
+        b"COMPRA CARTAO VISA - SUPERMERCADO PAO DE ACUCAR - DOCTO: 99",
+    )
+    batch2, new2 = import_file(session, 1, "b.ofx", outra_origem)
+    session.commit()
+    assert batch2.new_count == 1 and batch2.dup_count == 2
+    original = session.scalar(
+        select(Transaction).where(Transaction.description.contains("123456"))
+    )
+    assert new2[0].duplicate_of_id == original.id
+
+
+def test_reimport_identico_nao_marca_suspeita(session):
+    """O hash já barra; nada deve ser marcado como suspeito."""
+    import_file(session, 1, "a.ofx", load("bradesco_conta.ofx"))
+    session.commit()
+    _, new2 = import_file(session, 1, "b.ofx", load("bradesco_conta.ofx"))
+    session.commit()
+    assert new2 == []
+    marcadas = session.scalars(
+        select(Transaction).where(Transaction.duplicate_of_id.is_not(None))
+    ).all()
+    assert marcadas == []

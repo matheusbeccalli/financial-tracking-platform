@@ -4,6 +4,7 @@ from app.dedupe import make_hash
 from app.models import IgnoreRule, ImportBatch, Transaction
 from app.normalize import extract_installment, normalize_description, parse_installment
 from app.parsers import parse_file
+from app.services.suspect import mark_suspects
 
 # Conservador de propósito: só o que é certamente dupla contagem.
 # Transferências entre contas próprias não-óbvias são marcadas à mão na UI.
@@ -75,7 +76,8 @@ def import_parsed(
         session.add(tx)
         new.append(tx)
         batch.new_count += 1
-    session.flush()
+    session.flush()  # ids das novas: mark_suspects consulta o banco
+    mark_suspects(session, new)
     return batch, new
 
 
