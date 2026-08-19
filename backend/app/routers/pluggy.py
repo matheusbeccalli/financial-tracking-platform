@@ -11,6 +11,7 @@ from app.services.classify_job import JOBS, job_status, prune_jobs, run_classifi
 from app.services.llm import get_llm
 from app.services.pluggy import PluggyError, get_pluggy
 from app.services.pluggy_sync import sync_all
+from app.services.suspect import suspect_count
 
 router = APIRouter(prefix="/api/pluggy")
 
@@ -147,7 +148,7 @@ def sync(
             "filename": batch.filename,
             "new_count": batch.new_count,
             "dup_count": batch.dup_count,
-            "suspect_count": sum(1 for t in r["new"] if t.duplicate_of_id is not None),
+            "suspect_count": suspect_count(r["new"]),
             "skipped_currency": r["skipped_currency"],
             "classification": job_status(session, batch.id),
         })

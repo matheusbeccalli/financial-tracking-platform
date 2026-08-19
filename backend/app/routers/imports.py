@@ -17,6 +17,7 @@ from app.services.classifier import apply_rules, classify_new
 from app.services.classify_job import JOBS, job_status, prune_jobs, run_classification
 from app.services.importer import import_file, undo_batch
 from app.services.llm import get_llm
+from app.services.suspect import suspect_count
 
 router = APIRouter(prefix="/api")
 
@@ -51,7 +52,7 @@ def create_import(
         "filename": batch.filename,
         "new_count": batch.new_count,
         "dup_count": batch.dup_count,
-        "suspect_count": sum(1 for t in new if t.duplicate_of_id is not None),
+        "suspect_count": suspect_count(new),
         "classification": job_status(session, batch.id),
     }
 

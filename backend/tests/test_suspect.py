@@ -2,11 +2,12 @@
 from datetime import date
 
 from app.models import Transaction
-from app.services.suspect import find_twin, mark_suspects
+from app.services.suspect import find_twin, mark_suspects, suspect_count
 
 
 def add(session, *, batch_id, dia, cents=-150000, desc="X", installment=None,
-        installment_number=None, installment_total=None, duplicate_of_id=None):
+        installment_number=None, installment_total=None, duplicate_of_id=None,
+        ignored=False):
     tx = Transaction(
         account_id=1,
         date=date(2026, 8, dia),
@@ -19,6 +20,7 @@ def add(session, *, batch_id, dia, cents=-150000, desc="X", installment=None,
         installment_number=installment_number,
         installment_total=installment_total,
         duplicate_of_id=duplicate_of_id,
+        ignored=ignored,
     )
     session.add(tx)
     session.flush()
@@ -95,17 +97,19 @@ def test_sem_candidata(session):
 def test_mark_suspects_marca_e_conta(session):
     velha = add(session, batch_id=1, dia=10)
     nova = add(session, batch_id=2, dia=10, desc="NOVA")
-    assert mark_suspects(session, [nova]) == 1
+    mark_suspects(session, [nova])
     assert nova.duplicate_of_id == velha.id
+    assert suspect_count([nova]) == 1
 
 
 def test_mark_suspects_nao_usa_a_mesma_gemea_duas_vezes(session):
     velha = add(session, batch_id=1, dia=10)
     nova1 = add(session, batch_id=2, dia=10, desc="NOVA 1")
     nova2 = add(session, batch_id=2, dia=10, desc="NOVA 2")
-    assert mark_suspects(session, [nova1, nova2]) == 1
+    mark_suspects(session, [nova1, nova2])
     assert nova1.duplicate_of_id == velha.id
     assert nova2.duplicate_of_id is None
+    assert suspect_count([nova1, nova2]) == 1
 
 
 def test_parcela_compara_numeros_e_nao_o_texto(session):
@@ -131,3 +135,15 @@ def test_linha_sem_lote_e_candidata(session):
     velha = add(session, batch_id=None, dia=10)
     nova = add(session, batch_id=2, dia=10, desc="NOVA")
     assert find_twin(session, nova, set()) is velha
+
+
+def test_ignorada_nao_vira_suspeita(session):
+    """Pagamento de fatura e transferência entre contas próprias nascem
+    ignorados e aparecem nas duas origens. Marcá-los encheria o "possíveis
+    duplicatas" do card com linhas que a tela nem mostra."""
+    add(session, batch_id=1, dia=10, desc="PAGTO FATURA CARTAO", ignored=True)
+    nova = add(session, batch_id=2, dia=10, desc="PAGAMENTO FATURA - DOCTO 99",
+               ignored=True)
+    mark_suspects(session, [nova])
+    assert nova.duplicate_of_id is None
+    assert suspect_count([nova]) == 0

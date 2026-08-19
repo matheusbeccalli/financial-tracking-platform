@@ -277,3 +277,20 @@ describe("describeTwin", () => {
     );
   });
 });
+
+describe("marca de duplicata sem gêmea resolvida", () => {
+  const orfa = tx({ id: 9, duplicate_of_id: 7, duplicate_of: null });
+
+  it("não conta no chip", () => {
+    expect(statusCounts([orfa]).duplicadas).toBe(0);
+  });
+
+  it("não passa no filtro", () => {
+    const out = filterTxs([orfa], {
+      accountId: null,
+      categoryId: null,
+      status: "duplicadas",
+    });
+    expect(out).toEqual([]);
+  });
+});

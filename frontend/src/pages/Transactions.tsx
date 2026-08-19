@@ -155,7 +155,7 @@ export default function Transactions() {
           onDelete={(t) => {
             if (
               window.confirm(
-                `Apagar "${t.description}"? Não tem volta — reimportar o arquivo traz de volta.`
+                `Apagar "${t.description}"?\n\nSe veio da Pluggy, o próximo sync pode trazer de volta (a janela reprocessa os últimos dias) — nesse caso prefira apagar a linha do extrato, ou use o ✕ do badge para só tirar a marca.`
               )
             ) {
               deleteTx.mutate(t.id);

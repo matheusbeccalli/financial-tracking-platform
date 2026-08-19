@@ -61,19 +61,28 @@ def find_twin(session, tx: Transaction, taken: set[int]) -> Transaction | None:
     return min(candidatas, key=lambda c: (abs((c.date - tx.date).days), c.id))
 
 
-def mark_suspects(session, new: list[Transaction]) -> int:
+def mark_suspects(session, new: list[Transaction]) -> None:
     """Marca as linhas novas que parecem duplicar alguma existente.
 
     Precisa rodar depois do flush do lote: a busca é no banco, e sem id as
     linhas novas não se excluem umas às outras.
+
+    Ignoradas ficam de fora: elas não entram em total nenhum, então duplicá-las
+    não custa nada — e marcá-las inflaria o "possíveis duplicatas" do card com
+    linhas que a tela nem mostra (pagamento de fatura e transferência entre
+    contas próprias aparecem nas duas origens e nascem ignoradas por regra).
     """
     taken: set[int] = set()
-    marcadas = 0
     for tx in new:
+        if tx.ignored:
+            continue
         twin = find_twin(session, tx, taken)
         if twin is None:
             continue
         tx.duplicate_of_id = twin.id
         taken.add(twin.id)
-        marcadas += 1
-    return marcadas
+
+
+def suspect_count(new: list[Transaction]) -> int:
+    """Quantas do lote saíram marcadas — o número que o card do import mostra."""
+    return sum(1 for t in new if t.duplicate_of_id is not None)

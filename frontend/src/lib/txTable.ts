@@ -120,7 +120,7 @@ export function filterTxs(txs: Tx[], f: TxFilterState): Tx[] {
     if (f.categoryId !== null && t.category_id !== f.categoryId) return false;
     if (f.status === "llm" && t.source !== "llm") return false;
     if (f.status === "sem-categoria" && t.category_id !== null) return false;
-    if (f.status === "duplicadas" && t.duplicate_of_id === null) return false;
+    if (f.status === "duplicadas" && t.duplicate_of === null) return false;
     return true;
   });
 }
@@ -131,6 +131,11 @@ export function accountCounts(txs: Tx[]): Map<number, number> {
   return counts;
 }
 
+/**
+ * Conta e filtra por `duplicate_of`, não por `duplicate_of_id`: é o mesmo campo
+ * que a tabela usa para desenhar o badge. Olhar campos diferentes deixaria a
+ * linha contar no chip sem badge nem ✕ — visível e impossível de dispensar.
+ */
 export function statusCounts(
   txs: Tx[]
 ): { llm: number; semCategoria: number; duplicadas: number } {
@@ -140,7 +145,7 @@ export function statusCounts(
   for (const t of txs) {
     if (t.source === "llm") llm += 1;
     if (t.category_id === null) semCategoria += 1;
-    if (t.duplicate_of_id !== null) duplicadas += 1;
+    if (t.duplicate_of !== null) duplicadas += 1;
   }
   return { llm, semCategoria, duplicadas };
 }
