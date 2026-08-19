@@ -222,3 +222,28 @@ def test_pending_postada_libera_a_janela_e_importa(session):
     session.commit()
     assert results[0]["batch"].new_count == 1
     assert link.pending_since is None
+
+
+def test_to_parsed_le_credit_card_metadata():
+    raw = [_raw(creditCardMetadata={"installmentNumber": 3, "totalInstallments": 10})]
+    parsed, _ = to_parsed(raw, "CREDIT")
+    assert (parsed[0].installment_number, parsed[0].installment_total) == (3, 10)
+
+
+def test_to_parsed_sem_metadata_fica_none():
+    parsed, _ = to_parsed([_raw()], "CREDIT")
+    assert parsed[0].installment_number is None
+    assert parsed[0].installment_total is None
+
+
+def test_to_parsed_metadata_malformada_nao_quebra():
+    casos = [
+        _raw(creditCardMetadata=None),
+        _raw(creditCardMetadata="oi"),
+        _raw(creditCardMetadata={}),
+        _raw(creditCardMetadata={"installmentNumber": "x", "totalInstallments": 10}),
+        _raw(creditCardMetadata={"installmentNumber": 0, "totalInstallments": 10}),
+        _raw(creditCardMetadata={"installmentNumber": 5, "totalInstallments": 1}),
+    ]
+    parsed, _ = to_parsed(casos, "CREDIT")
+    assert all(p.installment_number is None and p.installment_total is None for p in parsed)
