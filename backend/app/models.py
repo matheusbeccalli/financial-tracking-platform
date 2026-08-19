@@ -54,6 +54,11 @@ class Transaction(Base):
     installment_number: Mapped[Optional[int]]  # nº da parcela (1-based)
     installment_total: Mapped[Optional[int]]  # total de parcelas
     ignored: Mapped[bool] = mapped_column(default=False)
+    # Suspeita de duplicata: aponta para a linha que esta parece duplicar.
+    # Preenchida no import; o usuário resolve apagando uma ou dispensando.
+    duplicate_of_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("transactions.id"), default=None
+    )
 
 
 class IgnoreRule(Base):
