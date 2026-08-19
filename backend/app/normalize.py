@@ -24,3 +24,20 @@ def extract_installment(desc: str) -> str | None:
     if 1 <= cur <= total and total >= 2:
         return f"{m.group(1)}/{m.group(2)}"
     return None
+
+
+def parse_installment(inst: str | None) -> tuple[int, int] | None:
+    """"02/10" → (2, 10). None, formato ou faixa inválidos → None.
+
+    Mesma regra de validade do extract_installment (1 <= atual <= total, total >= 2);
+    revalida porque a migração faz backfill de strings gravadas antes da regra existir.
+    """
+    if not inst:
+        return None
+    m = re.fullmatch(r"(\d{1,2})\s*/\s*(\d{1,2})", inst.strip())
+    if not m:
+        return None
+    cur, total = int(m.group(1)), int(m.group(2))
+    if 1 <= cur <= total and total >= 2:
+        return (cur, total)
+    return None
