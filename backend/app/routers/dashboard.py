@@ -3,7 +3,7 @@ from sqlalchemy import select
 
 from app.db import get_session
 from app.models import Transaction
-from app.routers.transactions import tx_out
+from app.routers.transactions import resolve_twins, tx_out
 from app.routers.validators import require_month
 from app.services.bridge import bridge as compute_bridge
 from app.services.budget import month_summary
@@ -21,13 +21,16 @@ def summary(month: str, session=Depends(get_session)):
 
 @router.get("/feed")
 def llm_feed(session=Depends(get_session)):
-    txs = session.scalars(
-        select(Transaction)
-        .where(Transaction.source == "llm")
-        .order_by(Transaction.id.desc())
-        .limit(FEED_LIMIT)
+    txs = list(
+        session.scalars(
+            select(Transaction)
+            .where(Transaction.source == "llm")
+            .order_by(Transaction.id.desc())
+            .limit(FEED_LIMIT)
+        )
     )
-    return [tx_out(t) for t in txs]
+    twins = resolve_twins(session, txs)
+    return [tx_out(t, twins) for t in txs]
 
 
 @router.get("/bridge")
