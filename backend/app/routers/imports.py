@@ -51,6 +51,7 @@ def create_import(
         "filename": batch.filename,
         "new_count": batch.new_count,
         "dup_count": batch.dup_count,
+        "suspect_count": sum(1 for t in new if t.duplicate_of_id is not None),
         "classification": job_status(session, batch.id),
     }
 

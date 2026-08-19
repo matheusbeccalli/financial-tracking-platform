@@ -147,6 +147,7 @@ def sync(
             "filename": batch.filename,
             "new_count": batch.new_count,
             "dup_count": batch.dup_count,
+            "suspect_count": sum(1 for t in r["new"] if t.duplicate_of_id is not None),
             "skipped_currency": r["skipped_currency"],
             "classification": job_status(session, batch.id),
         })

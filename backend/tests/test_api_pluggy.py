@@ -150,3 +150,15 @@ def test_sync_erro_parcial_nao_aborta(client, session):
     body = client.post("/api/pluggy/sync").json()
     assert "error" in body[0]
     assert body[1]["new_count"] == 1
+
+
+def test_sync_responde_quantas_suspeitas(client, session):
+    _mk_link(session)
+    session.add(Transaction(account_id=1, date=date(2026, 8, 10), description="Uber",
+                            normalized="UBER", amount_cents=-1990, dedupe_hash="h-uber",
+                            batch_id=None))
+    session.commit()
+    use_fake(client, FakePluggyApi(txs={"acc-1": [_tx()]}))
+    body = client.post("/api/pluggy/sync").json()
+    assert body[0]["new_count"] == 1
+    assert body[0]["suspect_count"] == 1

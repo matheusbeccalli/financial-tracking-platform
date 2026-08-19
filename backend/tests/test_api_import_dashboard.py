@@ -114,3 +114,18 @@ def test_import_with_llm_schedules_background_classification(client, session, mo
     assert body["classification"]["status"] == "running"  # snapshot na resposta
     r = client.get(f"/api/imports/{body['batch_id']}/classification").json()
     assert r["status"] == "done" and r["counts"]["llm"] == 2 and r["done"] == 2
+
+
+def test_import_responde_quantas_suspeitas(client):
+    upload(client)
+    outra_origem = (FIXTURES / "bradesco_conta.ofx").read_bytes().replace(
+        b"SUPERMERCADO PAO DE ACUCAR 123456",
+        b"COMPRA CARTAO VISA - SUPERMERCADO PAO DE ACUCAR - DOCTO: 99",
+    )
+    r = client.post(
+        "/api/imports",
+        data={"account_id": "1"},
+        files={"file": ("b.ofx", outra_origem)},
+    )
+    assert r.status_code == 200
+    assert r.json()["suspect_count"] == 1
