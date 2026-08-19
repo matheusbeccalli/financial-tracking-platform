@@ -4,6 +4,8 @@ import {
   useAccounts,
   useBatchPatchTx,
   useCategories,
+  useDeleteTx,
+  useNotDuplicate,
   usePatchTx,
   useTransactions,
 } from "../api/hooks";
@@ -37,6 +39,8 @@ export default function Transactions() {
   const { data: accounts } = useAccounts();
   const { data: categories } = useCategories();
   const patchTx = usePatchTx();
+  const deleteTx = useDeleteTx();
+  const notDuplicate = useNotDuplicate();
   const batchPatch = useBatchPatchTx();
   // Conta, categoria e estado são filtrados no cliente: os chips precisam da
   // contagem de cada opção, e para isso é preciso ter o mês inteiro em mãos.
@@ -148,6 +152,16 @@ export default function Transactions() {
             id !== null && patchTx.mutate({ id: t.id, patch: { category_id: id } })
           }
           onIgnore={(t) => patchTx.mutate({ id: t.id, patch: { ignored: !t.ignored } })}
+          onDelete={(t) => {
+            if (
+              window.confirm(
+                `Apagar "${t.description}"? Não tem volta — reimportar o arquivo traz de volta.`
+              )
+            ) {
+              deleteTx.mutate(t.id);
+            }
+          }}
+          onNotDuplicate={(t) => notDuplicate.mutate(t.id)}
           sort={sort}
           onSort={toggleSort}
         />

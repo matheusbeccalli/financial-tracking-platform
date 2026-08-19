@@ -398,3 +398,27 @@ button:disabled:hover {
 .cat-chip.is-disabled .cat-chip-select {
   cursor: default;
 }
+
+/* Suspeita de duplicata: marca discreta na linha, com ✕ para dispensar. */
+.tx-dup {
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--warn);
+  border: 1px solid var(--warn);
+  white-space: nowrap;
+}
+
+.tx-dup-x {
+  margin-left: 4px;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.tx-delete {
+  margin-left: 4px;
+}

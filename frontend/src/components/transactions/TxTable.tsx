@@ -1,7 +1,7 @@
 import type { Tx } from "../../api/types";
 import { dayMonth } from "../../lib/months";
 import { formatSigned } from "../../lib/money";
-import type { SortDir, SortKey } from "../../lib/txTable";
+import { describeTwin, type SortDir, type SortKey } from "../../lib/txTable";
 import CategoryChip from "../CategoryChip";
 
 const SOURCE_LABEL: Record<string, string> = {
@@ -27,6 +27,8 @@ export default function TxTable({
   onToggleAll,
   onCategory,
   onIgnore,
+  onDelete,
+  onNotDuplicate,
   sort,
   onSort,
 }: {
@@ -37,6 +39,8 @@ export default function TxTable({
   onToggleAll: () => void;
   onCategory: (tx: Tx, categoryId: number | null) => void;
   onIgnore: (tx: Tx) => void;
+  onDelete: (tx: Tx) => void;
+  onNotDuplicate: (tx: Tx) => void;
   sort: { key: SortKey; dir: SortDir } | null;
   onSort: (k: SortKey) => void;
 }) {
@@ -96,6 +100,19 @@ export default function TxTable({
               <td className="tx-col-desc">
                 <span className="tx-desc">{t.description}</span>
                 {t.installment && <span className="tx-parcela mono">{t.installment}</span>}
+                {t.duplicate_of && (
+                  <span className="tx-dup" title={describeTwin(t.duplicate_of)}>
+                    possível duplicata
+                    <button
+                      type="button"
+                      className="tx-dup-x"
+                      title="Não é duplicata — tirar a marca"
+                      onClick={() => onNotDuplicate(t)}
+                    >
+                      ✕
+                    </button>
+                  </span>
+                )}
               </td>
               <td className="tone-muted tx-col-account">
                 {accountName.get(t.account_id) ?? t.account_id}
@@ -122,6 +139,13 @@ export default function TxTable({
                   onClick={() => onIgnore(t)}
                 >
                   {t.ignored ? "↩" : "⊘"}
+                </button>
+                <button
+                  className="ghost tx-delete"
+                  title="Apagar este lançamento (não tem volta)"
+                  onClick={() => onDelete(t)}
+                >
+                  🗑
                 </button>
               </td>
             </tr>
