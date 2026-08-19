@@ -167,3 +167,34 @@ export interface SyncResult {
   classification?: ClassificationProgress;
   error?: string;
 }
+
+export type InstallmentStatus = "ok" | "risco" | "estouro";
+
+export interface InstallmentCatRow {
+  id: number | null;
+  nome: string;
+  parcelas: number[];
+  orcado: (number | null)[];
+  status: InstallmentStatus[];
+}
+
+export interface InstallmentSeries {
+  tx_id: number;
+  descricao: string;
+  conta: string;
+  categoria_id: number | null;
+  categoria_nome: string | null;
+  numero: number;
+  total: number;
+  valor: number;
+  termina_em: string;
+  restante: number;
+}
+
+export interface InstallmentsProjection {
+  month: string;
+  months: string[];
+  categorias: InstallmentCatRow[];
+  totais: number[];
+  series: InstallmentSeries[];
+}

@@ -18,6 +18,7 @@ import type {
   Category,
   IgnoreRule,
   ImportBatch,
+  InstallmentsProjection,
   PluggyStatus,
   Rule,
   Summary,
@@ -237,3 +238,10 @@ export const useDeletePluggyLink = () =>
   useInvalidatingMutation((id: number) =>
     api(`/pluggy/links/${id}`, { method: "DELETE" })
   );
+
+export const useInstallmentsProjection = (month: string) =>
+  useQuery({
+    queryKey: ["installments", month],
+    queryFn: () =>
+      api<InstallmentsProjection>(`/installments/projection?month=${month}`),
+  });
