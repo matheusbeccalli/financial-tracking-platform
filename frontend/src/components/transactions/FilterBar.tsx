@@ -73,6 +73,13 @@ export default function FilterBar({
         <Chip active={status === "sem-categoria"} onClick={() => toggle("sem-categoria")}>
           Sem categoria <span className="mono">{estados.semCategoria}</span>
         </Chip>
+        <Chip
+          tone="warn"
+          active={status === "duplicadas"}
+          onClick={() => toggle("duplicadas")}
+        >
+          Duplicadas <span className="mono">{estados.duplicadas}</span>
+        </Chip>
         <CategoryChip
           value={categoryId}
           onChange={onCategory}

@@ -53,6 +53,11 @@ export default function ResultCard({
       <div className="imp-result-grid">
         <Metric label="Novas" v={r.new_count} tone="accent" />
         <Metric label="Duplicadas" v={r.dup_count} tone="muted" />
+        {/* `?? 0` porque o SyncCard renderiza este card com um SyncResult, onde
+            suspect_count é opcional. */}
+        {(r.suspect_count ?? 0) > 0 && (
+          <Metric label="Possíveis duplicatas" v={r.suspect_count ?? 0} tone="warn" />
+        )}
         {status === "done" ? (
           <>
             <Metric label="Por regra" v={p.counts.regra} divider />
