@@ -1,5 +1,6 @@
-import type { CategoryKind, Tx } from "../api/types";
+import type { CategoryKind, Tx, TwinTx } from "../api/types";
 import { collatePt } from "./collate";
+import { dayMonth } from "./months";
 
 export interface TxSummary {
   count: number;
@@ -102,9 +103,10 @@ export function sortTxs(
 
 /**
  * "A classificar" é o que o LLM chutou e ninguém confirmou (`source === "llm"`);
- * "sem categoria" é o que nem regra nem LLM resolveram.
+ * "sem categoria" é o que nem regra nem LLM resolveram; "duplicadas" é o que o
+ * import marcou como provável repetição de outra origem.
  */
-export type TxStatus = "todas" | "llm" | "sem-categoria";
+export type TxStatus = "todas" | "llm" | "sem-categoria" | "duplicadas";
 
 export interface TxFilterState {
   accountId: number | null;
@@ -118,6 +120,7 @@ export function filterTxs(txs: Tx[], f: TxFilterState): Tx[] {
     if (f.categoryId !== null && t.category_id !== f.categoryId) return false;
     if (f.status === "llm" && t.source !== "llm") return false;
     if (f.status === "sem-categoria" && t.category_id !== null) return false;
+    if (f.status === "duplicadas" && t.duplicate_of_id === null) return false;
     return true;
   });
 }
@@ -128,12 +131,30 @@ export function accountCounts(txs: Tx[]): Map<number, number> {
   return counts;
 }
 
-export function statusCounts(txs: Tx[]): { llm: number; semCategoria: number } {
+export function statusCounts(
+  txs: Tx[]
+): { llm: number; semCategoria: number; duplicadas: number } {
   let llm = 0;
   let semCategoria = 0;
+  let duplicadas = 0;
   for (const t of txs) {
     if (t.source === "llm") llm += 1;
     if (t.category_id === null) semCategoria += 1;
+    if (t.duplicate_of_id !== null) duplicadas += 1;
   }
-  return { llm, semCategoria };
+  return { llm, semCategoria, duplicadas };
+}
+
+const ORIGIN_LABEL: Record<string, string> = {
+  ofx: "OFX",
+  csv: "CSV",
+  pluggy: "Pluggy",
+};
+
+/** Texto do `title` do badge: com quem a linha conflita. */
+export function describeTwin(twin: TwinTx): string {
+  const partes = [dayMonth(twin.date)];
+  if (twin.origin) partes.push(ORIGIN_LABEL[twin.origin] ?? twin.origin);
+  partes.push(twin.description);
+  return `Parece duplicar: ${partes.join(" · ")}`;
 }

@@ -222,6 +222,8 @@ describe("investSummary", () => {
     source: "manual",
     installment: null,
     ignored: false,
+    duplicate_of_id: null,
+    duplicate_of: null,
   });
 
   it("separa aportes de resgates e conta os lançamentos", () => {

@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import type { CategoryKind, Tx } from "../api/types";
-import { accountCounts, filterTxs, sortTxs, statusCounts, summarize } from "./txTable";
+import {
+  accountCounts,
+  describeTwin,
+  filterTxs,
+  sortTxs,
+  statusCounts,
+  summarize,
+} from "./txTable";
 
 function tx(partial: Partial<Tx> & { id: number }): Tx {
   return {
@@ -13,6 +20,8 @@ function tx(partial: Partial<Tx> & { id: number }): Tx {
     source: null,
     installment: null,
     ignored: false,
+    duplicate_of_id: null,
+    duplicate_of: null,
     ...partial,
   };
 }
@@ -221,5 +230,50 @@ describe("statusCounts", () => {
     ]);
     expect(c.llm).toBe(2);
     expect(c.semCategoria).toBe(2);
+  });
+});
+
+const gemea = {
+  id: 7,
+  date: "2026-08-13",
+  description: "Cartao Visa Electron D.b. Ortho Servic",
+  origin: "ofx" as const,
+};
+
+describe("filtro de duplicadas", () => {
+  it("deixa passar só as marcadas", () => {
+    const rows = [
+      tx({ id: 1 }),
+      tx({ id: 2, duplicate_of_id: 7, duplicate_of: gemea }),
+    ];
+    const out = filterTxs(rows, {
+      accountId: null,
+      categoryId: null,
+      status: "duplicadas",
+    });
+    expect(out.map((t) => t.id)).toEqual([2]);
+  });
+
+  it("conta as marcadas", () => {
+    const c = statusCounts([
+      tx({ id: 1 }),
+      tx({ id: 2, duplicate_of_id: 7, duplicate_of: gemea }),
+      tx({ id: 3, duplicate_of_id: 8, duplicate_of: gemea }),
+    ]);
+    expect(c.duplicadas).toBe(2);
+  });
+});
+
+describe("describeTwin", () => {
+  it("descreve a gêmea com data, origem e descrição", () => {
+    expect(describeTwin(gemea)).toBe(
+      "Parece duplicar: 13/08 · OFX · Cartao Visa Electron D.b. Ortho Servic"
+    );
+  });
+
+  it("aceita gêmea sem origem conhecida", () => {
+    expect(describeTwin({ ...gemea, origin: null })).toBe(
+      "Parece duplicar: 13/08 · Cartao Visa Electron D.b. Ortho Servic"
+    );
   });
 });
