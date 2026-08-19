@@ -256,3 +256,22 @@ def test_reimport_identico_nao_marca_suspeita(session):
         select(Transaction).where(Transaction.duplicate_of_id.is_not(None))
     ).all()
     assert marcadas == []
+
+
+def test_undo_batch_limpa_marcas_que_apontavam_para_ele(session):
+    """Desfazer um lote antigo não pode deixar marca órfã: quem apontava para
+    as linhas apagadas some do badge mas continuaria contando no filtro."""
+    batch1, _ = import_file(session, 1, "a.ofx", load("bradesco_conta.ofx"))
+    session.commit()
+    outra_origem = load("bradesco_conta.ofx").replace(
+        b"SUPERMERCADO PAO DE ACUCAR 123456",
+        b"COMPRA CARTAO VISA - SUPERMERCADO PAO DE ACUCAR - DOCTO: 99",
+    )
+    _, new2 = import_file(session, 1, "b.ofx", outra_origem)
+    session.commit()
+    marcada = new2[0]
+    assert marcada.duplicate_of_id is not None
+
+    undo_batch(session, batch1.id)
+    session.commit()
+    assert marcada.duplicate_of_id is None

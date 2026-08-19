@@ -1,4 +1,4 @@
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 
 from app.dedupe import make_hash
 from app.models import IgnoreRule, ImportBatch, Transaction
@@ -82,6 +82,14 @@ def import_parsed(
 
 
 def undo_batch(session, batch_id: int) -> None:
+    # Sem isto sobraria marca órfã: quem apontava para uma linha do lote ficaria
+    # com duplicate_of_id de id inexistente — some do badge e conta no filtro.
+    apagadas = select(Transaction.id).where(Transaction.batch_id == batch_id)
+    session.execute(
+        update(Transaction)
+        .where(Transaction.duplicate_of_id.in_(apagadas))
+        .values(duplicate_of_id=None)
+    )
     session.execute(delete(Transaction).where(Transaction.batch_id == batch_id))
     batch = session.get(ImportBatch, batch_id)
     if batch:
