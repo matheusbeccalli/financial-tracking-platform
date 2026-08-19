@@ -123,3 +123,11 @@ def test_nao_marca_parcelas_diferentes_pelos_numeros(session):
     nova = add(session, batch_id=2, dia=10, desc="HUGO BOSS DO BRA",
                installment="01/10", installment_number=1, installment_total=10)
     assert find_twin(session, nova, set()) is None
+
+
+def test_linha_sem_lote_e_candidata(session):
+    """`batch_id != NULL` é NULL em SQL, e a linha sumiria da busca. Sem lote
+    ela não pertence a lote nenhum, então nunca é "o mesmo arquivo"."""
+    velha = add(session, batch_id=None, dia=10)
+    nova = add(session, batch_id=2, dia=10, desc="NOVA")
+    assert find_twin(session, nova, set()) is velha

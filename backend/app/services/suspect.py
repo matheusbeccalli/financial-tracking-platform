@@ -46,7 +46,9 @@ def find_twin(session, tx: Transaction, taken: set[int]) -> Transaction | None:
         Transaction.amount_cents == tx.amount_cents,
         Transaction.date >= tx.date - timedelta(days=WINDOW_DAYS),
         Transaction.date <= tx.date + timedelta(days=WINDOW_DAYS),
-        Transaction.batch_id != tx.batch_id,
+        # is_distinct_from e não `!=`: linha sem lote (batch_id NULL) some da
+        # busca com `!=`, e sem lote ela nunca é "o mesmo arquivo".
+        Transaction.batch_id.is_distinct_from(tx.batch_id),
         Transaction.duplicate_of_id.is_(None),
     )
     candidatas = [
